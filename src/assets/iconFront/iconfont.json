@@ -1,0 +1,16 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "12025950",
+      "name": "撤回",
+      "font_class": "chehui",
+      "unicode": "e7a2",
+      "unicode_decimal": 59298
+    }
+  ]
+}
