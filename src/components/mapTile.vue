@@ -1,36 +1,63 @@
 <template>
-    <div class="box-01">
-        <div class="bg-sq-02" v-for="item in menuList1" :key="item.type">
-            {{ item.label }}
-        </div>
-    </div>
-    <div class="box-01">
-        <div class="bg-sq-02" v-for="item in filterList" :key="item.type" style="width: 87px;" @click="btnClick(item.type)">
-            {{ item.label }}
-        </div>
-    </div>
-    <div class="bg-sq-03">
-        <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item">
-            <div style="cursor: pointer;" @click="menu3Click(item.type)">
-                <span v-html="item.svg" style="margin: 0px"></span>
+    <div v-if="mixinState.mSelectMode === 'one'">
+        <div class="box-01">
+            <div class="bg-sq-02" v-for="item in menuList1" :key="item.type">
+                {{ item.label }}
             </div>
-            <div v-show="item.type == 'scale'">999</div>
-        </Tooltip>
+        </div>
+        <div class="box-01">
+            <div class="bg-sq-02" v-for="item in filterList" :key="item.type" style="width: 87px;"
+                @mousedown="btnClick(item.type)" :id="item.type">
+                {{ item.label }}
+            </div>
+        </div>
+        <!-- <clone></clone> -->
+        <div class="bg-sq-03" style="position: relative;">
+            <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item">
+                <div style="cursor: pointer;" @mousedown="menu3Click(item.type)" :id="item.type">
+                    <span v-html="item.svg" style="margin: 0px"></span>
+                </div>
+                <div v-show="item.type == 'scale' && state.isScale" class="scale-menu">
+                    <div class="item" id="scale-big" @click.stop="menu3Click('scale-big')">放大</div>
+                    <div class="item" id="scale-small" @click.stop="menu3Click('scale-small')">缩小</div>
+                </div>
+                <div v-show="item.type == 'layer' && state.isLayer" class="scale-menu" @click.stop id="layer">
+                    <div id="layer-up" class="item" @click.stop="menu3Click('layer-up')">上移</div>
+                    <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')">置顶</div>
+                    <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')">置底</div>
+                    <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
+                    <!-- <Slider v-model="layerNum" height="200px" vertycal id="layer-slider"></Slider> -->
+
+                </div>
+            </Tooltip>
+        </div>
+
+        <Lock v-show="false" :isLock="state.isLock"></Lock>
     </div>
-    <Lock v-show="false" :isLock="state.isLock"></Lock>
 </template>
 <script setup >
+
 import { ref } from 'vue'
 import { Tooltip } from 'view-ui-plus';
 import useSelect from '@/hooks/select';
 import { debounce } from 'lodash-es';
 import Lock from '@/components/lock.vue'
+import MouseEventEventListener from '@/utils/event/mouse.ts'
+// import clone from '@/components/clone.vue'
+// import { Slider } from 'element-plus'
+const update = getCurrentInstance();
 const { mixinState, canvasEditor } = useSelect();
 const event = inject('event');
 const emit = defineEmits()
 const state = reactive({
-    isLock: false
+    isLock: false,
+    isScale: false,
+    firstClickScale: false,
+    isLayer: false,
+    firstClickLayer: false
 })
+let layerNum = ref(0)
+let type = ref('')
 
 const menuList1 = [
     {
@@ -75,7 +102,7 @@ const menuList3 = [
         svg: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><defs><style>.a{fill:#fff;opacity:0;}.b,.c{fill:none;stroke:#4e5969;stroke-linejoin:round;stroke-width:1.5px;}.c{stroke-linecap:round;}</style></defs><g transform="translate(-95 -178)"><rect class="a" width="20" height="20" transform="translate(95 178)"/><g transform="translate(93.695 176.695)"><path class="b" d="M10.587,17.173A6.587,6.587,0,1,0,4,10.587,6.587,6.587,0,0,0,10.587,17.173Z"/><path class="c" d="M33.222,33.222l3.288,3.288" transform="translate(-17.9 -17.9)"/></g></g></svg>'
     },
     {
-        type: 'createCopy',
+        type: 'layer',
         label: '图层',
         svg: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><defs><style>.a{fill:#fff;opacity:0;}.b,.c{fill:none;stroke:#4e5969;stroke-linejoin:round;stroke-width:1.5px;}.c{stroke-linecap:round;}.d{fill:#4e5969;}</style></defs><g transform="translate(-3616 202)"><rect class="a" width="20" height="20" transform="translate(3616 -202)"/><g transform="translate(-0.492 -1.025)"><g transform="translate(3613.885 -203.86)"><path class="b" d="M4,7.813,12.138,10.7l8.138-2.883L12.138,5Z"/><path class="c" d="M4,20l8.138,2.848,3.147-.92" transform="translate(0 -6.896)"/><path class="c" d="M4,36l8.138,2.848s1.906-.467,3.941-1.179" transform="translate(0 -18.386)"/></g><path class="d" d="M2019.542-1368.653l-.25.25.021-4.164.229.229a.655.655,0,0,0,.467.193.655.655,0,0,0,.466-.193.66.66,0,0,0,0-.933l-1.368-1.368a.659.659,0,0,0-.933,0l-1.368,1.368a.66.66,0,0,0,0,.933.659.659,0,0,0,.933,0l.255-.254-.021,4.173-.234-.234a.66.66,0,0,0-.933,0,.66.66,0,0,0,0,.933l1.368,1.368a.655.655,0,0,0,.467.193.657.657,0,0,0,.466-.193l1.368-1.368a.66.66,0,0,0,0-.933A.66.66,0,0,0,2019.542-1368.653Z" transform="translate(1614.433 1183.069)"/></g></g></svg>'
     },
@@ -101,13 +128,86 @@ const menuList3 = [
 
     }
 ];
+onMounted(() => {
+    MouseEventEventListener.setMouseup()
+    event.on('selectOne', init);
+    MouseEventEventListener.setMouseupFn = () =>{}
+})
+const init = () => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+    console.log('activeObject', activeObject)
+    if (activeObject) {
+        type.value = activeObject.type;
+        update?.proxy?.$forceUpdate();
+    }
+}
 const del = debounce(function () {
     canvasEditor.del();
 }, 300);
 const btnClick = (item) => {
     emit('btnClick', item);
 };
+const setIsScale = () => {
+    const event = MouseEventEventListener.event
+    setTimeout(() => {
+        if (event && state.isScale && !event.target?.id) {
+            if (!state.firstClickScale) {
+                state.firstClickScale = true
+            } else {
+                state.isScale = false
+                state.firstClickScale = false
+            }
+        }
+    }, 100);
+}
+// 复制
+const clone = debounce(function () {
+    canvasEditor.clone();
+}, 300);
+const setLayer = () => {
+    const event = MouseEventEventListener.event
+    setTimeout(() => {
+        if (event && state.isLayer && !event.target?.id) {
+            if (!state.firstClickLayer) {
+                state.firstClickLayer = true
+            } else {
+                state.isLayer = false
+                state.firstClickLayer = false
+            }
+        }
+    }, 100);
+}
+// 元素缩小
+const scaleSmall = (obj) => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+    const oldW = activeObject.scaleX * activeObject.width
+    const oldH = activeObject.scaleY * activeObject.height
+    activeObject.scaleX = activeObject.scaleX - 0.1
+    activeObject.scaleY = activeObject.scaleY - 0.1
+    const newW = activeObject.scaleX * activeObject.width
+    const newH = activeObject.scaleY * activeObject.height
+    const left = (oldW - newW) / 2
+    const top = (oldH - newH) / 2
+    activeObject.left = activeObject.left + left
+    activeObject.top = activeObject.top + top
+    canvasEditor.canvas.renderAll()
 
+}
+// 元素变大
+const scaleBig = (obj) => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+    const oldW = activeObject.scaleX * activeObject.width
+    const oldH = activeObject.scaleY * activeObject.height
+    activeObject.scaleX = activeObject.scaleX + 0.1
+    activeObject.scaleY = activeObject.scaleY + 0.1
+    const newW = activeObject.scaleX * activeObject.width
+    const newH = activeObject.scaleY * activeObject.height
+    const left = (newW - oldW) / 2
+    const top = (newH - oldH) / 2
+    activeObject.left = activeObject.left - left
+    activeObject.top = activeObject.top - top
+    canvasEditor.canvas.renderAll()
+}
 const menu3Click = (type) => {
     switch (type) {
         case 'delete':
@@ -116,10 +216,43 @@ const menu3Click = (type) => {
         case 'lock':
             state.isLock = !state.isLock
             break
+        case 'scale':
+            state.isScale = !state.isScale
+            MouseEventEventListener.setMouseupFn = setIsScale
+            break
+        case 'scale-big':
+            scaleBig()
+            break
+        case 'scale-small':
+            scaleSmall()
+            break
+        case 'layer':
+            state.isLayer = !state.isLayer
+            MouseEventEventListener.setMouseupFn = setLayer
+            break
+        case 'layer-up':
+            canvasEditor.up();
+            break
+        case 'layer-down':
+            canvasEditor.down();
+            break
+        case 'layer-top':
+            canvasEditor.upTop();
+            break
+        case 'layer-bottom':
+            canvasEditor.downTop();
+            break
+        case 'createCopy':
+            clone();
+            break
         default:
     }
-
 }
+
+onMounted(() => {
+    MouseEventEventListener.rmMouseup()
+    event.off('selectOne', init);
+})
 
 
 </script>
@@ -128,5 +261,56 @@ const menu3Click = (type) => {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+}
+
+.layer-menu {
+    background: #fff;
+    position: absolute;
+    bottom: 38px;
+    left: -71px;
+    box-shadow: 0 5px 12px 4px rgba(0, 0, 0, .09), 0 3px 6px 0 rgba(0, 0, 0, .12), 0 1px 2px -2px rgba(0, 0, 0, .16);
+    overflow: hidden;
+    z-index: 88;
+    height: 200px;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+
+    /depp/.ivu-slider-wrap {
+        position: absolute;
+    }
+}
+
+.scale-menu {
+    position: absolute;
+    bottom: 38px;
+    box-sizing: border-box;
+    width: 86px;
+    // height: 80px;
+    background: #fff;
+    box-shadow: 0 5px 12px 4px rgba(0, 0, 0, .09), 0 3px 6px 0 rgba(0, 0, 0, .12), 0 1px 2px -2px rgba(0, 0, 0, .16);
+    border-radius: 5px;
+    z-index: 88;
+    overflow: hidden;
+    left: -41px;
+
+    & {
+        color: #333;
+    }
+
+    .item {
+        width: 100%;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d8d8d8;
+        order-radius: 5px;
+    }
+
+    .item:hover {
+        background-color: #2d8cf0;
+        color: #fff;
+    }
 }
 </style>

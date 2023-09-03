@@ -34,8 +34,8 @@
         </svg>
       </Button>
     </Tooltip>
-    <Tooltip :content="$t('flip.y')">
-      <Button :disabled="notSelectOneMode()" @click="flip('Y')" type="text" class="bg-sq-01">
+    <Tooltip content="逆时针翻转45°">
+      <Button :disabled="notSelectOneMode()" @click="angle(-45)" type="text" class="bg-sq-01">
         <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" class="icon-3">
           <g transform="translate(-1653.841 1470.472)">
             <rect class="a" width="26" height="26" transform="translate(1654.341 -1469.972)" />
@@ -49,8 +49,8 @@
         </svg>
       </Button>
     </Tooltip>
-    <Tooltip :content="$t('flip.y')">
-      <Button :disabled="notSelectOneMode()" @click="flip('Y')" type="text" class="bg-sq-01">
+    <Tooltip content="顺时针翻转45°">
+      <Button :disabled="notSelectOneMode()" @click="angle(45)" type="text" class="bg-sq-01">
         <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" class="icon-3">
 
           <g transform="translate(-1725.341 1470.472)">
@@ -91,6 +91,11 @@ const flip = (type) => {
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
   canvasEditor.canvas.requestRenderAll();
 };
+const angle = (value) => {
+  const activeObject = canvasEditor.canvas.getActiveObject();
+  activeObject.rotate(value);
+  canvasEditor.canvas.renderAll();
+}
 </script>
 
 <style scoped lang="less">

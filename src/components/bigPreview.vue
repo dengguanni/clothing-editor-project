@@ -1,19 +1,23 @@
 <template>
     <div class="big-preview" @click.stop>
         <div class="mode-selection">
-            <button :class="is3D ? 'btn-active':'btn'" @click="changeMode(true)">3D</button>
-            <button :class="!is3D ? 'btn-active':'btn'" @click="changeMode(false)">2D</button>
+            <button :class="is3D ? 'btn-active' : 'btn'" @click="changeMode(true)">3D</button>
+            <button :class="!is3D ? 'btn-active' : 'btn'" @click="changeMode(false)">2D</button>
         </div>
-        <div class="box" v-if="is3D">
+        <div class="box" v-show="is3D" id="big-3d">
 
         </div>
-        <div class="pre-2d" v-if="!is3D">
-            <div class="box"></div>
+        <div class="pre-2d" v-show="!is3D">
+            <div class="box">
+                <img :src="screenshotList[0]">
+            </div>
             <div class="right">
                 <div :class="directionSelection == item ? 'direction-active' : 'direction'" v-for="item in list" :key="item"
                     @click="changeDirection(item)">
                     <div v-if="directionSelection == item" class="active">效果图{{ item }}</div>
+                    <img :src="screenshotList[0]" style="width: 96px; height: 96px;">
                 </div>
+                
                 <Icon type="ios-arrow-dropup-circle" size="36" color="#DCE1E9" class="up" />
                 <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" />
             </div>
@@ -30,15 +34,18 @@
     </div>
 </template>
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onUnmounted, onMounted } from 'vue'
+import LoadScene from '@/core/3D/loadScene.ts'
+const load3DScene = new LoadScene()
 const props = defineProps({
     is3D: {
         type: Number,
         default: 4
     }
 })
-
-const is3D = ref(true)
+let screenshotList = reactive([])
+let scene, renderer, camera
+const is3D = ref(false)
 const colorSelection = ref('black')
 const colorList = reactive([
     'black',
@@ -48,7 +55,12 @@ const colorList = reactive([
 const directionSelection = ref(0)
 const list = reactive([0, 2, 34, 6, 9])
 onMounted(() => {
-   is3D.value = props.is3D === 4 ? true : false 
+    is3D.value = props.is3D === 4 ? true : false
+    load3DScene.init(scene, camera, renderer, 'big-3d')
+
+})
+onUnmounted(() => {
+    load3DScene.destroyScene()
 })
 const changeDirection = (item) => {
     directionSelection.value = item
@@ -58,6 +70,10 @@ const changeColor = (item) => {
 }
 const changeMode = (val) => {
     is3D.value = val
+    if (!is3D.value) {
+        screenshotList = load3DScene.getScreenshot()
+    }
+
 }
 </script>
 <style lang="less" scoped>
@@ -71,6 +87,8 @@ const changeMode = (val) => {
         position: absolute;
         top: -47px;
         right: 30%;
+        cursor: pointer;
+        z-index: 888;
 
         .btn {
             width: 108px;
@@ -79,8 +97,10 @@ const changeMode = (val) => {
             border: 1px solid #DCE1E9;
             font-size: 16px;
             color: #4E5969;
+
         }
-        .btn-active{
+
+        .btn-active {
             color: #FFFFFF;
             width: 108px;
             height: 40px;

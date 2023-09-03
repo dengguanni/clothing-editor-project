@@ -354,7 +354,6 @@ const checkAllGroupChange = (data: any) => {
     }
 
     .mode-btn {
-
         width: 100%;
         height: 40px;
         background: #E6F2FF;
@@ -364,6 +363,7 @@ const checkAllGroupChange = (data: any) => {
         font-family: Source Han Sans CN-Medium, Source Han Sans CN;
         font-weight: 500;
         color: #3064F2;
+        cursor: pointer;
     }
 }
 </style>

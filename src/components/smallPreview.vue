@@ -8,40 +8,73 @@
                 </div>
             </div>
             <!-- <div class="content"> -->
-            <div v-if="!is3D">
-                <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always">
-                    <CarouselItem>
-                        <div class="demo-carousel">1</div>
+            <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
+                    <CarouselItem  v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;">
+                            <img :src="item.src" style="height: 280px; width: 280px;" />
                     </CarouselItem>
-                    <CarouselItem>
-                        <div class="demo-carousel">2</div>
-                    </CarouselItem>
-                    <CarouselItem>
-                        <div class="demo-carousel">3</div>
-                    </CarouselItem>
-                    <CarouselItem>
-                        <div class="demo-carousel">4</div>
-                    </CarouselItem>
-                </Carousel>
-            </div>
+            </Carousel>
+            <div v-show="is3D" class="preview-3d" id="small-3d"></div>
             <!-- </div> -->
             <button class="preview" @click="preview">预览</button>
         </div>
     </div>
     <div class="shadow"></div>
+    <button @click="bb">截图</button>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { Carousel } from 'view-ui-plus'
+import LoadScene from '@/core/3D/loadScene.ts'
+const load3DScene = new LoadScene()
+let screenshotList = reactive([])
+let scene, renderer, camera
 const emit = defineEmits()
 let is3D = ref(true)
 let carousel = ref(0)
 const changeMode = () => {
     is3D.value = !is3D.value
+    // screenshotList = load3DScene.getScreenshot()
+    console.log('screenshotList', screenshotList)
 }
 const preview = () => {
     emit('preview', is3D.value)
 }
+onMounted(() => {
+    load3DScene.init(scene, camera, renderer, 'small-3d')
+})
+onUnmounted(() => {
+    load3DScene.destroyScene()
+})
+
+const bb = () => {
+    screenshotList = []
+    let arr = load3DScene.setCameraAngle()
+    arr.forEach(element => {
+        screenshotList.push(element)
+    });
+
+    console.log('screenshotList', screenshotList)
+}
+// 截图
+const saveAsPNG = () => {
+    let image = new Image();
+    renderer.render(scene, camera);//renderer为three.js里的渲染器，scene为场景 camera为相机
+    let imgData = renderer.domElement.toDataURL("image/jpeg");
+    image.src = imgData;
+    img.value = imgData
+    // document.getElementById('aaa').appendChild(image)
+    console.log('imgData', imgData)
+    //return canvas.toDataURL('image/bmp');//bmp有些浏览器不支持
+}
+const downLoad = (url) => {
+    let fd = document.createElement('a');
+    fd.download = '截图文件';//默认名是下载
+    fd.href = url;
+    document.body.appendChild(fd);
+    fd.click();
+    fd.remove();
+}
+
 
 </script>
 <style lang="less" scoped>
@@ -97,6 +130,9 @@ const preview = () => {
         width: 8px;
         height: 8px;
     }
+    /depp/.ivu-carousel-item{
+        position: absolute;
+    }
 
     // /deep/.radius{
     //     width: 8px;
@@ -120,6 +156,11 @@ const preview = () => {
     position: relative;
     font-family: Source Han Sans CN-Medium, Source Han Sans CN;
     font-weight: 500;
+
+    .preview-3d {
+        height: 200px;
+        width: 200px;
+    }
 
     .preview {
         width: 72px;
@@ -150,6 +191,8 @@ const preview = () => {
         width: 100%;
         justify-content: flex-end;
         position: absolute;
+        z-index: 99;
+
 
         .btn-box {
             display: flex;

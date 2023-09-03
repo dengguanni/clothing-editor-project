@@ -15,15 +15,30 @@ interface Selector {
   mSelectId: string[] | '';
   mSelectIds: string[];
   mSelectActive: unknown[];
+  isClipping: boolean,
+  clipBox: any,
+  clipActiveObj: object,
+  clipLeft: number | string,
+  clipRight: number | string,
+  setIsClipping: Function
 }
 
 export default function useSelect() {
+  const setIsClipping = (val: boolean) => {
+    state.isClipping = val
+  }
   const state = reactive<Selector>({
     mSelectMode: SelectMode.EMPTY,
     mSelectOneType: SelectOneType.EMPTY,
     mSelectId: '', // 选择id
     mSelectIds: [], // 选择id
     mSelectActive: [],
+    isClipping: false,
+    clipBox: {},
+    clipActiveObj: {},
+    clipLeft: 0,
+    clipRight: 0,
+    setIsClipping: setIsClipping
   });
 
   const fabric = inject('fabric');

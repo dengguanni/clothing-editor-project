@@ -11,19 +11,19 @@
   <div style="display: inline-block">
     <!-- 后退 -->
     <Tooltip :content="$t('history.revocation') + `(${undoStack.length})`">
-      <Button @click="undo" type="text" size="small" :disabled="undoStack.length === 0">
+      <Button @click="undo" type="text" size="small" :disabled="undoStack.length === 0" class="item">
         <commonIcon angleKey="withdraw"></commonIcon>
       </Button>
     </Tooltip>
     <!-- 重做 -->
-    <Tooltip :content="$t('history.redo') + `(${redoStack.length})`">
-      <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0">
+    <Tooltip :content="$t('history.redo') + `(${redoStack.length})`" >
+      <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0" class="item">
         <commonIcon angleKey="redo"></commonIcon>
       </Button>
     </Tooltip>
     <Tooltip :content="'清空'">
-      <Button @click="beforeClear" type="text" size="small">
-        <commonIcon angleKey="empty"></commonIcon>
+      <Button @click="beforeClear" type="text" size="small" class="item" >
+        <commonIcon angleKey="empty" ></commonIcon>
       </Button>
     </Tooltip>
     <!-- <span class="time" v-if="history.length">
@@ -32,12 +32,12 @@
   </div>
   <div class="reserve-line"></div>
   <Tooltip :content="'网格线'">
-    <Button @click="setLine" type="text" size="small">
+    <Button @click="setLine" type="text" size="small" class="item">
       <commonIcon angleKey="gridLine"></commonIcon>
     </Button>
   </Tooltip>
   <Tooltip :content="'辅助线'">
-    <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0">
+    <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0" class="item">
       <commonIcon angleKey="auxiliarylLine"></commonIcon>
     </Button>
   </Tooltip>
@@ -101,8 +101,8 @@ const setLine = () => {
           id: '0',
           name: '网格'
         })
-        imgInstance.scaleX = (703 / imgInstance.width) *1.3;
-        imgInstance.scaleY = (703 / imgInstance.height) *1.3;
+        imgInstance.scaleX = (703 / imgInstance.width);
+        imgInstance.scaleY = (703 / imgInstance.height) ;
         imgInstance.hasControls = false
         imgInstance.set('selectable', false);
         imgInstance.set('hasControls', false);
@@ -116,23 +116,23 @@ const setLine = () => {
           canvasEditor.canvas.add(imgInstance);
           canvasEditor.canvas.renderAll();
           imgEl.remove();
-          canvasEditor.canvas.on('mouse:wheel', opt => {
-            const delta = opt.e.deltaY
-            let zoom = canvasEditor.canvas.getZoom()
-            zoom = 0.999 * delta
-            if (zoom > 20) zoom = 20
-            if (zoom < 0.01) zoom = 0.01
-            if (delta > 0) {
-              imgInstance.scaleX = imgInstance.scaleX + 0.1
-              imgInstance.scaleY = imgInstance.scaleY + 0.1
-            } else {
-              imgInstance.scaleX = imgInstance.scaleX - 0.1
-              imgInstance.scaleY = imgInstance.scaleY - 0.1
-            }
-            canvasEditor.canvas.renderAll();
-            console.log(opt.e.deltaY, zoom)
+          // canvasEditor.canvas.on('mouse:wheel', opt => {
+          //   const delta = opt.e.deltaY
+          //   let zoom = canvasEditor.canvas.getZoom()
+          //   zoom = 0.999 * delta
+          //   if (zoom > 20) zoom = 20
+          //   if (zoom < 0.01) zoom = 0.01
+          //   if (delta > 0) {
+          //     imgInstance.scaleX = imgInstance.scaleX + 0.1
+          //     imgInstance.scaleY = imgInstance.scaleY + 0.1
+          //   } else {
+          //     imgInstance.scaleX = imgInstance.scaleX - 0.1
+          //     imgInstance.scaleY = imgInstance.scaleY - 0.1
+          //   }
+          //   canvasEditor.canvas.renderAll();
+          //   console.log(opt.e.deltaY, zoom)
 
-          })
+          // })
         };
       }
     }).catch(err => {
@@ -179,6 +179,16 @@ span.active {
 
 .time {
   color: #c1c1c1;
+}
+.item{
+  height: 36px;
+  width: 36px;
+  &hover{
+    background-color: #c1c1c1;
+  }
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
 }
 
 .reserve-line {

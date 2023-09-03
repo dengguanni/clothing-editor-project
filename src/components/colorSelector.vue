@@ -6,7 +6,7 @@
  * @Description: 颜色选择器
 -->
 <template>
-  <div class="box">
+  <div class="box" v-if="!mixinState.isClipping">
     <!-- 颜色开关 -->
     <!-- <iSwitch v-model="isGradient" size="large" class="switch">
       <template #open>
@@ -42,7 +42,7 @@ import 'color-gradient-picker-vue3/dist/style.css';
 import gradientColorPicker from 'color-gradient-picker-vue3';
 import { fabric } from 'fabric';
 import useSelect from '@/hooks/select';
-const { canvasEditor } = useSelect();
+const { canvasEditor, mixinState } = useSelect();
 const generateFabricGradientFromColorStops = (handlers, width, height, orientation, angle) => {
   // 角度转换坐标
   const gradAngleToCoords = (paramsAngle) => {
@@ -148,9 +148,15 @@ const checkColor = (val) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     if (activeObject) {
       // 控件属性设置
-      fabricGradientToCss(val, activeObject);
-      // bar背景设置
-      fabricGradientToBar(val);
+      console.log('mixinState', mixinState)
+      try {
+        fabricGradientToCss(val, activeObject);
+        // bar背景设置
+        fabricGradientToBar(val);
+      } catch (error) {
+        console.log('error', error)
+      }
+
     }
   }
 };
@@ -256,10 +262,11 @@ onMounted(() => {
   align-items: center;
 
 }
-/deep/.ivu-input-icon{
-right: 15px;
-color: #DCE1E9;
-font-size: 10px;
+
+/deep/.ivu-input-icon {
+  right: 15px;
+  color: #DCE1E9;
+  font-size: 10px;
 }
 
 /deep/.ivu-color-picker-color div {
@@ -268,6 +275,7 @@ font-size: 10px;
   border-radius: 5px 5px 5px 5px;
   margin-left: 3px;
 }
+
 /deep/.ivu-color-picker-color {
   height: 24px;
   width: 24px;

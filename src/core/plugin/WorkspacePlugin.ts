@@ -1,8 +1,4 @@
 /*
- * @Author: 秦少卫
- * @Date: 2023-06-27 12:26:41
- * @LastEditors: 秦少卫
- * @LastEditTime: 2023-07-05 00:34:38
  * @Description: 画布区域插件
  */
 
@@ -165,7 +161,6 @@ class WorkspacePlugin {
     this.workspace.clone((cloned: fabric.Rect) => {
       // this.canvas.backgroundColor = '#333'
       this.canvas.clipPath = cloned;
-      console.log('cloned', cloned)
       this.canvas.requestRenderAll();
 
     });
@@ -188,7 +183,6 @@ class WorkspacePlugin {
     zoomRatio += 0.05;
     const center = this.canvas.getCenter();
     this.canvas.zoomToPoint(new fabric.Point(center.left, center.top), zoomRatio);
-    console.log('放大')
   }
 
   // 缩小
@@ -200,14 +194,12 @@ class WorkspacePlugin {
       new fabric.Point(center.left, center.top),
       zoomRatio < 0 ? 0.01 : zoomRatio
     );
-    console.log('缩小')
   }
 
   // 自动缩放
   auto() {
     const scale = this._getScale();
     this.setZoomAuto(scale - 0.08);
-    console.log('自动缩放')
   }
 
   // 1:1 放大
@@ -217,21 +209,17 @@ class WorkspacePlugin {
   }
 
   _bindWheel() {
-    const aa = this.editor;
-    console.log(this.canvas.getObjects(),'@@@')
-    this.canvas.on('mouse:wheel', function (this: fabric.Canvas, opt) {
-      const delta = opt.e.deltaY;
-      let zoom = this.getZoom();
-      zoom *= 0.999 ** delta;
-      if (zoom > 20) zoom = 20;
-      if (zoom < 0.01) zoom = 0.01;
-      const center = this.getCenter();
-      this.zoomToPoint(new fabric.Point(center.left, center.top), zoom);
-      opt.e.preventDefault();
-      opt.e.stopPropagation();
-      
-      console.log(aa,'@@@')
-    });
+    // this.canvas.on('mouse:wheel', function (this: fabric.Canvas, opt) {
+    //   const delta = opt.e.deltaY;
+    //   let zoom = this.getZoom();
+    //   zoom *= 0.999 ** delta;
+    //   if (zoom > 20) zoom = 20;
+    //   if (zoom < 0.01) zoom = 0.01;
+    //   const center = this.getCenter();
+    //   this.zoomToPoint(new fabric.Point(center.left, center.top), zoom);
+    //   opt.e.preventDefault();
+    //   opt.e.stopPropagation();
+    // });
   }
 
   destroy() {

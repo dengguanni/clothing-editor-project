@@ -3,7 +3,7 @@
         <Input prefix="ios-search" placeholder="图片名称/编号/标签" class="input-search" />
         <div class="line"></div>
         <div class="content">
-            <!-- <img class="item" src="src\assets\png\bg-01.png" alt="1" @click="addItem" @dragend="dragItem"> -->
+            <img class="item" src="src\assets\png\bg-01.png" alt="1" @click="addItem" @dragend="dragItem">
             <!-- <img class="item" src="src\assets\png\bg-o2.png" alt="2"> -->
             <!-- <div class="item" v-for="item in imageList" :key="item"></div> -->
         </div>

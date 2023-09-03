@@ -2,7 +2,7 @@
   <Dialog @closeDailog="closeDailog" v-if="showDailog">
     <patternCard v-if="dialogType == 1"></patternCard>
     <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"></productDetails>
-    <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
+    <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType" ></bigPreview>
   </Dialog>
   <div class="home">
     <!-- <Layout> -->
@@ -10,7 +10,7 @@
     <Header v-if="state.isShowHeader">
       <div class="header-left">
         <div class="logo">
-          <!-- <img src="src\assets\png\logo.png" /> -->
+          <img src="src\assets\png\logo.png" />
         </div>
         <history></history>
       </div>
@@ -580,7 +580,7 @@ provide('canvasEditor', canvasEditor);
   position: relative;
   background: #f1f1f1;
   overflow: hidden;
-  
+
 }
 
 .content {
@@ -590,7 +590,7 @@ provide('canvasEditor', canvasEditor);
   padding-top: 0;
   height: 100%;
   overflow-y: hidden;
-  
+
 }
 
 .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu) {
@@ -608,8 +608,8 @@ provide('canvasEditor', canvasEditor);
   --offsetY: 0px;
   --size: 16px;
   background: -webkit-linear-gradient(top, transparent 39px, blue 39px, blue 41px, transparent 41px, transparent 79px, red 80px),
-  -webkit-linear-gradient(left, transparent 39px, yellow 39px, yellow 41px, transparent 41px, transparent 79px, green);
-background-size: 81px 81px;
+    -webkit-linear-gradient(left, transparent 39px, yellow 39px, yellow 41px, transparent 41px, transparent 79px, green);
+  background-size: 81px 81px;
   // --color: #dedcdc;
   // background-image: linear-gradient(45deg,
   //     var(--color) 25%,
