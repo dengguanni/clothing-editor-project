@@ -14,9 +14,9 @@
     <div class="filter-box">
 
       <!-- 无参数滤镜 -->
-      <div class="filter-item" v-for="(value, key) in state.noParamsFilters" :key="key">
-        <img :src="getImageUrl(key)" alt="" @click="changeFilters(key, !noParamsFilters[key])" />
-        <Checkbox v-model="state.noParamsFilters[key]" @on-change="(val) => changeFilters(key, val)">
+      <div class="filter-item" v-for="(value, key) in state.noParamsFilters" :key="key"  >
+        <img :src="getImageUrl(key)" alt="" @click="changeFilters(key, !noParamsFilters[key])" v-if="key !== 'Contrast'" />
+        <Checkbox v-model="state.noParamsFilters[key]" @on-change="(val) => changeFilters(key, val)"  v-if="key !== 'Contrast'">
           {{ $t('filters.' + key) }}
         </Checkbox>
       </div>
@@ -74,6 +74,7 @@
 <script name="Filter" setup>
 import useSelect from '@/hooks/select';
 import { uiType, paramsFilters, combinationFilters } from '@/config/constants/filter';
+
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
@@ -88,6 +89,7 @@ const noParamsFilters = {
   Polaroid: false,
   Invert: false,
   Sepia: false,
+  Contrast: false
 };
 
 const state = reactive({
@@ -97,13 +99,27 @@ const state = reactive({
   combinationFilters: [...combinationFilters],
   type: '',
 });
-
+const props = defineProps({
+  singleFilters: {
+    type: Boolean,
+    default: false
+  }
+})
+watch(
+  () => props.singleFilters,
+  (val) => {
+      console.log('singleFilters', val)
+      changeFilters('Contrast', val)
+  }
+);
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
+  console.log('type, value', type, value)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   state.noParamsFilters[type] = value;
   if (value) {
     const itemFilter = _getFilter(activeObject, type);
+    console.log('itemFilter', itemFilter)
     if (!itemFilter) {
       _createFilter(activeObject, type);
     }
@@ -215,10 +231,13 @@ function _createFilter(sourceImg, type, options = null) {
   // capitalize first letter for matching with fabric image filter name
   const fabricType = _getFabricFilterType(type);
   const ImageFilter = fabric.Image.filters[fabricType];
+  console.log('ImageFilter111', ImageFilter)
   if (ImageFilter) {
     filterObj = new ImageFilter(options);
     filterObj.options = options;
     sourceImg.filters.push(filterObj);
+    console.log('filterObj', filterObj)
+  
   }
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
@@ -233,7 +252,6 @@ function _createFilter(sourceImg, type, options = null) {
  */
 function _getFilter(sourceImg, type) {
   let imgFilter = null;
-
   if (sourceImg) {
     const fabricType = _getFabricFilterType(type);
     const { length } = sourceImg.filters;
@@ -247,7 +265,6 @@ function _getFilter(sourceImg, type) {
       }
     }
   }
-
   return imgFilter;
 }
 /**

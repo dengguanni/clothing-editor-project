@@ -9,9 +9,9 @@
             </div>
             <!-- <div class="content"> -->
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
-                    <CarouselItem  v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;">
-                            <img :src="item.src" style="height: 280px; width: 280px;" />
-                    </CarouselItem>
+                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;">
+                    <img :src="item.src" style="height: 280px; width: 280px;" />
+                </CarouselItem>
             </Carousel>
             <div v-show="is3D" class="preview-3d" id="small-3d"></div>
             <!-- </div> -->
@@ -19,12 +19,12 @@
         </div>
     </div>
     <div class="shadow"></div>
-    <button @click="bb">截图</button>
 </template>
 <script setup>
-import { ref, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, onBeforeMount } from 'vue'
 import { Carousel } from 'view-ui-plus'
 import LoadScene from '@/core/3D/loadScene.ts'
+import mitts from '@/utils/mitts.js';
 const load3DScene = new LoadScene()
 let screenshotList = reactive([])
 let scene, renderer, camera
@@ -33,28 +33,35 @@ let is3D = ref(true)
 let carousel = ref(0)
 const changeMode = () => {
     is3D.value = !is3D.value
-    // screenshotList = load3DScene.getScreenshot()
-    console.log('screenshotList', screenshotList)
 }
 const preview = () => {
     emit('preview', is3D.value)
 }
+onBeforeMount(()=>{
+  mitts.on('changeModelColor',(e)=>{
+    load3DScene.setModelColor(e, () => {
+        screenshotList = []
+        let arr = load3DScene.setCameraAngle()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+    })
+  })
+})
 onMounted(() => {
-    load3DScene.init(scene, camera, renderer, 'small-3d')
+    load3DScene.init(scene, camera, renderer, 'small-3d', () => {
+        screenshotList = []
+        let arr = load3DScene.setCameraAngle()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+    })
+
 })
 onUnmounted(() => {
     load3DScene.destroyScene()
 })
 
-const bb = () => {
-    screenshotList = []
-    let arr = load3DScene.setCameraAngle()
-    arr.forEach(element => {
-        screenshotList.push(element)
-    });
-
-    console.log('screenshotList', screenshotList)
-}
 // 截图
 const saveAsPNG = () => {
     let image = new Image();
@@ -130,7 +137,8 @@ const downLoad = (url) => {
         width: 8px;
         height: 8px;
     }
-    /depp/.ivu-carousel-item{
+
+    /depp/.ivu-carousel-item {
         position: absolute;
     }
 

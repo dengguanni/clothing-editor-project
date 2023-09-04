@@ -2,7 +2,7 @@
   <Dialog @closeDailog="closeDailog" v-if="showDailog">
     <patternCard v-if="dialogType == 1"></patternCard>
     <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"></productDetails>
-    <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType" ></bigPreview>
+    <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
   </Dialog>
   <div class="home">
     <!-- <Layout> -->
@@ -143,7 +143,7 @@
           <!-- 居中对齐 -->
           <!-- <center-align></center-align> -->
           <!-- <lock></lock> -->
-          <filters v-show="state.isShowFilters" @goBack="goBack"></filters>
+          <filters v-show="state.isShowFilters" @goBack="goBack" :singleFilters="state.isContrast"></filters>
           <cropping v-show="state.isShowCropping" @goBack="goBack"></cropping>
           <div style="padding: 0px 20px;" v-show="!state.isShowFilters && !state.isShowCropping">
 
@@ -263,7 +263,8 @@ const state = reactive({
   isDesign: false,
   isShowHeader: false,
   isShowFilters: false,
-  isShowCropping: false
+  isShowCropping: false,
+  isContrast: false
 });
 
 onMounted(() => {
@@ -324,12 +325,27 @@ const mapTileClick = (val) => {
     case 'cropping':
       state.isShowCropping = true
       break;
-    case 3:
+    case 'clearness':
+      changeFilters()
       break;
     default:
   }
   return 0;
 }
+const changeFilters = () => {
+  state.isContrast = !state.isContrast
+  // const type = 'Contrast'
+  // const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  // state.noParamsFilters[type] = state.isContrast;
+  // if (state.isContrast) {
+  //   const itemFilter = _getFilter(activeObject, type);
+  //   if (!itemFilter) {
+  //     _createFilter(activeObject, type);
+  //   }
+  // } else {
+  //   _removeFilter(activeObject, type);
+  // }
+};
 
 const rulerSwitch = (val) => {
   if (val) {

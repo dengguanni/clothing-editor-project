@@ -56,8 +56,9 @@
 <script lang="ts" setup scoped>
 import { Collapse, Panel } from 'view-ui-plus';
 import colorSelector from '@/components/colorSelector.vue';
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, provide } from 'vue'
 import useSelect from '@/hooks/select';
+import mitts from '@/utils/mitts.js'; 
 const emit = defineEmits();
 const value1 = ref('1')
 let indeterminate = ref(true);
@@ -118,6 +119,8 @@ const changeSize = (item: String) => {
 }
 const changeColor = (item: String) => {
     colorelected.value = item
+    mitts.emit('changeModelColor',item)
+    // GoodsInfo.setModelColor(item)
 }
 
 

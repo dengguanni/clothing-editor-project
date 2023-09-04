@@ -10,7 +10,6 @@ import '@/assets/iconFront/iconfont.css'
 // 自定义字体文件
 import '@/assets/fonts/font.css';
 // import axios from 'axios';
-
 import i18n from './language/index';
 if ('serviceWorker' in navigator) {
   registerSW();

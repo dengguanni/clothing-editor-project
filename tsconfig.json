@@ -26,6 +26,6 @@
     "src/**/*.vue",
     "typings/**/*.ts",
     "./auto-imports.d.ts"
-  ],
+, "src/utils/mitts.js"  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

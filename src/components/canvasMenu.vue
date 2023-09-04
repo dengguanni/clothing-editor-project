@@ -2,7 +2,7 @@
     <div class="canvas-menu-1">
         <button class="btn">整体设计</button>
         <div class="menu-list">
-            <div v-for="item in menuList" class="menu-item">
+            <div v-for="item in menuList" class="menu-item" >
                 <div :class="item.id == active ? 'active-image':'image'" @click="changeSelection(item.id)"></div>
                 <div class="text-1">{{ item.name }}</div>
             </div>
@@ -12,6 +12,8 @@
   
 <script setup >
 import { reactive } from 'vue'
+import LoadScene from '@/core/3D/loadScene.ts'
+const load3DScene = new LoadScene()
 const active = ref(1)
 const menuList = reactive([
     {
@@ -33,6 +35,8 @@ const menuList = reactive([
 ])
 const changeSelection = (id) => {
     active.value = id
+    load3DScene.setModelCamera()
+    console.log('1234567')
 }
 </script>
 <style lang="less">

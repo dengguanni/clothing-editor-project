@@ -9,18 +9,17 @@
         </div>
         <div class="pre-2d" v-show="!is3D">
             <div class="box">
-                <img :src="screenshotList[0]">
+                <img :src="imageActive" style="height: 600px; width: 600px;">
             </div>
             <div class="right">
-                <div :class="directionSelection == item ? 'direction-active' : 'direction'" v-for="item in list" :key="item"
-                    @click="changeDirection(item)">
-                    <div v-if="directionSelection == item" class="active">效果图{{ item }}</div>
-                    <img :src="screenshotList[0]" style="width: 96px; height: 96px;">
+                <div :class="directionSelection == item.id ? 'direction-active' : 'direction'"
+                    v-for="(item, index ) in screenshotList" :key="item.id" @click="changeDirection(item)">
+                    <div v-if="directionSelection == item.id" class="active">效果图{{ index }}</div>
+                    <img :src="item.src" style="width: 96px; height: 96px;">
                 </div>
-                
-                <Icon type="ios-arrow-dropup-circle" size="36" color="#DCE1E9" class="up" />
-                <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" />
             </div>
+            <Icon type="ios-arrow-dropup-circle" size="36" color="#DCE1E9" class="up" />
+            <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" />
         </div>
         <div class="color-selection">
             <div :class="colorSelection == item ? 'item-active' : 'item'" v-for="item in colorList" :key="item"
@@ -52,28 +51,45 @@ const colorList = reactive([
     'red'
 ])
 
-const directionSelection = ref(0)
+let directionSelection = ref('')
+let imageActive = ref('')
 const list = reactive([0, 2, 34, 6, 9])
 onMounted(() => {
     is3D.value = props.is3D === 4 ? true : false
-    load3DScene.init(scene, camera, renderer, 'big-3d')
+    load3DScene.init(scene, camera, renderer, 'big-3d', () => {
+        screenshotList = []
+        let arr = load3DScene.setCameraAngle()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+        imageActive.value = screenshotList[0].src
+        directionSelection.value = screenshotList[0].id
+    })
+
 
 })
+
 onUnmounted(() => {
     load3DScene.destroyScene()
 })
 const changeDirection = (item) => {
-    directionSelection.value = item
+    directionSelection.value = item.id
+    imageActive.value = item.src
 }
 const changeColor = (item) => {
     colorSelection.value = item
+    load3DScene.setModelColor(item, () => {
+        screenshotList = []
+        let arr = load3DScene.setCameraAngle()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+        imageActive.value = screenshotList[0].src
+        directionSelection.value = screenshotList[0].id
+    })
 }
 const changeMode = (val) => {
     is3D.value = val
-    if (!is3D.value) {
-        screenshotList = load3DScene.getScreenshot()
-    }
-
 }
 </script>
 <style lang="less" scoped>
@@ -113,8 +129,6 @@ const changeMode = (val) => {
     .box {
         width: 600px;
         height: 600px;
-        border: 1px solid #DCE1E9;
-
     }
 
     .color-selection {
@@ -163,14 +177,31 @@ const changeMode = (val) => {
     .pre-2d {
         display: flex;
 
+        .up {
+            position: absolute;
+            top: 0px;
+            cursor: pointer;
+            right: 55px;
+        }
+
+        .down {
+            position: absolute;
+            bottom: 22px;
+            cursor: pointer;
+            right: 55px;
+        }
+
         .right {
             height: auto;
-            width: 120px;
+            // width: 120px;
             position: relative;
             padding-left: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            height: 600px;
+            overflow-y: scroll;
+            overflow-x: hidden;
 
 
             .direction {
@@ -204,17 +235,7 @@ const changeMode = (val) => {
                 }
             }
 
-            .up {
-                position: absolute;
-                top: 0px;
-                cursor: pointer;
-            }
 
-            .down {
-                position: absolute;
-                bottom: 0px;
-                cursor: pointer;
-            }
         }
     }
 }

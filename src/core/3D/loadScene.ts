@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
+import TWEEN from '@tweenjs/tween.js';
 // 引入轨道控制器
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // 模型加载器，用于加载3D Studio Max软件中的3DS和MAX文件格式
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { setTimeout } from 'timers/promises';
 class LoadScene {
     static canvasId: string
     static camera: any
@@ -12,13 +12,13 @@ class LoadScene {
     static renderer: any
     static screenshotList: Array<any> = []
 
-    init(scene: any, camera: any, renderer: any, id: string) {
+    init(scene: any, camera: any, renderer: any, id: string, callBack: Function) {
         LoadScene.scene = scene
         LoadScene.camera = camera
         LoadScene.renderer = renderer
         // 创建一个场景
         LoadScene.scene = new THREE.Scene();
-        LoadScene.scene.background = new THREE.Color(0xffffdd);
+        LoadScene.scene.background = new THREE.Color(0xffffff);
         // 创建一个相机
         LoadScene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
         // 设置相机的位置
@@ -37,8 +37,10 @@ class LoadScene {
         // 创建一个渲染器
         LoadScene.renderer = new THREE.WebGLRenderer({
             antialias: true, // 设置抗锯齿
-            preserveDrawingBuffer: true
+            preserveDrawingBuffer: true,
+            alpha: true
         });
+        LoadScene.renderer.setClearAlpha(0.0)
         // 设置渲染尺寸
         const height = id == 'big-3d' ? 600 : 280
         const width = id == 'big-3d' ? 600 : 280
@@ -60,6 +62,12 @@ class LoadScene {
         const loader = new FBXLoader();
         loader.load('src/assets/model/JBJ_D(1).FBX', object => {
             object.name = 'duanxiu'
+
+            const color = new THREE.Color('blue')
+            const material = new THREE.MeshBasicMaterial({ color })
+            object.traverse((v: any) => {
+                v.material = material
+            })
             LoadScene.scene.add(object);
         });
         // loader.load('src/assets/model/short.FBX', object => {
@@ -86,44 +94,51 @@ class LoadScene {
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
             // 通过动画帧来执行函数
             requestAnimationFrame(render);
+            TWEEN.update()
+
         };
-        // const setCameraAngle = (angel: number) => {
-
-        //     LoadScene.renderer.render(LoadScene.scene, LoadScene.camera)
-        //     let imgData = LoadScene.renderer.domElement.toDataURL("image/jpeg");
-        //     LoadScene.screenshotList.push(imgData)
-        //     // render()
-        // }
-        // let imgData = LoadScene.renderer.domElement.toDataURL("image/jpeg");
-        // LoadScene.screenshotList.push(imgData)
-        // console.log('LoadScene.screenshotList', LoadScene.screenshotList)
-        // setCameraAngle(45)
         render();
-
+        setTimeout(() => {
+            callBack()
+        }, 1000);
+        console.log('LoadScene.scene', LoadScene.scene)
 
     }
-    setCameraAngle(angel: number) {
-        console.log(' LoadScene.scene', LoadScene.scene)
-        LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
-                c.rotation.y = c.rotation.y + Math.PI / 3
-            }
-        })
-        LoadScene.renderer.render(LoadScene.scene, LoadScene.camera)
-        // setTimeout(() => {
+    setCameraAngle() {
+        LoadScene.screenshotList = []
+        const setImage = () => {
+            LoadScene.renderer.render(LoadScene.scene, LoadScene.camera)
             let imgData = LoadScene.renderer.domElement.toDataURL("image/jpeg");
             const obj = {
                 src: imgData,
                 id: uuid()
             }
             LoadScene.screenshotList.push(obj)
-            return LoadScene.screenshotList
-        // }, 1000)
-
+        }
+        setImage()
+        LoadScene.scene.traverse((c: any) => {
+            if (c.name == 'duanxiu') {
+                c.rotation.y = c.rotation.y - Math.PI / 3
+                setImage()
+            }
+        })
+        LoadScene.scene.traverse((c: any) => {
+            if (c.name == 'duanxiu') {
+                c.rotation.y = c.rotation.y - 2 * Math.PI / 3
+                setImage()
+            }
+        })
+        LoadScene.scene.traverse((c: any) => {
+            if (c.name == 'duanxiu') {
+                c.rotation.y = 0
+            }
+        })
+        return LoadScene.screenshotList
     }
 
     destroyScene() {
         LoadScene.scene = null
+        console.log('销毁')
     }
     getScreenshot() {
         let screenshotList = []
@@ -131,7 +146,43 @@ class LoadScene {
         let imgData = LoadScene.renderer.domElement.toDataURL("image/jpeg");
         screenshotList.push(imgData)
         return screenshotList
-        // document.getElementById('aaa').appendChild(image)
+    }
+    setModelColor(color1: string, callBack: Function) {
+        const color = new THREE.Color(color1)
+        const material = new THREE.MeshBasicMaterial({ color })
+        LoadScene.scene.traverse((c: any) => {
+            if (c.name == 'duanxiu') {
+                c.traverse((v: any) => {
+                    v.material = material
+                })
+
+            }
+        })
+        setTimeout(() => {
+            callBack()
+        }, 1000);
+    }
+    setModelCamera() {
+        LoadScene.scene.traverse((c: any) => {
+            if (c.name == 'duanxiu') {
+                let rotation = { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z };
+                let testTween = new TWEEN.Tween(rotation);
+                testTween.to({ x: c.rotation.x, y: c.rotation.y - Math.PI / 3, z: c.rotation.z }, 500);
+                testTween.onStart(function () {
+                    console.log("start");
+                }).onUpdate(function (object) {
+                    c.rotation.y = object.y
+                    console.log("update", object);
+                }).onComplete(function () {
+                    console.log("complete");
+                });
+                testTween.easing(TWEEN.Easing.Quadratic.Out);
+                testTween.start(); //开始
+            }
+        })
+
+
+
     }
 }
 export default LoadScene
