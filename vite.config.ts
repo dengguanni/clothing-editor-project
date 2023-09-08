@@ -14,6 +14,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueSetupExtend from 'vite-plugin-vue-setup-extend-plus';
 import autoImports from 'unplugin-auto-import/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 type CacheStrategy =
   | 'CacheFirst'
@@ -74,9 +76,13 @@ const config = ({ mode }) => {
       }),
       autoImports({
         imports: ['vue'],
+        resolvers: [ElementPlusResolver()],
         eslintrc: {
           enabled: true,
         },
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()],
       }),
       vueSetupExtend(),
       // 增加下面的配置项,这样在运行时就能检查eslint规范
@@ -138,6 +144,11 @@ const config = ({ mode }) => {
           target: 'https://github.com/',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/fontFile/, ''),
+        },
+        '/api': {
+          target: 'http://8.140.206.30:8011/QueryData?SqlCmdName=Web\get_goodsImageListByTreeNode&DBC=d1',	// 实际请求地址
+          changeOrigin: true, // 是否跨域
+          rewrite: (path) => path.replace(/^\/api/, '') // 对什么类的服务器匹配
         },
       },
     },

@@ -52,4 +52,7 @@ declare module 'vue' {
     Tools: typeof import('./src/components/tools.vue')['default']
     Zoom: typeof import('./src/components/zoom.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
+  }
 }

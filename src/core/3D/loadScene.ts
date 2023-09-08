@@ -62,7 +62,6 @@ class LoadScene {
         const loader = new FBXLoader();
         loader.load('src/assets/model/JBJ_D(1).FBX', object => {
             object.name = 'duanxiu'
-
             const color = new THREE.Color('blue')
             const material = new THREE.MeshBasicMaterial({ color })
             object.traverse((v: any) => {

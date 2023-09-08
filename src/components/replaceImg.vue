@@ -7,8 +7,8 @@
 -->
 
 <template>
-  <div v-if="mixinState.mSelectMode === 'one' && type === 'image'" >
-    <Button @click="repleace" type="text" long  class="btn-02">{{ $t('repleaceImg') }}</Button>
+  <div v-if="mixinState.mSelectMode === 'one' && type === 'image'">
+    <Button @click="repleace" type="text" long class="btn-02">{{ $t('repleaceImg') }}</Button>
   </div>
 </template>
 

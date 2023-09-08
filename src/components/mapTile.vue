@@ -1,7 +1,7 @@
 <template>
     <div v-if="mixinState.mSelectMode === 'one'">
         <div class="box-01">
-            <div class="bg-sq-02" v-for="item in menuList1" :key="item.type">
+            <div class="bg-sq-02" v-for="item in menuList1" :key="item.type" @click="menuList1Click(item.type)">
                 {{ item.label }}
             </div>
         </div>
@@ -131,7 +131,7 @@ const menuList3 = [
 onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
-    MouseEventEventListener.setMouseupFn = () =>{}
+    MouseEventEventListener.setMouseupFn = () => { }
 })
 const init = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
@@ -139,6 +139,48 @@ const init = () => {
     if (activeObject) {
         type.value = activeObject.type;
         update?.proxy?.$forceUpdate();
+    }
+}
+const menuList1Click = (type) => {
+    switch (type) {
+        case 'basic':
+            const workspace = this.canvas.getObjects().find((item) => item.id === 'workspace');
+            const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+            var canvasElement = document.getElementById('myCanvas');
+            // 创建一个新的 Pattern 对象
+            const rowCount = 3;
+            const colCount = 3;
+            // 复制并平铺图像
+            for (let row = 0; row < rowCount; row++) {
+                for (let col = 0; col < colCount; col++) {
+                    if (row === 0 && col === 0) continue; // 跳过原始图像
+
+                    // 克隆原始图像
+                    const clonedImage = activeObject.clone();
+
+                    // 调整位置，平铺图像
+                    clonedImage.set({
+                        left: originalImage.width * col,
+                        top: originalImage.height * row,
+                        scaleX: -1, // 镜像水平翻转
+                        scaleY: 1, // 保持垂直方向不变
+                    });
+                    // 将克隆图像添加到画布
+                    canvas.add(clonedImage);
+                }
+            }
+
+            // 渲染画布
+            canvas.renderAll();
+            //   state.isShowFilters = true
+            break;
+        case 'cropping':
+            //   state.isShowCropping = true
+            break;
+        case 'clearness':
+            //   changeFilters()
+            break;
+        default:
     }
 }
 const del = debounce(function () {
