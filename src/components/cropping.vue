@@ -2,11 +2,11 @@
     <div class="box">
         <div class="menu">
             <div @click="goBack">返回</div>
-            <div @click="">恢复</div>
+            <div @click="restore">恢复</div>
         </div>
-        <div @click="text" style="height: 100px; width: 100px; background-color: aqua;"> 剪切</div>
+        <!-- <div @click="text" style="height: 100px; width: 100px; background-color: aqua;"> 剪切</div> -->
         <div class="filter-box">
-            <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value.src)>
+            <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value)>
                 <img :src="value.src" />
             </div>
         </div>
@@ -27,26 +27,26 @@ const state = reactive({
 const imageList = reactive([
     {
         id: '1',
-        src: 'http://127.0.0.1:3000/src/assets/croping/未标题-1.jpg'
+        src: 'http://8.140.206.30:8089/ImageSource/Masks/01.png'
 
     }, {
         id: '2',
-        src: 'http://127.0.0.1:3000/src/assets/croping/未标题-2.jpg'
+        src: 'http://8.140.206.30:8089/ImageSource/Masks/02.png'
 
     },
     {
         id: '3',
-        src: 'http://127.0.0.1:3000/src/assets/croping/未标题-3.jpg'
+        src: 'http://8.140.206.30:8089/ImageSource/Masks/03.png'
 
     },
     {
         id: '4',
-        src: 'http://127.0.0.1:3000/src/assets/croping/未标题-4.jpg'
+        src: 'http://8.140.206.30:8089/ImageSource/Masks/04.png'
 
     },
     {
         id: '5',
-        src: 'http://127.0.0.1:3000/src/assets/croping/未标题-5.jpg'
+        src: 'http://8.140.206.30:8089/ImageSource/Masks/05.png'
 
     }
 ])
@@ -54,18 +54,42 @@ onMounted(() => {
     // console.log('mixinState', mixinState)
     // console.log('activeObject', activeObject)
 })
-const addItem = (src) => {
-    mixinState.setIsClipping(true)
-    clipImage()
-    // console.log(activeObject)
-    // imgToBase64(src).then(res => {
-    //     if (res) {
-    //         console.log('生成的base64图片', res)
-    //         insertImgFile(res);
-    //     }
-    // }).catch(err => {
-    //     console.log('这里是错误', err);
-    // });
+const restore = () => {
+    const info = canvasEditor.canvas.getObjects().find((item) => {
+        if (item.hasCropping) {
+            canvasEditor.canvas.remove(item)
+        }
+    });
+}
+const addItem = (item) => {
+    // mixinState.setIsClipping(true)
+    // clipImage()
+    const activeObject = canvasEditor.canvas.getObjects();
+    console.log('activeObject', activeObject)
+    activeObject.map((item) => {
+        if (item.hasCropping) {
+            canvasEditor.canvas.remove(item)
+            canvasEditor.upTop()
+        }
+    }
+    )
+    const imageURL = item.src;
+    let callback = (image, isError) => {
+        if (!isError) {
+            image.hasCropping = true
+            image.id = uuid()
+            canvasEditor.canvas.add(image);
+            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+            canvasEditor.canvas.discardActiveObject();
+            canvasEditor.canvas.setActiveObject(info);
+            canvasEditor.canvas.requestRenderAll();
+        }
+    };
+    const properties = {
+        left: 0,
+        top: 0
+    };
+    fabric.Image.fromURL(imageURL, callback, properties);
 }
 const text = () => {
 

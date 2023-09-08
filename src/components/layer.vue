@@ -8,28 +8,11 @@
 
 <template>
   <div class="box">
-    <Button type="" class="all-design-btn">
+    <Button  class="all-design-btn" style="display: none;">
       <span v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></span>
       整体设计
     </Button>
-    <div class="layer-box">
-      <div v-for="item in list" @click="select(item.id)" :key="item.id" :class="isSelect(item) && 'active'">
-        <Tooltip :content="item.name || item.text || item.type" placement="left">
-          <div class="ellipsis">
-            <div style="display:flex;">
-              <div :class="isSelect(item) && 'active'" v-html="iconType(item.type)" style="margin: 2px 5px 0px 40px;">
-              </div>
-              <span> {{ textType(item.type, item) }}</span>
-            </div>
-            <div>
-              <span v-html="iconType(state.isLock ? 'lock' : 'unlock')" style="margin: 0px 10px;"
-                @click.stop="doLock()"></span>
-              <span v-html="iconType('display')" style="margin: 0px 10px;" @click.stop="doHide()"></span>
-            </div>
-          </div>
-        </Tooltip>
-      </div>
-    </div>
+
     <template v-if="list.length">
       <Collapse v-model="value1">
         <Panel name="1">

@@ -1,8 +1,4 @@
 /*
- * @Author: 秦少卫
- * @Date: 2023-08-04 21:13:16
- * @LastEditors: 秦少卫
- * @LastEditTime: 2023-08-07 23:04:58
  * @Description: 素材插件
  */
 
@@ -27,7 +23,7 @@ class MaterialPlugin {
     };
   }
 
-  // 根据素材类型获取分裂列表
+  // 根据素材类型获取分类列表
   async getMaterialType(typeId: string) {
     console.log('typeId', typeId)
     const url = this.apiMapUrl[typeId];

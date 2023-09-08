@@ -8,50 +8,50 @@
         <div class="content">
             <div class="size-details" v-if="selection == 0">
                 <div class="details">
-                    <div class="left">尺码说明</div>
-                    <div class="right">男士短袖夏威夷衬衫</div>
+                    <div class="left">产品别名</div>
+                    <div class="right">{{ goodsDetailInfo['产品别名'] }}</div>
                 </div>
                 <div class="item-1">
-                    <div class="details" v-for="item in list" :key="item">
-                        <div class="left">尺码说明</div>
-                        <div class="right">男士短袖夏威夷衬衫</div>
+                    <div v-for="(item, key) in goodsDetailInfo">
+                        <div class="details" :key="item" v-if="key !== 'GUID' && key !== '产品别名' && key !== '描述'">
+                            <div class="left" >{{ key }}</div>
+                            <div class="right">{{
+                                goodsDetailInfo[key]
+                            }}</div>
+                        </div>
                     </div>
+
                 </div>
                 <div class="tips">
                     <div class="title-1">其他描述</div>
                     <div class="tips-content">
-                        【设计说明】全幅单面印花
-                        【材质说明】100%涤
-                        【产品性能】采用全涤加密提花面料制成，轻盈、透气、柔软触感、防风、防晒、易于收纳。经久耐用,轻便舒适。防泼水速干材质，让您保持舒适干爽。采用拉链设计，方便穿脱。连帽设计，时尚百搭。舒适的版型，可以搭配多种下装。
-                        【适用场景】适合所有户外活动,海滩、跑步、骑行、登山、钓鱼、徒步、旅行、户外、露营。 也适合休闲和锻炼。
-                        【适用人群】男女同款
-                        【配件构造】长袖；前门襟拉链；连帽设计；下摆、袖口松紧带设计；左侧一内口袋。
-                        【洗涤说明】手洗机洗均可，请勿漂白
-                        【特别说明】此尺码数据在衣服平铺下测量所得，因测量方法不同，误差在2-4cm内的属于正常现象
+                        {{ goodsDetailInfo['描述'] }}
                     </div>
                 </div>
-                <div class="tips">
-                    <div class="title-1">其他描述</div>
-                    <div class="tips-content">
-                        【设计说明】全幅单面印花
-                        【材质说明】100%涤
-                        【产品性能】采用全涤加密提花面料制成，轻盈、透气、柔软触感、防风、防晒、易于收纳。经久耐用,轻便舒适。防泼水速干材质，让您保持舒适干爽。采用拉链设计，方便穿脱。连帽设计，时尚百搭。舒适的版型，可以搭配多种下装。
-                        【适用场景】适合所有户外活动,海滩、跑步、骑行、登山、钓鱼、徒步、旅行、户外、露营。 也适合休闲和锻炼。
-                        【适用人群】男女同款
-                        【配件构造】长袖；前门襟拉链；连帽设计；下摆、袖口松紧带设计；左侧一内口袋。
-                        【洗涤说明】手洗机洗均可，请勿漂白
-                        【特别说明】此尺码数据在衣服平铺下测量所得，因测量方法不同，误差在2-4cm内的属于正常现象
-                    </div>
-                </div>
+
             </div>
             <div class="size-description" v-if="selection == 1">
                 <!-- <Table size="large" :columns="columns1" :data="data1"></Table> -->
-                <commonTabel :titleList="columns1"  :data="data1"></commonTabel>
+                <!-- <commonTabel :titleList="columns1" :data="sizeInfo"></commonTabel> -->
+                <el-table :data="sizeInfo" stripe style="width: 100%">
+                    <el-table-column prop="Title" label="尺码" />
+                    <el-table-column prop="肩宽" label="肩宽" />
+                    <el-table-column prop="胸围" label="胸围" />
+                    <el-table-column prop="腰围" label="腰围" />
+                    <el-table-column prop="衣长" label="衣长" />
+                </el-table>
                 <div class="warm">*尺码数据仅供参考，因测量方式不同，可能存在一定误差，请以实物为准</div>
             </div>
             <div class="packaging-specifications" v-if="selection == 2">
                 <!-- <Table :columns="columns2" :data="data1"></Table> -->
-                <commonTabel :titleList="columns2"  :data="data2"></commonTabel>
+                <el-table :data="sizeInfo" stripe style="width: 100%">
+                    <el-table-column prop="Title" label="尺码" />
+                    <el-table-column prop="包装体积cm" label="包装体积cm" />
+                    <el-table-column prop="包装体积in" label="包装体积in" />
+                    <el-table-column prop="包装尺寸in" label="包装尺寸in" />
+                    <el-table-column prop="含包装重量g" label="含包装重量g" />
+                    <el-table-column prop="含包装重量lb" label="含包装重量lb" />
+                </el-table>
             </div>
 
         </div>
@@ -59,155 +59,69 @@
 </template>
   
 <script lang="ts" setup>
-import commonTabel from '@/components/commonTabel.vue'
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ElTable, ElTableColumn } from 'element-plus'
+import { ref, reactive, onMounted, watch, } from 'vue'
+import getLeftClassificationList from '@/api/commodity.ts'
 const props = defineProps({
     selectedProduct: {
         type: Number,
         default: 0
+    },
+    goodsId: {
+        type: String,
+        default: ''
     }
 });
 
+const goodsDetailInfo = ref({
+    '产品别名': '',
+    '描述': ''
+})
+const sizeInfo = ref()
 
-const list = reactive([1, 2, 3, 56, 6, 9])
-const columns2 = reactive([
-    {
-        title: '尺码',
-        key: 'name'
-    },
-    {
-        title: '包装尺寸(cm)',
-        key: 'aa'
-    },
-    {
-        title: '包装尺寸(in)',
-        key: 'address'
-    },
-    {
-        title: '包装体积(cm³)',
-        key: 'age'
-    },
-    {
-        title: '包装体积(in³)',
-        key: 'bb'
-    },
-    {
-        title: '含包装重量(g)',
-        key: 'age'
-    },
-    {
-        title: '含包装重量(g)',
-        key: 'cc'
-    }
-])
-const columns1 = reactive([
-    {
-        title: '尺码',
-        key: 'name'
-    },
-    {
-        title: '肩宽',
-        key: 'age'
-    },
-    {
-        title: '1/2胸围',
-        key: 'address'
-    },
-    {
-        title: '衣长',
-        key: 'aa'
-    },
-    {
-        title: '袖长',
-        key: 'address'
-    }
-])
-const data2 = reactive([
-    {
-        name: 'Johon',
-        age: 18,
-        address: 'NePark',
-        date: '2016',
-        aa: '12cm',
-        bb: '12cm',
-        cc: '24mm'
-    },
-    {
-        name: 'Jimn',
-        age: 24,
-        address: 'ark',
-        date: '2016',
-        aa: '12cm',
-        bb: '12cm',
-        cc: '24mm'
-    },
-    {
-        name: 'Joe',
-        age: 30,
-        address: 'Park',
-        date: '2016',
-        aa: '12cm',
-        bb: '12cm',
-        cc: '24mm'
-    },
-    {
-        name: 'Jon',
-        age: 26,
-        address: 'Park',
-        date: '2016',
-        aa: '12cm',
-        bb: '12cm',
-        cc: '24mm'
-    }
-])
-const data1 = reactive([
-    {
-        name: 'Johon',
-        age: 18,
-        address: 'NePark',
-        date: '2016',
-        aa: '12cm'
-    },
-    {
-        name: 'Jimn',
-        age: 24,
-        address: 'ark',
-        date: '2016',
-        aa: '12cm'
-    },
-    {
-        name: 'Joe',
-        age: 30,
-        address: 'Park',
-        date: '2016',
-        aa: '12cm'
-    },
-    {
-        name: 'Jon',
-        age: 26,
-        address: 'Park',
-        date: '2016',
-        aa: '12cm'
-    }
-])
 let selection = ref(0)
 watch(
     () => props.selectedProduct,
     (val) => {
-        console.log('selection.value', selection.value)
         selection.value = val
+        getGoodsDetails()
+        getSizeInfo()
     }
 );
-onMounted(()=>{
-    selection.value =  props.selectedProduct
-    console.log('prop', props.selectedProduct)
+onMounted(() => {
+    selection.value = props.selectedProduct
+    initData()
 })
+const initData = () => {
+    getSizeInfo()
+    getGoodsDetails()
+}
+const getSizeInfo = () => {
+    const p = {
+        GUID: props.goodsId
+    }
+    getLeftClassificationList.getGoodsSizeDetails(p).then(res => {
+        sizeInfo.value = [...res.Tag[0].Table]
+        console.log('尺码', sizeInfo.value)
+    })
+}
+const getGoodsDetails = () => {
+    const p = {
+        GUID: props.goodsId
+    }
+    getLeftClassificationList.getGoodsDetails(p).then(res => {
+        if (res.Tag[0].Table) {
+            goodsDetailInfo.value = { ...res.Tag[0].Table[0] }
+        }
+    })
+}
 const changeSelection = (val) => {
     selection.value = val
-    
-    // if(selection.value == 1) {
+    if (val !== 0) {
+        // getSizeInfo()
+    } else {
 
-    // }
+    }
 }
 
 </script>
@@ -287,8 +201,6 @@ const changeSelection = (val) => {
             .item-1 {
                 display: flex;
                 flex-wrap: wrap;
-
-
             }
 
         }

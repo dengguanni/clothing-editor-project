@@ -8,27 +8,23 @@
         </div>
         <div class="goods-detail">
             <div class="goods">
-                <div class="image"></div>
+                <img class="image" :src="info.ImageUrl" />
                 <div class="right">
-                    <div class="text-1">青少年轻薄运动大事故就...</div>
+                    <div class="text-1">{{ info.Title }}</div>
                     <div class="text-2">(版型编号:12039)</div>
                     <button class="btn-1" @click="openDailog(2)">产品详情</button>
                 </div>
             </div>
-            <div class="size-box">
+            <div class="size-box" v-if="props.sizeList.length !== 0">
                 <button class="right" @click.native.stop="openDailog(3)">尺码表</button>
                 <Collapse v-model="value1" simple>
                     <Panel name="1">尺寸
-                        <!-- <div class="header">
-                            <div class="left">尺寸</div>
-                            
-                        </div> -->
                         <template #content>
                             <div class="size-selection">
-                                <div v-for="item in sizeList" :key="item"
-                                    :class="sizeSelected == item ? 'size-selected' : 'size'" @click="changeSize(item)">{{
-                                        item }}</div>
-
+                                <div v-for="item in props.sizeList" :key="item.GUID"
+                                    :class="sizeSelected == item.GUID ? 'size-selected' : 'size'" @click="changeSize(item)">
+                                    {{
+                                        item.Title }}</div>
                             </div>
                         </template>
                     </Panel>
@@ -46,33 +42,55 @@
                         </template>
                     </Panel>
                 </Collapse>
-
             </div>
         </div>
-
     </div>
 </template>
   
 <script lang="ts" setup scoped>
 import { Collapse, Panel } from 'view-ui-plus';
 import colorSelector from '@/components/colorSelector.vue';
-import { reactive, ref, onMounted, provide } from 'vue'
+import { reactive, ref, onMounted, provide, watch } from 'vue'
 import useSelect from '@/hooks/select';
-import mitts from '@/utils/mitts.js'; 
+import mitts from '@/utils/mitts.js';
+const info: any = ref({
+    GUID: '',
+    ImageUrl: '',
+    Title: ''
+})
 const emit = defineEmits();
+const props = defineProps({
+    goodsInfo: {
+        type: Object,
+        default: () => {
+            return {
+                GUID: '',
+                ImageUrl: '',
+                Title: ''
+            }
+        }
+    },
+    sizeList: {
+        type: Array,
+        default: () => {
+            return []
+        }
+    }
+})
+
 const value1 = ref('1')
 let indeterminate = ref(true);
 let checkAll = ref(false);
 let checkAllGroup = reactive(['S'])
-const sizeSelected = ref('S')
+const sizeSelected = ref('')
 const colorelected = ref('#ffff')
-const sizeList = reactive([
-    'S',
-    'M',
-    'L',
-    'XL',
-    'XXL'
-]);
+// const sizeList = reactive([
+//     'S',
+//     'M',
+//     'L',
+//     'XL',
+//     'XXL'
+// ]);
 const colorList = reactive([
     '#ffff',
     '#19be6b',
@@ -102,6 +120,22 @@ const baseAttr = reactive({
 onMounted(() => {
 
 })
+watch(
+    () => props.goodsInfo,
+    (val) => {
+        if (val.GUID) {
+            info.value = { ...val }
+        }
+    }
+);
+watch(
+    () => props.sizeList,
+    (val) => {
+        if (val.length > 0) {
+            sizeSelected.value = val[0].GUID
+        }
+    }
+);
 const openDailog = (val) => {
     emit('openDailog', val)
 }
@@ -114,12 +148,13 @@ const changeCommon = (key, value) => {
     // 更新属性
     getObjectAttr();
 }
-const changeSize = (item: String) => {
-    sizeSelected.value = item
+const changeSize = (item: any) => {
+    sizeSelected.value = item.GUID
+    mitts.emit('changeSize', item)
 }
 const changeColor = (item: String) => {
     colorelected.value = item
-    mitts.emit('changeModelColor',item)
+    mitts.emit('changeModelColor', item)
     // GoodsInfo.setModelColor(item)
 }
 
@@ -183,11 +218,13 @@ const checkAllGroupChange = (data: any) => {
     height: 60px;
     // padding-top: 10px;
 }
-/deep/.ivu-collapse-header{
+
+/deep/.ivu-collapse-header {
     height: 60px;
     // padding-top: 10px;
 }
-/deep/.ivu-collapse-content{
+
+/deep/.ivu-collapse-content {
     padding: 20px 0px;
 }
 
@@ -317,7 +354,6 @@ const checkAllGroupChange = (data: any) => {
             justify-content: space-between;
 
             .image {
-                // background: #6d6c6c;
                 height: 120px;
                 width: 120px;
                 border-radius: 10%;

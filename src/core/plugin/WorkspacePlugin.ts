@@ -15,6 +15,7 @@ class WorkspacePlugin {
   static apis = ['big', 'small', 'auto', 'one', 'setSize'];
   workspaceEl: HTMLElement;
   workspace: null | fabric.Rect;
+  newWorkspace: null | fabric.Rect;
   option: any;
   constructor(canvas: fabric.Canvas, editor: IEditor) {
     this.canvas = canvas;
@@ -95,13 +96,27 @@ class WorkspacePlugin {
       id: 'workspace',
     });
 
+    let a = 703
+    let b = 400
+    // const aa = new fabric.Rect({
+    //   fill: 'rgba(255,255,25,1)',
+    //   width: a,
+    //   height: b,
+    //   top: 200,
+    //   id: 'workspace',
+    // });
+    // aa.set('selectable', false);
+    // aa.set('hasControls', false);
+    // aa.hoverCursor = 'default';
+    // this.newWorkspace = aa
+
     // workspace.clipPath = clipPath
     workspace.set('selectable', false);
     workspace.set('hasControls', false);
     workspace.hoverCursor = 'default';
     this.canvas.add(workspace);
+    // this.canvas.add(aa);
     this.canvas.renderAll();
-
     this.workspace = workspace;
     this.auto();
   }
@@ -116,7 +131,6 @@ class WorkspacePlugin {
     if (canvas.width === undefined || canvas.height === undefined || !viewportTransform) return;
     viewportTransform[4] = canvas.width / 2 - objCenter.x * viewportTransform[0];
     viewportTransform[5] = 0;
-    console.log('canvas.height / 2 - objCenter.y * viewportTransform[3]', canvas.height / 2 - objCenter.y * viewportTransform[3])
     canvas.setViewportTransform(viewportTransform);
     canvas.renderAll();
   }
@@ -159,11 +173,13 @@ class WorkspacePlugin {
 
     // 超出画布不展示
     this.workspace.clone((cloned: fabric.Rect) => {
-      // this.canvas.backgroundColor = '#333'
       this.canvas.clipPath = cloned;
       this.canvas.requestRenderAll();
-
     });
+    // this.newWorkspace.clone((cloned: fabric.Rect) => {
+    //   this.canvas.clipPath = cloned;
+    //   this.canvas.requestRenderAll();
+    // });
     if (cb) cb(this.workspace.left, this.workspace.top);
   }
 

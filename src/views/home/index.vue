@@ -1,7 +1,8 @@
 <template>
   <Dialog @closeDailog="closeDailog" v-if="showDailog">
-    <patternCard v-if="dialogType == 1"></patternCard>
-    <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"></productDetails>
+    <patternCard v-if="dialogType == 1" @senGoodsId="senGoodsId"></patternCard>
+    <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"
+      :goodsId="goodsInfo.GUID"></productDetails>
     <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
   </Dialog>
   <div class="home">
@@ -104,7 +105,7 @@
           </div>
         </div>
         <div v-show="!state.isDesign" class="content">
-          <Pattern @openDailog="openDailog"></Pattern>
+          <Pattern @openDailog="openDailog" :goodsInfo="goodsInfo" :sizeList="sizeList"></Pattern>
         </div>
         <!-- 关闭按钮 -->
         <div class="close-btn" v-show="state.toolsBarShow" @click="hideToolsBar"></div>
@@ -114,10 +115,11 @@
       <div id="workspace">
         <div class="canvas-box">
           <div class="canvas-menu">
-            <canvasMenu></canvasMenu>
+            <canvasMenu :sizeList="sizeList"></canvasMenu>
           </div>
           <div class="inside-shadow"></div>
           <canvas id="canvas" :class="state.ruler ? 'design-stage-grid' : ''" width="400" height="300"></canvas>
+          <canvas id="canvas2" :class="state.ruler ? 'design-stage-grid' : ''" width="400" height="200"></canvas>
           <dragMode v-if="state.show"></dragMode>
           <zoom></zoom>
           <!-- <mouseMenu></mouseMenu> -->
@@ -219,6 +221,9 @@ import canvasMenu from '@/components/canvasMenu.vue'
 // import { downFile } from '@/utils/utils';
 import { fabric } from 'fabric';
 
+// api
+import getLeftClassificationList from '@/api/commodity.ts'
+
 // icon
 import commonIcon from '@/components/commonIcon.vue'
 import Editor, {
@@ -247,6 +252,12 @@ const dialogType = ref(0)
 const showDailog = ref(false)
 const repoSrc = import.meta.env.APP_REPO;
 const logoImg = `${repoSrc}font-tmpl/1.png`;
+const sizeList = ref([])
+let goodsInfo = ref({
+  GUID: '',
+  ImageUrl: '',
+  Title: ''
+})
 console.log('repoSrc', repoSrc);
 // 创建编辑器
 const canvasEditor = new Editor();
@@ -356,6 +367,23 @@ const rulerSwitch = (val) => {
 };
 const closeDailog = () => {
   showDailog.value = false
+}
+const senGoodsId = (val) => {
+  showDailog.value = false
+  goodsInfo.value = { ...val }
+  getLeftClassificationList.getGoodsSizeDetails({ GUID: goodsInfo.value.GUID }).then(res => {
+    console.log('外部尺码', res)
+    let arr = []
+    res.Tag[0].Table.forEach(el => {
+      arr.push({
+        Title: el.Title,
+        GUID: el.GUID
+      })
+    })
+    sizeList.value = [...arr]
+  })
+
+  console.log('商品详情111', val)
 }
 // 点击滤镜或者剪裁时候返回
 const goBack = (val) => {
@@ -566,8 +594,8 @@ provide('canvasEditor', canvasEditor);
 
   .canvas-menu {
     position: absolute;
-    top: 40px;
-    left: 110px;
+    top: 0px;
+    left: 141px;
     z-index: 99;
   }
 }

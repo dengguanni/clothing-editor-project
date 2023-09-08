@@ -6,101 +6,173 @@
       </div>
       <div class="tree">
         <div class="all-btn">全部分类</div>
-        <TreeSelect v-model="treeValue" :data="treeData" v-width="200" />
-        <TreeSelect v-model="treeValue" :data="treeData" v-width="200" />
-        <TreeSelect v-model="treeValue" :data="treeData" v-width="200" />
-        <TreeSelect v-model="treeValue" :data="treeData" v-width="200" />
-        <TreeSelect v-model="treeValue" :data="treeData" v-width="200" />
+        <el-tree-v2 :data="treeData" :props="treeProps" :height="499" @nodeExpand="getNode" @currentChange="selectNOde"
+          @getCurrentNode="getCurrentNode"></el-tree-v2>
       </div>
     </div>
     <div class="right">
       <div class="header-1">
         <div class="serach-box">
           <!-- <Icon type="ios-search" size="20" /> -->
-          <Input search enter-button="搜索" placeholder="Enter something..." prefix="ios-contact"></Input>
+          <Input search enter-button="搜索" placeholder="Enter something..." prefix="ios-contact" v-model="searchKey"
+            @on-search="searchGoods"></Input>
         </div>
         <button class="reset">重置</button>
       </div>
       <div class="content">
-        <div class="conten-item" v-for="item in list" :key="item">
-          <div class="image"></div>
-          <div>儿童轻薄运动长袖防晒衣</div>
+        <div class="conten-item" v-for="item in goodList" :key="item.GUID" @click="getGoodsId(item)">
+          <img class="image" :src="item.ImageUrl" />
+          <div>{{ item.Title }}</div>
         </div>
       </div>
       <div class="page">
-        <Page :total="100" show-sizer />
+        <Page :total="1" show-sizer />
       </div>
-
     </div>
   </div>
 </template>
   
 <script setup>
 import { TreeSelect, Page } from 'view-ui-plus'
-import { ref, reactive } from 'vue'
-const treeValue = ref('parent1')
+import { ref, reactive, onMounted } from 'vue'
+import { ElTreeV2 } from 'element-plus'
+import getLeftClassificationList from '@/api/commodity.ts'
+const emit = defineEmits()
+let searchKey = ref('')
+let goodList = ref([])
+let treeValue = ref('parent1')
 const list = reactive([1, 4, 5, 6, 7, 89, , 75, 3, 33])
-const treeData = reactive(
-  [
-    {
-      title: 'parent1',
-      expand: true,
-      value: 'parent1',
-      selected: false,
-      checked: false,
-      children: [
-        {
-          title: 'parent 1-1',
-          expand: true,
-          value: 'parent1-1',
-          selected: false,
-          checked: false,
-          children: [
-            {
-              title: 'leaf 1-1-1',
-              value: 'leaf1',
-              selected: false,
-              checked: false,
-            },
-            {
-              title: 'leaf 1-1-2',
-              value: 'leaf2',
-              selected: false,
-              checked: false,
-            }
-          ]
-        },
-        {
-          title: 'parent 1-2',
-          expand: true,
-          value: 'parent1-2',
-          selected: false,
-          checked: false,
-          children: [
-            {
-              title: 'leaf 1-2-1',
-              value: 'leaf3',
-              selected: false,
-              checked: false,
-            },
-            {
-              title: 'leaf 1-2-1',
-              value: 'leaf4',
-              selected: false,
-              checked: false,
-            }
-          ]
-        }
-      ]
+let treeData = ref([])
+let currentParentNodeId = ref('')
+const treeProps = {
+  value: 'id',
+  label: 'label',
+  children: 'children',
+}
+
+onMounted(() => {
+  init()
+})
+const init = () => {
+  getTreeInfo()
+}
+const getGoodsId = (item) => {
+  emit('senGoodsId', item)
+}
+const getCurrentNode = () => {
+  console.log('getCurrentNode')
+}
+const searchGoods = (val) => {
+  console.log(val)
+  const p = {
+    TreeNodeGUID:currentParentNodeId.value ,
+    Page_Index: 0,
+    QueryKeyWord: val,
+    Page_RowCount: 1
+  }
+  getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+    let arr = []
+    if (res.Tag[0].Table) {
+      res.Tag[0].Table.forEach(el => {
+        arr.push(el)
+      })
+      goodList.value = arr
     }
-  ]
-)
+    console.log('搜索', res.Tag[0].Table)
+  })
+}
+const getNode = (val) => {
+  if (val.HasChilds == '1') {
+    console.log('展开节点', val)
+    getLeftClassificationList.getLeftClassificationList({ PGUID: val.id }).then(res => {
+      let arr1 = []
+      res.Tag[0].Table.forEach(el => {
+        let children = []
+        if (el.HasChilds === '1') {
+          children = [{
+            id: '',
+            label: '...',
+            children: [],
+            HasChilds: '0'
+          }]
+          const p = {
+            TreeNodeGUID: val.id,
+            Page_Index: 0,
+            QueryKeyWord: '',
+            Page_RowCount: 1
+          }
+          getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+            console.log('缩略图', res)
+          })
+        }
+        const obj = {
+          id: el.GUID,
+          label: el.Title,
+          children: children,
+          HasChilds: el.HasChilds
+        }
+        arr1.push(obj)
+      })
+      val.children = arr1
+      treeData.value = [...treeData.value]
+      console.log('treeData.value', treeData.value)
+    })
+  }
+}
+const selectNOde = (val) => {
+  const p = {
+    TreeNodeGUID: val.id,
+    Page_Index: 0,
+    QueryKeyWord: '',
+    Page_RowCount: 1
+  }
+  getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+    let arr = []
+    if (res.Tag[0].Table) {
+      res.Tag[0].Table.forEach(el => {
+        arr.push(el)
+      })
+      goodList.value = arr
+      currentParentNodeId.value = val.id
+    }
+  })
+
+}
+const getTreeInfo = () => {
+  getLeftClassificationList.getLeftClassificationList({ PGUID: '' }).then(res => {
+    console.log('res', res)
+    let arr1 = []
+    res.Tag[0].Table.forEach(el => {
+      let children = []
+      if (el.HasChilds === '1') {
+        children = [{
+          id: '',
+          label: '...',
+          HasChilds: '0',
+          children: []
+        }]
+      }
+      const obj = {
+        id: el.GUID,
+        label: el.Title,
+        children: children,
+        HasChilds: el.HasChilds,
+      }
+      arr1.push(obj)
+    })
+    treeData.value = [...arr1]
+    console.log('treeData', treeData)
+  })
+}
+
+
 </script>
 <style lang="less" scoped>
 .patter-card {
   width: 1230px;
   height: 554px;
   display: flex;
+  overflow: hidden;
 
   .left {
     /deep/.ivu-select-selection {
@@ -137,13 +209,19 @@ const treeData = reactive(
         height: 100%;
         border-bottom: 2px solid #3064F2;
         margin-left: 20px;
+        border-radius: 0px;
+        width: 84px;
       }
     }
 
     .tree {
+      overflow: hidden;
+      padding-left: 27px;
+
       .all-btn {
-        margin-left: 42px;
+        margin-left: 15px;
         margin-top: 21px;
+        margin-bottom: 17px;
       }
     }
   }
@@ -208,12 +286,18 @@ const treeData = reactive(
       text-align: center;
 
       .conten-item {
+        cursor: pointer;
+
         .image {
           height: 177px;
           width: 177px;
           background-color: #e4e1dd;
           border-radius: 4%;
           margin: 8px;
+
+          &hover {
+            border: 1px solid #3064F2;
+          }
         }
       }
     }
