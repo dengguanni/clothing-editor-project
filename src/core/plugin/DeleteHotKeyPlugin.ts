@@ -1,7 +1,7 @@
 /*
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-06-20 12:57:35
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-06-27 23:10:02
  * @Description: 删除快捷键
  */

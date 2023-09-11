@@ -1,63 +1,44 @@
 <!--
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2022-09-03 19:16:55
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-24 23:13:51
  * @Description: 图层面板
 -->
 
 <template>
   <div class="box">
-    <Button  class="all-design-btn" style="display: none;">
+    <Button class="all-design-btn" style="display: none;">
       <span v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></span>
       整体设计
     </Button>
 
     <template v-if="list.length">
       <Collapse v-model="value1">
-        <Panel name="1">
+        <Panel :name="item1.Title" v-for="(item1, index) in layerList" :key="item1.Title">
           <div v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></div>
-          <div>前片</div>
+          <div>{{ item1.Title }}</div>
           <template #content>
             <div class="layer-box">
-              <div v-for="item in list" @click="select(item.id)" :key="item.id" :class="isSelect(item) && 'active'">
-                <Tooltip :content="item.name || item.text || item.type" placement="left">
-                  <div class="ellipsis">
-                    <div style="display:flex;">
-                      <div :class="isSelect(item) && 'active'" v-html="iconType(item.type)"
-                        style="margin: 2px 5px 0px 40px;"></div>
-                      <span> {{ textType(item.type, item) }}</span>
+              <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
+                @click="select(item.id, item1)">
+                <div v-if="item.cutPartsType == item1.Title">
+                  <Tooltip :content="item.name || item.text || item.type" placement="left">
+                    <div class="ellipsis">
+                      <div style="display:flex;">
+                        <div :class="isSelect(item) && 'active'" v-html="iconType(item.type)"
+                          style="margin: 2px 5px 0px 40px;"></div>
+                        <span> {{ textType(item.type, item) }}</span>
+                      </div>
+                      <div>
+                        <Lock v-show="false" :isLock="state.isLock"></Lock>
+                        <span v-html="iconType('unlock')" style="margin: 0px 10px;"></span>
+                        <span v-html="iconType('display')" style="margin: 0px 10px;"></span>
+                      </div>
                     </div>
-                    <div>
-                      <Lock v-show="false" :isLock="state.isLock"></Lock>
-                      <span v-html="iconType('unlock')" style="margin: 0px 10px;"></span>
-                      <span v-html="iconType('display')" style="margin: 0px 10px;"></span>
-                    </div>
-                  </div>
-                </Tooltip>
-              </div>
-            </div>
-          </template>
-        </Panel>
-        <Panel name="2">
-          <div v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></div>
-          <div>后片</div>
-          <template #content>
-            <div class="layer-box">
-              <div v-for="item in list" @click="select(item.id)" :key="item.id" :class="isSelect(item) && 'active'">
-                <Tooltip :content="item.name || item.text || item.type" placement="left">
-                  <div class="ellipsis">
-                    <div style="display:flex;">
-                      <div :class="isSelect(item) && 'active'" v-html="iconType(item.type)"
-                        style="margin: 2px 5px 0px 40px;"></div>
-                      <span> {{ textType(item.type, item) }}</span>
-                    </div>
-                    <div>
-                      <span v-html="iconType('unlock')" style="margin: 0px 10px;"></span>
-                      <span v-html="iconType('display')" style="margin: 0px 10px;"></span>
-                    </div>
-                  </div>
-                </Tooltip>
+                  </Tooltip>
+                </div>
+
               </div>
             </div>
           </template>
@@ -85,16 +66,28 @@ import { Collapse, Panel, Button } from 'view-ui-plus';
 import Lock from '@/components/lock.vue'
 import useSelect from '@/hooks/select';
 import { ref } from 'vue'
+import mitts from '@/utils/mitts'
+// import CutParts from '@/core/objects/cutPartsInfo.ts'
 const value1 = [1, 2]
-
 const { canvasEditor, fabric, mixinState } = useSelect();
-
 const list = ref([]);
 const state = reactive({
   isLock: false,
   isHide: true
 })
+let cutPartsType = ref('')
+const layerList = ref([])
 
+onMounted(() => {
+  mitts.on('cutParts', (val) => {
+    layerList.value = [...val]
+    cutPartsType.value = layerList.value[0].Title
+  })
+  // mitts.on('cutParts', (val) => {
+  //   layerList.value = [...val]
+  //   console.log('接受裁片', val)
+  // })
+})
 // 是否选中元素
 const isSelect = (item) => {
   return item.id === mixinState.mSelectId || mixinState.mSelectIds.includes(item.id);
@@ -126,14 +119,15 @@ const iconType = (type) => {
     '<svg t="1650855578257" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="17630" width="16" height="16"><path d="M620.606061 0a62.060606 62.060606 0 0 1 62.060606 62.060606v188.943515C874.945939 273.997576 1024 437.651394 1024 636.121212c0 214.217697-173.661091 387.878788-387.878788 387.878788-198.469818 0-362.123636-149.054061-385.117091-341.333333H62.060606a62.060606 62.060606 0 0 1-62.060606-62.060606V62.060606a62.060606 62.060606 0 0 1 62.060606-62.060606h558.545455z m62.060606 297.937455V620.606061a62.060606 62.060606 0 0 1-62.060606 62.060606H297.937455C320.636121 849.159758 463.39103 977.454545 636.121212 977.454545c188.509091 0 341.333333-152.824242 341.333333-341.333333 0-172.730182-128.294788-315.485091-294.787878-338.183757zM620.606061 46.545455H62.060606a15.515152 15.515152 0 0 0-15.406545 13.699878L46.545455 62.060606v558.545455a15.515152 15.515152 0 0 0 13.699878 15.406545L62.060606 636.121212h186.181818c0-214.217697 173.661091-387.878788 387.878788-387.878788V62.060606a15.515152 15.515152 0 0 0-13.699879-15.406545L620.606061 46.545455z m15.515151 248.242424c-188.509091 0-341.333333 152.824242-341.333333 341.333333h325.818182a15.515152 15.515152 0 0 0 15.406545-13.699879L636.121212 620.606061V294.787879z" p-id="17631"></path></svg>';
   return iconType[type] || defaultIcon;
 };
+
 const doLock = () => {
   state.isLock = !state.isLock
 }
-const doHide = () =>{
+const doHide = () => {
   // activeObject && activeObject.set(key, value / 100);
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   state.isHide = !state.isHide
-  if(!state.isHide) {
+  if (!state.isHide) {
     activeObject.set('opacity', 0)
     state.isLock = true
     canvasEditor.canvas.renderAll();
@@ -159,7 +153,9 @@ const textType = (type, item) => {
   return typeText[type] || '默认元素';
 };
 // 选中元素
-const select = (id) => {
+const select = (id, obj) => {
+  // console.log('CutParts', obj)
+  // CutParts.cutPartsType = obj.Title
   const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
   canvasEditor.canvas.discardActiveObject();
   canvasEditor.canvas.setActiveObject(info);
@@ -202,14 +198,16 @@ const getList = () => {
   ]
     .reverse()
     .map((item) => {
-      const { type, id, name, text } = item;
+      const { type, id, name, text, cutPartsType } = item;
       return {
         type,
         id,
         name,
         text,
+        cutPartsType
       };
     });
+  console.log('list', list.value)
 };
 
 onMounted(() => {

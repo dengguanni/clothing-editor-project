@@ -19,6 +19,7 @@ import HistoryPlugin from './plugin/HistoryPlugin';
 import FlipPlugin from './plugin/FlipPlugin';
 import RulerPlugin from './plugin/RulerPlugin';
 import MaterialPlugin from './plugin/MaterialPlugin';
+import ControlsTile from './plugin/ControlsTile'
 
 export {
   DringPlugin,
@@ -40,5 +41,6 @@ export {
   FlipPlugin,
   RulerPlugin,
   MaterialPlugin,
+  ControlsTile
 };
 export default Editor;

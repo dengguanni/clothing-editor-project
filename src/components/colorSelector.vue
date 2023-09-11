@@ -1,7 +1,7 @@
 <!--
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-02-16 22:52:00
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-24 23:15:36
  * @Description: 颜色选择器
 -->

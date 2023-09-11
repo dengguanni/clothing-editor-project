@@ -1,7 +1,7 @@
 <!--
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2022-04-21 20:20:20
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-08-05 18:44:54
  * @Description: 缩放元素
 -->

@@ -1,7 +1,7 @@
 <!--
  * @Author: bigFace2019 599069310@qq.com
  * @Date: 2023-04-09 11:19:07
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-05 00:58:02
  * @FilePath: \vue-fabric-editor\src\components\preview.vue
  * @Description: 预览组件

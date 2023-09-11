@@ -6,7 +6,7 @@
                 选择版型
             </button>
         </div>
-        <div class="goods-detail">
+        <div class="goods-detail" v-if="props.sizeList.length !== 0">
             <div class="goods">
                 <img class="image" :src="info.ImageUrl" />
                 <div class="right">
@@ -53,6 +53,7 @@ import colorSelector from '@/components/colorSelector.vue';
 import { reactive, ref, onMounted, provide, watch } from 'vue'
 import useSelect from '@/hooks/select';
 import mitts from '@/utils/mitts.js';
+const { fabric, mixinState, canvasEditor } = useSelect();
 const info: any = ref({
     GUID: '',
     ImageUrl: '',
@@ -97,7 +98,6 @@ const colorList = reactive([
 
 ]);
 const color4 = ref('#19be6b')
-const { fabric, mixinState, canvasEditor } = useSelect();
 const activeObject = canvasEditor.canvas.getActiveObject();
 const baseAttr = reactive({
     id: '',
@@ -151,10 +151,12 @@ const changeCommon = (key, value) => {
 const changeSize = (item: any) => {
     sizeSelected.value = item.GUID
     mitts.emit('changeSize', item)
+
 }
 const changeColor = (item: String) => {
     colorelected.value = item
     mitts.emit('changeModelColor', item)
+
     // GoodsInfo.setModelColor(item)
 }
 

@@ -1,7 +1,7 @@
 /*
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-07-04 23:45:49
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-05 00:26:39
  * @Description: 标尺插件
  */

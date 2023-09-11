@@ -1,7 +1,7 @@
 /*
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-06-20 13:21:10
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-06-20 13:42:32
  * @Description: 组合拆分组合插件
  */

@@ -49,6 +49,7 @@ declare module 'vue' {
     SetSize: typeof import('./src/components/setSize.vue')['default']
     SmallPreview: typeof import('./src/components/smallPreview.vue')['default']
     SvgIcon: typeof import('./src/components/svgIcon/index.vue')['default']
+    Test: typeof import('./src/components/test.vue')['default']
     Tools: typeof import('./src/components/tools.vue')['default']
     Zoom: typeof import('./src/components/zoom.vue')['default']
   }

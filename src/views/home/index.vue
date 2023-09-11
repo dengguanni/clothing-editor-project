@@ -148,7 +148,7 @@
           <filters v-show="state.isShowFilters" @goBack="goBack" :singleFilters="state.isContrast"></filters>
           <cropping v-show="state.isShowCropping" @goBack="goBack"></cropping>
           <div style="padding: 0px 20px;" v-show="!state.isShowFilters && !state.isShowCropping">
-
+            <div id="img-width"></div>
             <!-- 替换图片 -->
             <replaceImg></replaceImg>
             <!-- <Button></Button> -->
@@ -271,7 +271,7 @@ const state = reactive({
   attrBarShow: true,
   select: null,
   ruler: false,
-  isDesign: false,
+  isDesign: true,
   isShowHeader: false,
   isShowFilters: false,
   isShowCropping: false,
@@ -328,7 +328,6 @@ onMounted(() => {
 //   }
 // },
 const mapTileClick = (val) => {
-  console.log('val', val)
   switch (val) {
     case 'filter':
       state.isShowFilters = true

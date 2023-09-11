@@ -25,6 +25,7 @@ import { getImgStr, selectFiles } from '@/utils/utils';
 import useSelect from '@/hooks/select';
 import { v4 as uuid } from 'uuid';
 import getPicture from '@/api/picture.ts'
+import mitts from '@/utils/mitts'
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -36,10 +37,14 @@ const { fabric, canvasEditor } = useSelect();
 const page = ref(1)
 const imageList = ref([])
 let queryKeyWord = ref('')
+const cutPartsType = ref('')
 onMounted(() => {
     init()
 })
 const init = () => {
+    mitts.on('cutPartsType', (val) => {
+        cutPartsType.value = val
+    })
     props.isBg ? getImagesBackground('') : getImagesLibrary('')
 }
 const getImagesBackground = (QueryKeyWord) => {
@@ -71,15 +76,14 @@ const getImagesLibrary = (QueryKeyWord) => {
         loading.value = false
     })
 }
-const addImage = (item) => {
 
-}
 // 点击添加
 const addItem = (item) => {
     const imageURL = item.ImageUrl;
     let callback = (image, isError) => {
         if (!isError) {
             image.name = item.Title
+            image.cutPartsType = cutPartsType.value
             image.crossOrigin = "anonymous"
             image.id = uuid()
             canvasEditor.canvas.add(image);
@@ -109,6 +113,7 @@ const dragItem = (event) => {
                 };
                 const pointerVpt = canvasEditor.canvas.restorePointerVpt(point);
                 image.id = uuid()
+                image.cutPartsType = cutPartsType.value
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);
@@ -118,6 +123,7 @@ const dragItem = (event) => {
                 canvasEditor.canvas.requestRenderAll();
             }
         };
+
         const properties = {
             left: 0,
             top: 0

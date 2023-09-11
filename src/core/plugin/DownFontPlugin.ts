@@ -1,7 +1,7 @@
 /*
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-06-27 22:58:57
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-16 13:51:48
  * @Description: 下载字体插件
  */

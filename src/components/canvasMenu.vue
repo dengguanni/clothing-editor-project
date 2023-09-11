@@ -2,21 +2,29 @@
     <div class="canvas-menu-1">
         <!-- <button @click="changeSelection(0)" :class="0 == active ? 'btn-active' : 'btn'">整体设计</button> -->
         <div class="menu-list">
+
             <div v-for="item in cutParts" :key="item.Title" class="menu-item">
-                <div :class="item.Title == active ? 'active-image' : 'image'" @click="changeSelection(item.Title)">
-                    <img :src="item.ImageUrl" class="thumbnail">
+                <div :class="item.Title == active ? 'active-image' : 'image'" @click="changeSelection(item)">
+                    <div class="thumbnail">
+                        <img :src="item.ImageUrl" style="width: 100%; height: auto;">
+                    </div>
                 </div>
-                <div class="text-1">{{ item.Title }}</div>
+                <div class="text-1">{{ item.Title }} </div>
             </div>
         </div>
     </div>
 </template>
   
 <script setup >
+import useSelect from '@/hooks/select';
 import { reactive } from 'vue'
+import { v4 as uuid } from 'uuid';
+const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
+import CutParts from '@/core/objects/cutPartsInfo.ts'
+let cutPartsType = ref('')
 const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
     sizeList: {
@@ -29,22 +37,10 @@ const props = defineProps({
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
-const menuList = reactive([
-    {
-        name: '前片',
-        id: 1,
-        ImageUrl: 'http://8.140.206.30:8089/ImageSource/Masks/01.png'
-    },
-    {
-        name: '后片',
-        id: 2,
-        ImageUrl: 'http://8.140.206.30:8089/ImageSource/Masks/02.png'
-    }
-])
-onMounted(() =>{
+onMounted(() => {
     mitts.on('changeSize', (e) => {
         let arr = []
-        picture.getCutParts({SizeGUID: e.GUID}).then(res =>{
+        picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
             res.Tag[0].Table.forEach(el => {
                 arr.push({
                     Title: el.Title,
@@ -52,12 +48,53 @@ onMounted(() =>{
                 })
             })
             cutParts.value = [...arr]
-            console.log('裁片',JSON.parse(JSON.stringify(res)))
+            cutPartsType.value = cutParts.value[0].Title
+            mitts.emit('cutPartsType', cutPartsType.value)
+            mitts.emit('cutParts', cutParts.value)
         })
     })
 })
-const changeSelection = (Title) => {
-    active.value = Title
+const changeSelection = (item) => {
+    active.value = item.Title
+    console.log('canvasEditor.canvas.getObjects()', canvasEditor.canvas.getObjects())
+    cutPartsType.value = item.Title
+    canvasEditor.canvas.getObjects().map(el => {
+        {
+            if (el.isCutPart) {
+                canvasEditor.canvas.remove(el)
+            }
+            if (el.cutPartsType == cutPartsType.value) {
+                el.visible = true
+            } else if (el.id !== 'workspace') {
+                el.visible = false
+            }
+        }
+    })
+    let callback = (image, isError) => {
+        if (!isError) {
+            image.hasCropping = true
+            image.id = uuid()
+            image.name = item.Title
+            image.cutPartsType = item.Title
+            image.isCutPart = true
+            canvasEditor.canvas.add(image);
+            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+            canvasEditor.canvas.discardActiveObject();
+            canvasEditor.canvas.setActiveObject(info);
+            canvasEditor.canvas.requestRenderAll();
+            cutPartsType.value = item.Title
+            // CutParts.cutPartsType = item.Title
+            console.log(' item.Title', item.Title)
+            mitts.emit('cutPartsType', item.Title)
+        }
+    };
+    const properties = {
+        left: 0,
+        top: 0,
+        "scaleX": 0.0761,
+        "scaleY": 0.0761,
+    };
+    fabric.Image.fromURL(item.ImageUrl, callback, properties);
     // load3DScene.setModelCamera()
 }
 </script>
@@ -116,6 +153,9 @@ const changeSelection = (Title) => {
             background: #666661;
             border-radius: 5px 5px 5px 5px;
             border: 2px solid #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .active-image {
@@ -125,15 +165,17 @@ const changeSelection = (Title) => {
             background: #DCE1E9;
             border-radius: 5px 5px 5px 5px;
             background: #666661;
-            
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
         }
 
         .thumbnail {
             height: 37px;
             width: 30px;
-            margin-top: 10px;
-            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
         }
 
         .text-1 {

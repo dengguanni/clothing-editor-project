@@ -1,7 +1,7 @@
 <!--
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2022-09-03 19:16:55
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-16 12:39:51
  * @Description: 锁定元素
 -->
@@ -36,7 +36,6 @@ const isLock = ref(false);
 watch(
   () => props.isLock,
   (val) => {
-    console.log('0000')
     isLock.value = val
     isLock.value ? lock() : unLock()
   }

@@ -1,7 +1,7 @@
 <!--
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2022-09-03 19:16:55
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-24 23:12:09
  * @Description: 元素翻转
 -->
@@ -12,7 +12,6 @@
     <Tooltip :content="$t('flip.x')">
       <Button :disabled="notSelectOneMode()" @click="flip('X')" type="text" class="bg-sq-01">
         <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27">
-
           <g transform="translate(-1509.5 1469.5)">
             <rect class="a" width="26" height="26" transform="translate(1510 -1469)" />
             <path class="b" d="M1523-1465v18" />
@@ -79,7 +78,7 @@
 
 <script setup name="Flip">
 import useSelect from '@/hooks/select';
-
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 const { mixinState, canvasEditor } = useSelect();
 
 // 非单选时，禁止镜像操作
@@ -90,11 +89,13 @@ const flip = (type) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
   canvasEditor.canvas.requestRenderAll();
+  ControlsTile.setRepeat(null, true)
 };
 const angle = (value) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.rotate(value);
   canvasEditor.canvas.renderAll();
+  ControlsTile.setRepeat(null, true)
 }
 </script>
 

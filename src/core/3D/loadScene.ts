@@ -5,6 +5,9 @@ import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // 模型加载器，用于加载3D Studio Max软件中的3DS和MAX文件格式
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { TGALoader } from 'three/examples/jsm/loaders/TGALoader.js';
+
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 class LoadScene {
     static canvasId: string
     static camera: any
@@ -57,17 +60,61 @@ class LoadScene {
         // control.enableDamping = true;
 
         // 加载纹理
-        // const normal = new THREE.TextureLoader().load('src/assets/png/bg-01.png');
+        const updateSticker = (name: string, url: string = "") => {
+            LoadScene.scene.traverse(async (item: any) => {
+                if (item.name == name && url) {
+                    let getsheet = new THREE.TextureLoader().load(url);
+                    // getsheet.flipY = false;
+                    // getsheet.encoding = THREE.sRGBEncoding;
+                    // item.loadBear.material = await new THREE.MeshBasicMaterial({
+                    //     map: getsheet,
+                    // });
+                }
+            });
+        };
         // 加载模型
+        var loaderTexture = new THREE.TextureLoader();
+
+
         const loader = new FBXLoader();
-        loader.load('src/assets/model/JBJ_D(1).FBX', object => {
+        //  const loader = new GLTFLoader();
+        
+        loader.load('public/static/JBJ_D(1).FBX', object => {
             object.name = 'duanxiu'
             const color = new THREE.Color('blue')
-            const material = new THREE.MeshBasicMaterial({ color })
-            object.traverse((v: any) => {
-                v.material = material
-            })
-            LoadScene.scene.add(object);
+            // var material = new THREE.MeshPhongMaterial({
+            //     map: texturePlante
+            // });
+            // const material = new THREE.MeshBasicMaterial({ color })
+            // object.traverse((child: any) => {
+            //     if (child.isMesh) {
+                   
+                    // loader.load(
+                    //     'http://8.140.206.30:8089/ImageSource/Masks/02.png',   // 本地路径的图片
+
+                    //     // 加载完贴图后的回调函数
+                    //     function (texture) {
+                    //         child.material.map = texture;
+                    //         child.material.needsUpdate = true;
+                    //         console.log("身体贴图更新完毕");
+                    //     },
+
+                    //     // 目前不支持加载贴图过程中的回调函数
+                    //     undefined,
+
+                    //     // 加载出错时候的回调函数
+                    //     function (err) {
+                    //         console.error('An error happened.', err);
+                    //     }
+                    // );
+                    // child.material = material;
+                    // child.texture.needsUpdate = true
+                    // child.material.map = texture
+            //     }
+            // })
+            console.log('object', object)
+            LoadScene.scene.add(object.scene);
+            console.log('LoadScene.scene', LoadScene.scene)
         });
         // loader.load('src/assets/model/short.FBX', object => {
         //     // 遍历对象，给物体添加贴图
@@ -86,6 +133,7 @@ class LoadScene {
         //     LoadScene.scene.add(object);
         //     console.log('scene', LoadScene.scene)
         // });
+
 
         // 创建渲染函数
         const render = () => {

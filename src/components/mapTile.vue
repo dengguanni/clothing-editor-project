@@ -11,7 +11,6 @@
                 {{ item.label }}
             </div>
         </div>
-        <!-- <clone></clone> -->
         <div class="bg-sq-03" style="position: relative;">
             <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item">
                 <div style="cursor: pointer;" @mousedown="menu3Click(item.type)" :id="item.type">
@@ -26,12 +25,9 @@
                     <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')">置顶</div>
                     <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')">置底</div>
                     <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
-                    <!-- <Slider v-model="layerNum" height="200px" vertycal id="layer-slider"></Slider> -->
-
                 </div>
             </Tooltip>
         </div>
-
         <Lock v-show="false" :isLock="state.isLock"></Lock>
     </div>
 </template>
@@ -42,7 +38,9 @@ import { Tooltip } from 'view-ui-plus';
 import useSelect from '@/hooks/select';
 import { debounce } from 'lodash-es';
 import Lock from '@/components/lock.vue'
+import { v4 as uuid } from 'uuid';
 import MouseEventEventListener from '@/utils/event/mouse.ts'
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
 const update = getCurrentInstance();
@@ -56,9 +54,22 @@ const state = reactive({
     isLayer: false,
     firstClickLayer: false
 })
+let stateRepeat = reactive({
+    isRepeat: false,
+    basic: false,
+    mirror: false,
+    transverse: false,
+    direction: false
+})
 let layerNum = ref(0)
 let type = ref('')
-
+let activeInfo = reactive({
+    angle: 0,
+    width: 0,
+    height: 0,
+    scaleX: 0,
+    scaleY: 0
+})
 const menuList1 = [
     {
         type: 'basic',
@@ -132,6 +143,10 @@ onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
     MouseEventEventListener.setMouseupFn = () => { }
+    // ControlsTile.setRepeat()
+    ControlsTile.canvas= canvasEditor.canvas
+
+    ControlsTile.setCanvasObserve(canvasEditor.canvas)
 })
 const init = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
@@ -144,35 +159,7 @@ const init = () => {
 const menuList1Click = (type) => {
     switch (type) {
         case 'basic':
-            const workspace = this.canvas.getObjects().find((item) => item.id === 'workspace');
-            const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-            var canvasElement = document.getElementById('myCanvas');
-            // 创建一个新的 Pattern 对象
-            const rowCount = 3;
-            const colCount = 3;
-            // 复制并平铺图像
-            for (let row = 0; row < rowCount; row++) {
-                for (let col = 0; col < colCount; col++) {
-                    if (row === 0 && col === 0) continue; // 跳过原始图像
-
-                    // 克隆原始图像
-                    const clonedImage = activeObject.clone();
-
-                    // 调整位置，平铺图像
-                    clonedImage.set({
-                        left: originalImage.width * col,
-                        top: originalImage.height * row,
-                        scaleX: -1, // 镜像水平翻转
-                        scaleY: 1, // 保持垂直方向不变
-                    });
-                    // 将克隆图像添加到画布
-                    canvas.add(clonedImage);
-                }
-            }
-
-            // 渲染画布
-            canvas.renderAll();
-            //   state.isShowFilters = true
+            ControlsTile.setRepeat('basic')
             break;
         case 'cropping':
             //   state.isShowCropping = true
@@ -180,9 +167,19 @@ const menuList1Click = (type) => {
         case 'clearness':
             //   changeFilters()
             break;
+        case 'mirror':
+        ControlsTile.setRepeat('mirror')
+            break;
+        case 'transverse':
+        ControlsTile.setRepeat('transverse')
+            break;
+        case 'direction':
+        ControlsTile.setRepeat('direction')
+            break;
         default:
     }
 }
+
 const del = debounce(function () {
     canvasEditor.del();
 }, 300);

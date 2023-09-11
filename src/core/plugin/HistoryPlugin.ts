@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /*
- * @Author: 秦少卫
+ * @Author: 邓官妮
  * @Date: 2023-06-20 13:06:31
- * @LastEditors: 秦少卫
+ * @LastEditors: 邓官妮
  * @LastEditTime: 2023-07-04 23:37:07
  * @Description: 历史记录插件
  */

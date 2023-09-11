@@ -111,11 +111,13 @@ class WorkspacePlugin {
     // this.newWorkspace = aa
 
     // workspace.clipPath = clipPath
+    // this.canvas.add(aa);
+
     workspace.set('selectable', false);
     workspace.set('hasControls', false);
     workspace.hoverCursor = 'default';
     this.canvas.add(workspace);
-    // this.canvas.add(aa);
+
     this.canvas.renderAll();
     this.workspace = workspace;
     this.auto();
@@ -241,6 +243,8 @@ class WorkspacePlugin {
   destroy() {
     console.log('pluginDestroy');
   }
+
+
 }
 
 export default WorkspacePlugin;

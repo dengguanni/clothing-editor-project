@@ -155,7 +155,6 @@ const clipImage = () => {
             canvasEditor.canvas.renderAll();
             mixinState.clipBox.on({
                 'moving': () => {
-                    console.log(999)
                     if (!mixinState.isClipping) {
                         clipBox.clipClone.left = clipBox.left - mixinState.clipLeft
                         clipBox.clipClone.top = clipBox.top - mixinState.clipTop
