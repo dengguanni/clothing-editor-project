@@ -144,7 +144,7 @@ onMounted(() => {
     event.on('selectOne', init);
     MouseEventEventListener.setMouseupFn = () => { }
     // ControlsTile.setRepeat()
-    ControlsTile.canvas= canvasEditor.canvas
+    ControlsTile.canvas = canvasEditor.canvas
 
     ControlsTile.setCanvasObserve(canvasEditor.canvas)
 })
@@ -168,13 +168,13 @@ const menuList1Click = (type) => {
             //   changeFilters()
             break;
         case 'mirror':
-        ControlsTile.setRepeat('mirror')
+            ControlsTile.setRepeat('mirror')
             break;
         case 'transverse':
-        ControlsTile.setRepeat('transverse')
+            ControlsTile.setRepeat('transverse')
             break;
         case 'direction':
-        ControlsTile.setRepeat('direction')
+            ControlsTile.setRepeat('direction')
             break;
         default:
     }

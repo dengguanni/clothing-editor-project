@@ -1,7 +1,7 @@
 
 <template>
     <div class="paving" v-if="mixinState.mSelectMode === 'one'">
-        <div v-for="(item, i ) in svgList" :key="item.type" class="bg-sq-01">
+        <div v-for="(item, i ) in svgList" :key="item.type" class="bg-sq-01" @click="changeSelection(item)">
             <Tooltip :content="item.label">
                 <span v-html="item.svg" style="margin: 5px 0px 0px 3px;"></span>
             </Tooltip>
@@ -12,7 +12,11 @@
 <script lang="ts" setup>
 import { reactive } from 'vue'
 import useSelect from '@/hooks/select';
-const { mixinState, canvasEditor } = useSelect();
+import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
+const { mixinState, canvasEditor }: any = useSelect();
+onMounted(() => {
+    MaximizePlugin.canvasEditor = canvasEditor
+})
 const svgList = reactive([
     {
         label: '设计最大化',
@@ -36,6 +40,9 @@ const svgList = reactive([
     }
 ]
 )
+const changeSelection = (item) => {
+    MaximizePlugin.setMax(item.type)
+}
 
 </script>
   

@@ -142,8 +142,6 @@ class ControlsTile {
                 } else if (type == 'direction') {
                     this.handelRepeat(cloned, false, false, 0, (cloned.height * cloned.scaleY) / 2)
                 }
-
-
                 // this.canvas.add(group);
                 this.canvas.requestRenderAll();
             }

@@ -5,8 +5,6 @@ import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // 模型加载器，用于加载3D Studio Max软件中的3DS和MAX文件格式
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { TGALoader } from 'three/examples/jsm/loaders/TGALoader.js';
-
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 class LoadScene {
     static canvasId: string
@@ -15,6 +13,26 @@ class LoadScene {
     static renderer: any
     static screenshotList: Array<any> = []
 
+    static loadModel(url: string, name: string) {
+
+        const loader = new GLTFLoader();
+        loader.load('public/static/duanxiu1.glb', object => {
+            const color = new THREE.Color('0xffffff')
+            object.name = name
+            object.scene.traverse((child: any) => {
+                if (child.isMesh) {
+                    const mapTexture = new THREE.TextureLoader().load('public/static/bg-01.png')
+                    child.material = new THREE.MeshLambertMaterial({
+                        map: mapTexture,
+                        transparent: true, // 允许材质可透明
+                        // color
+                    })
+                }
+            })
+            LoadScene.scene.add(object.scene);
+            console.log('LoadScene.scene', LoadScene.scene)
+        });
+    }
     init(scene: any, camera: any, renderer: any, id: string, callBack: Function) {
         LoadScene.scene = scene
         LoadScene.camera = camera
@@ -25,17 +43,26 @@ class LoadScene {
         // 创建一个相机
         LoadScene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
         // 设置相机的位置
-        LoadScene.camera.position.z = 5;
+        LoadScene.camera.position.z = 3;
         // 将相机添加到场景中
         LoadScene.scene.add(LoadScene.camera);
 
         // 添加直线光,并设置光源位置
-        const light1 = new THREE.DirectionalLight(0xffeedd);
-        light1.position.set(0, 0, 2);
+        const light1 = new THREE.DirectionalLight(0xffffff);
+        light1.position.set(0.479, 5.491, 0.636);
         LoadScene.scene.add(light1);
-        const light2 = new THREE.DirectionalLight(0xffeedd);
-        light2.position.set(0, 0, -2);
+        const light2 = new THREE.DirectionalLight(0xffffff);
+        light2.position.set(7.663, 0.215, -0.162);
         LoadScene.scene.add(light2);
+        const light3 = new THREE.DirectionalLight(0xffffff);
+        light3.position.set(-9.651, 0.310, -0.364);
+        LoadScene.scene.add(light3);
+        const light4 = new THREE.DirectionalLight(0xffffff);
+        light4.position.set(-0.101, 0.711, -7.471);
+        LoadScene.scene.add(light4);
+        const light5 = new THREE.DirectionalLight(0xffffff);
+        light5.position.set(0.393, -0.997, 7.500);
+        LoadScene.scene.add(light5);
 
         // 创建一个渲染器
         LoadScene.renderer = new THREE.WebGLRenderer({
@@ -58,83 +85,7 @@ class LoadScene {
         control.target.set(0, 0, 0);
         // 设置阻尼
         // control.enableDamping = true;
-
-        // 加载纹理
-        const updateSticker = (name: string, url: string = "") => {
-            LoadScene.scene.traverse(async (item: any) => {
-                if (item.name == name && url) {
-                    let getsheet = new THREE.TextureLoader().load(url);
-                    // getsheet.flipY = false;
-                    // getsheet.encoding = THREE.sRGBEncoding;
-                    // item.loadBear.material = await new THREE.MeshBasicMaterial({
-                    //     map: getsheet,
-                    // });
-                }
-            });
-        };
-        // 加载模型
-        var loaderTexture = new THREE.TextureLoader();
-
-
-        const loader = new FBXLoader();
-        //  const loader = new GLTFLoader();
-        
-        loader.load('public/static/JBJ_D(1).FBX', object => {
-            object.name = 'duanxiu'
-            const color = new THREE.Color('blue')
-            // var material = new THREE.MeshPhongMaterial({
-            //     map: texturePlante
-            // });
-            // const material = new THREE.MeshBasicMaterial({ color })
-            // object.traverse((child: any) => {
-            //     if (child.isMesh) {
-                   
-                    // loader.load(
-                    //     'http://8.140.206.30:8089/ImageSource/Masks/02.png',   // 本地路径的图片
-
-                    //     // 加载完贴图后的回调函数
-                    //     function (texture) {
-                    //         child.material.map = texture;
-                    //         child.material.needsUpdate = true;
-                    //         console.log("身体贴图更新完毕");
-                    //     },
-
-                    //     // 目前不支持加载贴图过程中的回调函数
-                    //     undefined,
-
-                    //     // 加载出错时候的回调函数
-                    //     function (err) {
-                    //         console.error('An error happened.', err);
-                    //     }
-                    // );
-                    // child.material = material;
-                    // child.texture.needsUpdate = true
-                    // child.material.map = texture
-            //     }
-            // })
-            console.log('object', object)
-            LoadScene.scene.add(object.scene);
-            console.log('LoadScene.scene', LoadScene.scene)
-        });
-        // loader.load('src/assets/model/short.FBX', object => {
-        //     // 遍历对象，给物体添加贴图
-        //     object.traverse((child) => {
-        //         // if (child.isMesh) {
-        //         //     //此处更新fbx 模型的贴图信息 ，需要在引入GTALoader.js
-        //         //     const tgaloader = new TGALoader()
-        //         //     tgaloader.load('src/assets/png/bg-01.png', (texture) => {
-        //         //         //模型使用新的贴图纹理
-        //         //         texture.needsUpdate = true
-        //         //         child.material.map = texture
-
-        //         //     })
-        //         // }
-        //     })
-        //     LoadScene.scene.add(object);
-        //     console.log('scene', LoadScene.scene)
-        // });
-
-
+        // LoadScene.loadModel()
         // 创建渲染函数
         const render = () => {
             control.update();
@@ -142,7 +93,6 @@ class LoadScene {
             // 通过动画帧来执行函数
             requestAnimationFrame(render);
             TWEEN.update()
-
         };
         render();
         setTimeout(() => {
@@ -151,6 +101,7 @@ class LoadScene {
         console.log('LoadScene.scene', LoadScene.scene)
 
     }
+
     setCameraAngle() {
         LoadScene.screenshotList = []
         const setImage = () => {
@@ -227,9 +178,6 @@ class LoadScene {
                 testTween.start(); //开始
             }
         })
-
-
-
     }
 }
 export default LoadScene

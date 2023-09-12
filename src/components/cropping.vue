@@ -26,26 +26,26 @@ const state = reactive({
 });
 const imageList = reactive([
     {
-        id: '1',
+        id: uuid(),
         src: 'http://8.140.206.30:8089/ImageSource/Masks/01.png'
 
     }, {
-        id: '2',
+        id: uuid(),
         src: 'http://8.140.206.30:8089/ImageSource/Masks/02.png'
 
     },
     {
-        id: '3',
+        id: uuid(),
         src: 'http://8.140.206.30:8089/ImageSource/Masks/03.png'
 
     },
     {
-        id: '4',
+        id: uuid(),
         src: 'http://8.140.206.30:8089/ImageSource/Masks/04.png'
 
     },
     {
-        id: '5',
+        id: uuid(),
         src: 'http://8.140.206.30:8089/ImageSource/Masks/05.png'
 
     }

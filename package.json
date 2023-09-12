@@ -11,8 +11,7 @@
     "build": "vite build",
     "build:staging": "vite build --mode=staging",
     "preview": "npm run build && vite preview",
-    "preview:staging": "npm run build:staging && vite preview --mode=staging",
-    "prepare": "husky install"
+    "preview:staging": "npm run build:staging && vite preview --mode=staging"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^21.0.0",
@@ -68,11 +67,5 @@
     "vite-plugin-pwa": "^0.16.4",
     "vite-plugin-vue-setup-extend-plus": "^0.1.0",
     "vue-tsc": "^0.34.7"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
   }
 }

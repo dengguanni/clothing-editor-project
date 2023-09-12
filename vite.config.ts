@@ -150,6 +150,11 @@ const config = ({ mode }) => {
           changeOrigin: true, // 是否跨域
           rewrite: (path) => path.replace(/^\/api/, '') // 对什么类的服务器匹配
         },
+        '/aa': {
+          target: 'http://8.140.206.30:8089/',	// 实际请求地址
+          changeOrigin: true, // 是否跨域
+          rewrite: (path) => path.replace(/^\/aa/, '') // 对什么类的服务器匹配
+        },
       },
     },
     preview: {

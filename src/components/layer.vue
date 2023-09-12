@@ -12,7 +12,6 @@
       <span v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></span>
       整体设计
     </Button>
-
     <template v-if="list.length">
       <Collapse v-model="value1">
         <Panel :name="item1.Title" v-for="(item1, index) in layerList" :key="item1.Title">
@@ -38,7 +37,6 @@
                     </div>
                   </Tooltip>
                 </div>
-
               </div>
             </div>
           </template>
@@ -67,7 +65,6 @@ import Lock from '@/components/lock.vue'
 import useSelect from '@/hooks/select';
 import { ref } from 'vue'
 import mitts from '@/utils/mitts'
-// import CutParts from '@/core/objects/cutPartsInfo.ts'
 const value1 = [1, 2]
 const { canvasEditor, fabric, mixinState } = useSelect();
 const list = ref([]);

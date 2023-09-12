@@ -23,7 +23,6 @@ const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
-import CutParts from '@/core/objects/cutPartsInfo.ts'
 let cutPartsType = ref('')
 const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
@@ -39,14 +38,19 @@ const active = ref('')
 let cutParts = ref([])
 onMounted(() => {
     mitts.on('changeSize', (e) => {
+        console.log('on')
         let arr = []
         picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
-            res.Tag[0].Table.forEach(el => {
-                arr.push({
-                    Title: el.Title,
-                    ImageUrl: baseUrl + el.ImageUrl
+            if (res.Tag[0]) {
+                res.Tag[0].Table.forEach(el => {
+                    arr.push({
+                        Title: el.Title,
+                        ImageUrl: baseUrl + el.ImageUrl
+                    })
+                    // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
+                    LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName)
                 })
-            })
+            }
             cutParts.value = [...arr]
             cutPartsType.value = cutParts.value[0].Title
             mitts.emit('cutPartsType', cutPartsType.value)
@@ -55,6 +59,7 @@ onMounted(() => {
     })
 })
 const changeSelection = (item) => {
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = item.Title
     console.log('canvasEditor.canvas.getObjects()', canvasEditor.canvas.getObjects())
     cutPartsType.value = item.Title
@@ -72,6 +77,12 @@ const changeSelection = (item) => {
     })
     let callback = (image, isError) => {
         if (!isError) {
+
+            // 超出画布不展示
+            workspace.clone((cloned) => {
+                canvasEditor.canvas.clipPath = cloned;
+                canvasEditor.canvas.requestRenderAll();
+            });
             image.hasCropping = true
             image.id = uuid()
             image.name = item.Title
@@ -82,10 +93,20 @@ const changeSelection = (item) => {
             canvasEditor.canvas.discardActiveObject();
             canvasEditor.canvas.setActiveObject(info);
             canvasEditor.canvas.requestRenderAll();
+            canvasEditor.position('center')
             cutPartsType.value = item.Title
             // CutParts.cutPartsType = item.Title
-            console.log(' item.Title', item.Title)
+            console.log('item.Title', item.Title)
             mitts.emit('cutPartsType', item.Title)
+
+            image.clone((cloned) => {
+                const path = new fabric.Rect({ width: workspace.width, height: image.height, top: image.top, left: image.left })
+                console.log('image.clipPath', image.clipPath)
+                console.log('workspace', workspace.clipPath)
+                canvasEditor.canvas.clipPath = cloned;
+                canvasEditor.canvas.renderAll()
+                canvasEditor.canvas.requestRenderAll();
+            });
         }
     };
     const properties = {

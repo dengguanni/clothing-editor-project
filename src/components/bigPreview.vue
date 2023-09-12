@@ -64,6 +64,7 @@ onMounted(() => {
         });
         imageActive.value = screenshotList[0].src
         directionSelection.value = screenshotList[0].id
+        LoadScene.loadModel('', 'duanxiu')
     })
 
 
