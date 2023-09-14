@@ -72,6 +72,7 @@ const getImagesLibrary = (QueryKeyWord) => {
     getPicture.getImagesLibrary(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
+        console.log('图库', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -86,6 +87,9 @@ const addItem = (item) => {
             image.cutPartsType = cutPartsType.value
             image.crossOrigin = "anonymous"
             image.id = uuid()
+            image.ImageUrl = item.ImageUrl
+            image.name = item.FileName
+            image.FilePath = item.FilePath
             canvasEditor.canvas.add(image);
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
             canvasEditor.canvas.discardActiveObject();
@@ -113,6 +117,8 @@ const dragItem = (event) => {
                 };
                 const pointerVpt = canvasEditor.canvas.restorePointerVpt(point);
                 image.id = uuid()
+                // image.name = item.FileName
+                // image.FilePath = item.FilePath
                 image.cutPartsType = cutPartsType.value
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;

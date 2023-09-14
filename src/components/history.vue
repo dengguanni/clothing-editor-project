@@ -16,14 +16,14 @@
       </Button>
     </Tooltip>
     <!-- 重做 -->
-    <Tooltip :content="$t('history.redo') + `(${redoStack.length})`" >
+    <Tooltip :content="$t('history.redo') + `(${redoStack.length})`">
       <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0" class="item">
         <commonIcon angleKey="redo"></commonIcon>
       </Button>
     </Tooltip>
     <Tooltip :content="'清空'">
-      <Button @click="beforeClear" type="text" size="small" class="item" >
-        <commonIcon angleKey="empty" ></commonIcon>
+      <Button @click="beforeClear" type="text" size="small" class="item">
+        <commonIcon angleKey="empty"></commonIcon>
       </Button>
     </Tooltip>
     <!-- <span class="time" v-if="history.length">
@@ -37,7 +37,7 @@
     </Button>
   </Tooltip>
   <Tooltip :content="'辅助线'">
-    <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0" class="item">
+    <Button @click="setAuxiliaryLine" type="text" size="small" :disabled="redoStack.length === 0" class="item">
       <commonIcon angleKey="auxiliarylLine"></commonIcon>
     </Button>
   </Tooltip>
@@ -81,6 +81,9 @@ const beforeClear = () => {
     onOk: () => clear(),
   });
 };
+const setAuxiliaryLine = () => {
+
+}
 
 
 const setLine = () => {
@@ -102,7 +105,7 @@ const setLine = () => {
           name: '网格'
         })
         imgInstance.scaleX = (703 / imgInstance.width);
-        imgInstance.scaleY = (703 / imgInstance.height) ;
+        imgInstance.scaleY = (703 / imgInstance.height);
         imgInstance.hasControls = false
         imgInstance.set('selectable', false);
         imgInstance.set('hasControls', false);
@@ -180,12 +183,15 @@ span.active {
 .time {
   color: #c1c1c1;
 }
-.item{
+
+.item {
   height: 36px;
   width: 36px;
-  &hover{
+
+  &hover {
     background-color: #c1c1c1;
   }
+
   // display: flex;
   // align-items: center;
   // justify-content: center;

@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import TWEEN from '@tweenjs/tween.js';
-// 引入轨道控制器
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-// 模型加载器，用于加载3D Studio Max软件中的3DS和MAX文件格式
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 class LoadScene {
@@ -12,7 +10,6 @@ class LoadScene {
     static scene: any
     static renderer: any
     static screenshotList: Array<any> = []
-
     static loadModel(url: string, name: string) {
 
         const loader = new GLTFLoader();
@@ -37,17 +34,11 @@ class LoadScene {
         LoadScene.scene = scene
         LoadScene.camera = camera
         LoadScene.renderer = renderer
-        // 创建一个场景
         LoadScene.scene = new THREE.Scene();
-        LoadScene.scene.background = new THREE.Color(0xffffff);
-        // 创建一个相机
         LoadScene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
-        // 设置相机的位置
         LoadScene.camera.position.z = 3;
-        // 将相机添加到场景中
         LoadScene.scene.add(LoadScene.camera);
 
-        // 添加直线光,并设置光源位置
         const light1 = new THREE.DirectionalLight(0xffffff);
         light1.position.set(0.479, 5.491, 0.636);
         LoadScene.scene.add(light1);

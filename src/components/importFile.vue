@@ -28,10 +28,7 @@
         <!-- <Icon type="ios-close" size="30" @click="delImage(item)" style="cursor: pointer;" class="icon"/> -->
         <Icon type="md-trash" class="icon" size="27" v-show="showDelIcon == item.GUID" @mouseenter="showIcon(item)"
           @click="delImage(item)" />
-
       </div>
-
-
       <!-- <img class="item" id="myImage" @click="addItem" /> -->
     </div>
 
@@ -79,7 +76,6 @@ const delImage = (item) => {
       })
     }
   })
-  console.log('删除图片')
 }
 // 上传记录
 const getImagesCustom = () => {
@@ -94,8 +90,6 @@ const getImagesCustom = () => {
 
 const setUpLoadFile = (str) => {
   const result = str.substring(str.indexOf(',') + 1,)
-  console.log('大小', imageSize(result))
-  console.log('分包', splitBase64(result, 1048596))
   const splitBase64Str = splitBase64(result, 1048596)
   if (splitBase64Str.length > 30) {
     ElMessage({
@@ -246,7 +240,6 @@ const imageSize = (base64Str) => {
 const splitBase64 = (base64String, chunkSize) => {
   var result = [];
   var index = 0;
-
   while (index < base64String.length) {
     var chunk = base64String.slice(index, index + chunkSize);
     result.push(chunk);
@@ -323,6 +316,8 @@ const addItem = (item) => {
       image.name = item.Title
       image.id = uuid()
       canvasEditor.canvas.add(image);
+      image.name = item.FileName
+      image.FilePath = item.FilePath
       const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
       canvasEditor.canvas.discardActiveObject();
       canvasEditor.canvas.setActiveObject(info);

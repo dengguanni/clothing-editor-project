@@ -204,7 +204,7 @@ const getList = () => {
         cutPartsType
       };
     });
-  console.log('list', list.value)
+  // console.log('list', list.value)
 };
 
 onMounted(() => {

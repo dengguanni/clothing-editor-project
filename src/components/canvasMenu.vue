@@ -61,7 +61,6 @@ onMounted(() => {
 const changeSelection = (item) => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = item.Title
-    console.log('canvasEditor.canvas.getObjects()', canvasEditor.canvas.getObjects())
     cutPartsType.value = item.Title
     canvasEditor.canvas.getObjects().map(el => {
         {
@@ -101,8 +100,6 @@ const changeSelection = (item) => {
 
             image.clone((cloned) => {
                 const path = new fabric.Rect({ width: workspace.width, height: image.height, top: image.top, left: image.left })
-                console.log('image.clipPath', image.clipPath)
-                console.log('workspace', workspace.clipPath)
                 canvasEditor.canvas.clipPath = cloned;
                 canvasEditor.canvas.renderAll()
                 canvasEditor.canvas.requestRenderAll();
