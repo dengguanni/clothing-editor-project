@@ -17,7 +17,7 @@
   
 <script setup >
 import useSelect from '@/hooks/select';
-import { reactive } from 'vue'
+import { reactive, } from 'vue'
 import { v4 as uuid } from 'uuid';
 const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
@@ -36,7 +36,26 @@ const props = defineProps({
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
+onUnmounted(() => {
+    mitts.off('changeSize', '')
+})
 onMounted(() => {
+    setTimeout(() => {
+
+        // canvasEditor.canvas.setOverlayColor(
+        //     {
+        //         source: 'scr/assets/png/01前片.png',
+        //         repeat: 'no-repeat', // 不重复
+        //     },
+        //     canvasEditor.canvas.renderAll.bind(canvasEditor.canvas),
+        //     {
+        //         width: 100
+        //     }
+        // )
+        // console.log('OverlayColor', canvasEditor.canvas)
+    }, 2000)
+
+
     mitts.on('changeSize', (e) => {
         console.log('on')
         let arr = []
@@ -48,8 +67,8 @@ onMounted(() => {
                         ImageUrl: baseUrl + el.ImageUrl
                     })
                     // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
-                    LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName)
                 })
+                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName)
             }
             cutParts.value = [...arr]
             cutPartsType.value = cutParts.value[0].Title
@@ -59,6 +78,8 @@ onMounted(() => {
     })
 })
 const changeSelection = (item) => {
+    console.log('选择裁片')
+    load3DScene.setModelCamera(item.Title)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = item.Title
     cutPartsType.value = item.Title
@@ -74,46 +95,52 @@ const changeSelection = (item) => {
             }
         }
     })
-    let callback = (image, isError) => {
-        if (!isError) {
 
-            // 超出画布不展示
-            workspace.clone((cloned) => {
-                canvasEditor.canvas.clipPath = cloned;
-                canvasEditor.canvas.requestRenderAll();
+
+    var img = new Image();
+    // img.src = item.ImageUrl
+    img.src = 'src/assets/png/01前片.jpg'
+    workspace.clone((cloned) => {
+        canvasEditor.canvas.clipPath = cloned;
+        canvasEditor.canvas.requestRenderAll();
+    });
+    img.onload = function () {
+        var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
+        var maskRect = new fabric.Rect(
+            {
+                scaleX: 0.08,
+                scaleY: 0.08,
+                width: img.width,
+                height: img.height,
+                fill: pattern,
+                opacity: 0.3,
+                hasControls: false,
+                selectable: false,
+                evented: false,
+                left: workspace.width / 2 - (img.width * 0.08) / 2,
+                top: workspace.height / 2 - (img.height * 0.08) / 2,
             });
-            image.hasCropping = true
-            image.id = uuid()
-            image.name = item.Title
-            image.cutPartsType = item.Title
-            image.isCutPart = true
-            canvasEditor.canvas.add(image);
-            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-            canvasEditor.canvas.discardActiveObject();
-            canvasEditor.canvas.setActiveObject(info);
+        maskRect.name = item.Title
+        maskRect.cutPartsType = item.Title
+        maskRect.isCutPart = true
+        maskRect.objectCaching = false
+        maskRect.isMask = true
+        // maskRect.hasCropping = true
+        canvasEditor.canvas.add(maskRect);
+        canvasEditor.canvas.discardActiveObject();
+
+        // const info = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        // canvasEditor.canvas.centerObject(info)
+        canvasEditor.canvas.requestRenderAll();
+        maskRect.clone((cloned) => {
+            const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
+            canvasEditor.canvas.clipPath = cloned;
+            canvasEditor.canvas.renderAll()
             canvasEditor.canvas.requestRenderAll();
-            canvasEditor.position('center')
-            cutPartsType.value = item.Title
-            // CutParts.cutPartsType = item.Title
-            console.log('item.Title', item.Title)
-            mitts.emit('cutPartsType', item.Title)
+        });
 
-            image.clone((cloned) => {
-                const path = new fabric.Rect({ width: workspace.width, height: image.height, top: image.top, left: image.left })
-                canvasEditor.canvas.clipPath = cloned;
-                canvasEditor.canvas.renderAll()
-                canvasEditor.canvas.requestRenderAll();
-            });
-        }
     };
-    const properties = {
-        left: 0,
-        top: 0,
-        "scaleX": 0.0761,
-        "scaleY": 0.0761,
-    };
-    fabric.Image.fromURL(item.ImageUrl, callback, properties);
-    // load3DScene.setModelCamera()
+
 }
 </script>
 <style lang="less">

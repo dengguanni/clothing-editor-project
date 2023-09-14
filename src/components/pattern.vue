@@ -50,7 +50,7 @@
 <script lang="ts" setup scoped>
 import { Collapse, Panel } from 'view-ui-plus';
 import colorSelector from '@/components/colorSelector.vue';
-import { reactive, ref, onMounted, provide, watch } from 'vue'
+import { reactive, ref, onMounted, provide, watch, onUnmounted } from 'vue'
 import useSelect from '@/hooks/select';
 import mitts from '@/utils/mitts.js';
 const { fabric, mixinState, canvasEditor } = useSelect();
@@ -120,6 +120,9 @@ const baseAttr = reactive({
 onMounted(() => {
 
 })
+onUnmounted(() => {
+    mitts.off('changeSize', '')
+})
 watch(
     () => props.goodsInfo,
     (val) => {
@@ -150,6 +153,7 @@ const changeCommon = (key, value) => {
 }
 const changeSize = (item: any) => {
     sizeSelected.value = item.GUID
+    console.log('发送')
     mitts.emit('changeSize', item)
 
 }

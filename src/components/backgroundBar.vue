@@ -72,7 +72,6 @@ const getImagesLibrary = (QueryKeyWord) => {
     getPicture.getImagesLibrary(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
-        console.log('图库', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -80,6 +79,8 @@ const getImagesLibrary = (QueryKeyWord) => {
 
 // 点击添加
 const addItem = (item) => {
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+    console.log('maskRect', maskRect)
     const imageURL = item.ImageUrl;
     let callback = (image, isError) => {
         if (!isError) {
@@ -90,11 +91,14 @@ const addItem = (item) => {
             image.ImageUrl = item.ImageUrl
             image.name = item.FileName
             image.FilePath = item.FilePath
+            image.mask = maskRect
             canvasEditor.canvas.add(image);
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+            canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.discardActiveObject();
             canvasEditor.canvas.setActiveObject(info);
             canvasEditor.canvas.requestRenderAll();
+
         }
     };
     const properties = {

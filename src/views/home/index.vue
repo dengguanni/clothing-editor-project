@@ -118,8 +118,18 @@
             <canvasMenu :sizeList="sizeList"></canvasMenu>
           </div>
           <div class="inside-shadow"></div>
+          <!-- <img src="http://8.140.206.30:8089/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/Part/01前片.jpg" style="height: auto;
+    width: 793px;
+    transform: scale(0.8);
+    position: absolute;
+    z-index: 9;
+    left: 254px;
+    top: -58px;
+    pointer-events: none;
+    opacity: 0.4;"/> -->
+
           <canvas id="canvas" :class="state.ruler ? 'design-stage-grid' : ''" width="400" height="300"></canvas>
-          <canvas id="canvas2" :class="state.ruler ? 'design-stage-grid' : ''" width="400" height="200"></canvas>
+          <!-- <canvas id="canvas2" :class="state.ruler ? 'design-stage-grid' : ''" width="400" height="200"></canvas> -->
           <dragMode v-if="state.show"></dragMode>
           <zoom></zoom>
           <!-- <mouseMenu></mouseMenu> -->

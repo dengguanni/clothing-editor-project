@@ -11,6 +11,16 @@ class LoadScene {
     static renderer: any
     static screenshotList: Array<any> = []
     static loadModel(url: string, name: string) {
+        if (LoadScene.scene) {
+            LoadScene.scene.traverse(c => {
+                if (c.isGroup) {
+                    console.log('asdfghj')
+                    LoadScene.scene.remove(c);
+                    // c.geometry.dispose();
+                    // c.material.dispose();
+                }
+            })
+        }
 
         const loader = new GLTFLoader();
         loader.load('public/static/duanxiu1.glb', object => {
@@ -27,7 +37,7 @@ class LoadScene {
                 }
             })
             LoadScene.scene.add(object.scene);
-            console.log('LoadScene.scene', LoadScene.scene)
+            LoadScene.setCameraAngle()
         });
     }
     init(scene: any, camera: any, renderer: any, id: string, callBack: Function) {
@@ -93,7 +103,7 @@ class LoadScene {
 
     }
 
-    setCameraAngle() {
+    static setCameraAngle() {
         LoadScene.screenshotList = []
         const setImage = () => {
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera)
@@ -151,22 +161,34 @@ class LoadScene {
             callBack()
         }, 1000);
     }
-    setModelCamera() {
+    setModelCamera(direction: string) {
         LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
+            const setModleRotation = (targetRotation) => {
                 let rotation = { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z };
                 let testTween = new TWEEN.Tween(rotation);
-                testTween.to({ x: c.rotation.x, y: c.rotation.y - Math.PI / 3, z: c.rotation.z }, 500);
+                testTween.to({ x: c.rotation.x, y: targetRotation, z: c.rotation.z }, 1000);
                 testTween.onStart(function () {
-                    console.log("start");
                 }).onUpdate(function (object) {
                     c.rotation.y = object.y
-                    console.log("update", object);
                 }).onComplete(function () {
-                    console.log("complete");
                 });
                 testTween.easing(TWEEN.Easing.Quadratic.Out);
                 testTween.start(); //开始
+            }
+            if (c.name == 'duanxiu') {
+                if (direction.includes('左')) {
+                    setModleRotation(Math.PI / 2)
+                } else if (direction.includes('右')) {
+                    setModleRotation(-(Math.PI / 2))
+                } else if (direction.includes('前')) {
+                    setModleRotation((Math.PI))
+                } else if (direction.includes('后')) {
+                    setModleRotation(-Math.PI)
+                } else {
+                    setModleRotation((Math.PI))
+                }
+
+
             }
         })
     }

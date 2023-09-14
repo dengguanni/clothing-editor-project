@@ -13,6 +13,7 @@ class WorkspacePlugin {
   static pluginName = 'WorkspacePlugin';
   static events = ['sizeChange'];
   static apis = ['big', 'small', 'auto', 'one', 'setSize'];
+  static hasCut = false
   workspaceEl: HTMLElement;
   workspace: null | fabric.Rect;
   newWorkspace: null | fabric.Rect;
@@ -141,6 +142,7 @@ class WorkspacePlugin {
   _initResizeObserve() {
     const resizeObserver = new ResizeObserver(
       throttle(() => {
+        console.log(22233)
         this.auto();
       }, 50)
     );
@@ -157,14 +159,13 @@ class WorkspacePlugin {
       .find((item) => item.id === 'workspace') as fabric.Rect;
     this.workspace.set('width', width);
     this.workspace.set('height', height);
-    this.auto();
+    // this.auto();
   }
 
   setZoomAuto(scale: number, cb?: (left?: number, top?: number) => void) {
     const { workspaceEl } = this;
     const width = workspaceEl.offsetWidth;
     const height = workspaceEl.offsetHeight;
-
     this.canvas.setWidth(width);
     this.canvas.setHeight(height);
     const center = this.canvas.getCenter();
@@ -186,6 +187,7 @@ class WorkspacePlugin {
   }
 
   _getScale() {
+    console.log('222')
     const viewPortWidth = this.workspaceEl.offsetWidth;
     const viewPortHeight = this.workspaceEl.offsetHeight;
     // 按照宽度
@@ -216,13 +218,16 @@ class WorkspacePlugin {
 
   // 自动缩放
   auto() {
-    const scale = this._getScale();
-    this.setZoomAuto(scale - 0.08);
+    if (!WorkspacePlugin.hasCut) {
+      const scale = this._getScale();
+      this.setZoomAuto(scale - 0.08);
+    }
+
   }
 
   // 1:1 放大
   one() {
-    this.setZoomAuto(0.8 - 0.08);
+    // this.setZoomAuto(0.8 - 0.08);
     this.canvas.requestRenderAll();
   }
 

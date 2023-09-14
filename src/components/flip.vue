@@ -93,7 +93,8 @@ const flip = (type) => {
 };
 const angle = (value) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
-  activeObject.rotate(value);
+  activeObject.rotate(activeObject.angle + value);
+  // activeObject.angle = activeObject.angle+ value
   canvasEditor.canvas.renderAll();
   ControlsTile.setRepeat(null, true)
 }

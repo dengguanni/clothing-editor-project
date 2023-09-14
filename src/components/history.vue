@@ -37,7 +37,7 @@
     </Button>
   </Tooltip>
   <Tooltip :content="'辅助线'">
-    <Button @click="setAuxiliaryLine" type="text" size="small" :disabled="redoStack.length === 0" class="item">
+    <Button @click="setAuxiliaryLine" type="text" size="small" class="item">
       <commonIcon angleKey="auxiliarylLine"></commonIcon>
     </Button>
   </Tooltip>
@@ -82,7 +82,11 @@ const beforeClear = () => {
   });
 };
 const setAuxiliaryLine = () => {
-
+  const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+  if (maskRect) {
+    maskRect.visible = !maskRect.visible
+    canvasEditor.canvas.renderAll();
+  }
 }
 
 

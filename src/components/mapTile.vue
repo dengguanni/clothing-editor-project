@@ -16,6 +16,23 @@
                 <div style="cursor: pointer;" @mousedown="menu3Click(item.type)" :id="item.type">
                     <span v-html="item.svg" style="margin: 0px"></span>
                 </div>
+                <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
+                    <div class="item" id="scale-big" @click.stop="setCopyTo({ Title: 'all' })">所有片</div>
+                    <div class="item" id="scale-big" @click.stop="setCopyTo(item1)" v-for="item1 in cutParts"
+                        :key="item.Title">{{ item1.Title }}</div>
+                </div>
+                <!-- <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
+                    <ElDropdownMenu>
+                        <ElDropdownItem>Action 1</ElDropdownItem>
+                        <ElDropdownItem>Action 2</ElDropdownItem>
+                        <ElDropdownItem>Action 3</ElDropdownItem>
+                    </ElDropdownMenu> -->
+                <!-- <ElDropdown ref="dropdown1" trigger="contextmenu">
+                        <template #dropdown>
+
+                        </template>
+                    </ElDropdown> -->
+                <!-- </div> -->
                 <div v-show="item.type == 'scale' && state.isScale" class="scale-menu">
                     <div class="item" id="scale-big" @click.stop="menu3Click('scale-big')">放大</div>
                     <div class="item" id="scale-small" @click.stop="menu3Click('scale-small')">缩小</div>
@@ -34,13 +51,16 @@
 <script setup >
 
 import { ref } from 'vue'
-import { Tooltip } from 'view-ui-plus';
+import { Tooltip, } from 'view-ui-plus';
+import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus'
 import useSelect from '@/hooks/select';
 import { debounce } from 'lodash-es';
+import { Message } from 'view-ui-plus';
 import Lock from '@/components/lock.vue'
 import { v4 as uuid } from 'uuid';
 import MouseEventEventListener from '@/utils/event/mouse.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
+import mitts from '@/utils/mitts'
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
 const update = getCurrentInstance();
@@ -52,15 +72,19 @@ const state = reactive({
     isScale: false,
     firstClickScale: false,
     isLayer: false,
-    firstClickLayer: false
+    firstClickLayer: false,
+    copyTo: false
 })
+let cutPartsType = ref('')
 let stateRepeat = reactive({
     isRepeat: false,
     basic: false,
     mirror: false,
     transverse: false,
-    direction: false
+    direction: false,
+
 })
+let cutParts = ref([])
 let layerNum = ref(0)
 let type = ref('')
 let activeInfo = reactive({
@@ -142,6 +166,12 @@ const menuList3 = [
 onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
+    mitts.on('cutParts', (val) => {
+        cutParts.value = [...val]
+    })
+    mitts.on('cutPartsType', val => {
+        cutPartsType.value = val
+    })
     MouseEventEventListener.setMouseupFn = () => { }
     // ControlsTile.setRepeat()
     ControlsTile.canvas = canvasEditor.canvas
@@ -155,6 +185,36 @@ const init = () => {
         type.value = activeObject.type;
         update?.proxy?.$forceUpdate();
     }
+}
+const setCopyTo = (item) => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+    if (item.Title == 'all') {
+        cutParts.value.forEach(el => {
+            if (el.Title !== cutPartsType.value) {
+                activeObject.clone(c => {
+                    c.set({
+                        id: uuid(),
+                        cutPartsType: el.Title,
+                        visible: false
+                    })
+                    canvasEditor.canvas.add(c)
+                })
+            }
+        })
+    } else {
+        activeObject.clone(c => {
+            c.set({
+                id: uuid(),
+                cutPartsType: item.Title,
+                visible: false
+            })
+            canvasEditor.canvas.add(c)
+        })
+    }
+    canvasEditor.canvas.renderAll();
+    state.copyTo = false
+    Message.success('复制成功');
+    
 }
 const menuList1Click = (type) => {
     switch (type) {
@@ -283,6 +343,9 @@ const menu3Click = (type) => {
             break
         case 'createCopy':
             clone();
+            break
+        case 'copyTo':
+            state.copyTo = !state.copyTo
             break
         default:
     }
