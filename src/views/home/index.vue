@@ -11,7 +11,7 @@
     <Header v-if="state.isShowHeader">
       <div class="header-left">
         <div class="logo">
-          <img src="src\assets\png\logo.png" />
+          <img src="http://8.140.206.30:8089/ImageSource/Other/Logo.png" style="height: 54px; width: 180px;" />
         </div>
         <history></history>
       </div>
@@ -233,6 +233,9 @@ import { fabric } from 'fabric';
 
 // api
 import getLeftClassificationList from '@/api/commodity.ts'
+
+// 3D
+import LoadScene from '@/core/3D/loadScene.ts'
 
 // icon
 import commonIcon from '@/components/commonIcon.vue'

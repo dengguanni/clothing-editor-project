@@ -9,7 +9,7 @@
             <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value)>
                 <img :src="value.src" />
             </div>
-            <img :src="imagebase64" style=" border-color: black;" />
+            <!-- <img :src="imagebase64" style=" border-color: black;" /> -->
         </div>
     </div>
 </template>

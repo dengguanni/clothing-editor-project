@@ -4,7 +4,7 @@
             @keyup.enter="searchImg" />
         <div class="line"></div>
         <div class="content">
-            <img class="item" src="src\assets\png\bg-01.png" alt="1" @click="addItem" @dragend="dragItem">
+            <img class="item" src="src/assets/png/xingqiu.png" alt="1" @dragend="dragItem" />
             <img class="item" :src="item.ImageUrl" v-for="item in imageList" :key="item.GUID" @click="addItem(item)"
                 @dragend="dragItem">
         </div>
@@ -23,9 +23,12 @@ import { Input } from 'view-ui-plus'
 import { reactive, onMounted } from 'vue'
 import { getImgStr, selectFiles } from '@/utils/utils';
 import useSelect from '@/hooks/select';
+import { ElMessage } from 'element-plus';
 import { v4 as uuid } from 'uuid';
 import getPicture from '@/api/picture.ts'
 import mitts from '@/utils/mitts'
+import LoadScene from '@/core/3D/loadScene.ts'
+const fakeInfo = ref({ ImageUrl: 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', Title: 'xingqiu', FileName: '', FilePath: '' })
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -76,36 +79,60 @@ const getImagesLibrary = (QueryKeyWord) => {
         loading.value = false
     })
 }
+const upDateTexture = () => {
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+    if (cutPartsType.value) {
+        console.log('添加运行')
+        // workspace.visible = false
+        // mask.visible = false
+        // canvasEditor.canvas.requestRenderAll();
+        LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
+            // workspace.visible = true
+            // mask.visible = true
+            // canvasEditor.canvas.requestRenderAll();
+        })
+    }
+}
 
 // 点击添加
 const addItem = (item) => {
-    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-    console.log('maskRect', maskRect)
-    const imageURL = item.ImageUrl;
-    let callback = (image, isError) => {
-        if (!isError) {
-            image.name = item.Title
-            image.cutPartsType = cutPartsType.value
-            image.crossOrigin = "anonymous"
-            image.id = uuid()
-            image.ImageUrl = item.ImageUrl
-            image.name = item.FileName
-            image.FilePath = item.FilePath
-            image.mask = maskRect
-            canvasEditor.canvas.add(image);
-            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-            canvasEditor.canvas.bringToFront(maskRect)
-            canvasEditor.canvas.discardActiveObject();
-            canvasEditor.canvas.setActiveObject(info);
-            canvasEditor.canvas.requestRenderAll();
+    if (!cutPartsType.value) {
+        ElMessage({
+            showClose: true,
+            message: '请先选择版型',
+            type: 'error',
+        })
+    } else {
+        const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        const imageURL = item.ImageUrl;
+        let callback = (image, isError) => {
+            if (!isError) {
+                image.name = item.Title
+                image.cutPartsType = cutPartsType.value
+                image.crossOrigin = "anonymous"
+                image.id = uuid()
+                image.ImageUrl = item.ImageUrl
+                image.name = item.FileName
+                image.FilePath = item.FilePath
+                image.mask = maskRect
+                canvasEditor.canvas.add(image);
+                const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+                canvasEditor.canvas.bringToFront(maskRect)
+                canvasEditor.canvas.discardActiveObject();
+                canvasEditor.canvas.setActiveObject(info);
+                canvasEditor.canvas.requestRenderAll();
 
-        }
-    };
-    const properties = {
-        left: 100,
-        top: 100
-    };
-    fabric.Image.fromURL(imageURL, callback, properties);
+            }
+            console.log('isError', isError)
+        };
+        const properties = {
+            left: 100,
+            top: 100
+        };
+        fabric.Image.fromURL(imageURL, callback, properties);
+    }
+
 }
 // 拖拽添加
 const dragItem = (event) => {
@@ -124,6 +151,7 @@ const dragItem = (event) => {
                 // image.name = item.FileName
                 // image.FilePath = item.FilePath
                 image.cutPartsType = cutPartsType.value
+                console.log('image.cutPartsType', image.cutPartsType)
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);
@@ -131,6 +159,7 @@ const dragItem = (event) => {
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.requestRenderAll();
+                upDateTexture()
             }
         };
 
@@ -138,7 +167,17 @@ const dragItem = (event) => {
             left: 0,
             top: 0
         };
-        fabric.Image.fromURL(imageURL, callback, properties);
+        if (!cutPartsType.value) {
+            ElMessage({
+                showClose: true,
+                message: '请先选择版型',
+                type: 'error',
+            })
+        } else {
+            fabric.Image.fromURL(imageURL, callback, properties);
+        }
+
+
     }
 
 }

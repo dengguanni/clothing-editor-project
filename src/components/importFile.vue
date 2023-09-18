@@ -44,6 +44,8 @@ import { Upload } from 'view-ui-plus';
 import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
 import { ElMessage } from 'element-plus';
+import { getImagesCustom, setUpLoadFile } from '@/core/2D/handleImages.ts'
+import mitts from '@/utils/mitts'
 const { fabric, canvasEditor } = useSelect();
 const state = reactive({
   showModal: false,
@@ -52,23 +54,78 @@ const state = reactive({
 });
 let showDelIcon = ref('')
 onMounted(() => {
+  mitts.on('replaceImages', (val) => {
+    replaceImage(val)
+  })
   document.getElementById("myInput").addEventListener("change", getFile, true)
-  getImagesCustom()
+  getImagesCustom(imageList)
 })
 const closeIcon = (item) => {
   showDelIcon.value = ''
 }
-
 const imageList = ref([])
 onMounted(() => {
-  getImagesCustom()
+  getImagesCustom(imageList)
 })
 const showIcon = (item) => {
   showDelIcon.value = item.GUID
 }
+
+const replaceImage = (str) => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  const callback = (FileName) => {
+    const width = activeObject.get('width');
+    const height = activeObject.get('height');
+    const scaleX = activeObject.get('scaleX');
+    const scaleY = activeObject.get('scaleY');
+
+    const properties = {
+      left: 0,
+      top: 0
+    };
+    console.log(imageList.value, FileName)
+    let callback2 = (item => {
+      activeObject.setSrc(item.ImageUrl, () => {
+        activeObject.set('name', item.Title);
+        activeObject.set('id', uuid());
+        activeObject.set('FileName', item.FileName);
+        activeObject.set('FilePath', item.FilePath);
+        // activeObject.set('scaleX', (width * scaleX) / imgEl.width);
+        // activeObject.set('scaleY', (height * scaleY) / imgEl.height);
+        canvasEditor.canvas.renderAll();
+      });
+    })
+    // imageList.value.forEach(el => {
+    // if (el.FileName == FileName) {
+    getImagesCustom(imageList, FileName, callback2)
+
+    // let callback2 = (image, isError) => {
+    //   if (!isError) {
+    //     image.name = el.Title
+    //     image.id = uuid()
+    //     image.name = el.FileName
+    //     image.width = width
+    //     image.height = height
+    //     image.FilePath = el.FilePath
+    //     canvasEditor.canvas.add(image);
+    //     const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+    //     canvasEditor.canvas.discardActiveObject();
+    //     canvasEditor.canvas.setActiveObject(info);
+    //     canvasEditor.canvas.requestRenderAll();
+    //   }
+    // };
+    // fabric.Image.fromURL(el.ImageUrl, callback2, properties);
+    // }
+    // })
+  }
+  setUpLoadFile(str, imageList, callback)
+
+}
 const delImage = (item) => {
   picture.delImagesCustom({ GUID: item.GUID }).then(res => {
     if (res.OK == 'True') {
+      // imageList.value = [...]
+      imageList.value = [...imageList.value.filter(el => el.GUID !== item.GUID)]
       ElMessage({
         showClose: true,
         message: '删除成功',
@@ -77,131 +134,7 @@ const delImage = (item) => {
     }
   })
 }
-// 上传记录
-const getImagesCustom = () => {
-  const p = {
-    Page_Index: 0,
-    Page_RowCount: 20
-  }
-  picture.getImagesCustom(p).then(res => {
-    imageList.value = [...res.Tag[0].Table]
-  })
-}
 
-const setUpLoadFile = (str) => {
-  const result = str.substring(str.indexOf(',') + 1,)
-  const splitBase64Str = splitBase64(result, 1048596)
-  if (splitBase64Str.length > 30) {
-    ElMessage({
-      showClose: true,
-      message: '上传图片不可超过30M!',
-      type: 'error',
-    })
-    return
-  } else {
-    // 不分包
-    if (splitBase64Str.length == 1) {
-      const FileName = guid() + '.png'
-      const FilePath = 'images_custom\\' + FileName.substring(0, 1)
-      const p = {
-        FileName: FileName,
-        FilePath: FilePath,
-        AppendSize: imageSize(splitBase64Str[0]),
-        AppendComplete: 'True',
-        base64Str: splitBase64Str[0]
-      }
-      picture.setUpLoadFile(p).then(res => {
-        if (res.OK == 'True') {
-          picture.setImagesCustom({ FileName }).then(e => {
-            if (e.OK == 'True') {
-              ElMessage({
-                showClose: true,
-                message: '上传成功',
-                type: 'success',
-              })
-            } else {
-              ElMessage({
-                showClose: true,
-                message: res.Message,
-                type: 'error',
-              })
-            }
-          })
-        } else {
-          ElMessage({
-            showClose: true,
-            message: res.Message,
-            type: 'error',
-          })
-        }
-      })
-    } else {
-      const FileName2 = guid() + '.png'
-      const FilePath = 'images_custom\\' + FileName2.substring(0, 1)
-      splitBase64Str.forEach((el, index) => {
-        if (index == 0) {
-          const aa = splitBase64Str[index]
-          const p = {
-            FileName: FileName2,
-            FilePath: FilePath,
-            AppendSize: imageSize(aa),
-            AppendComplete: 'False',
-            base64Str: splitBase64Str[index]
-          }
-          picture.setUpLoadFile(p).then(res => {
-            if (res.OK == 'False') {
-              ElMessage({
-                showClose: true,
-                message: res.Message,
-                type: 'error',
-              })
-            }
-          })
-        } else {
-          const p = {
-            FileName: FileName2,
-            FilePath: FilePath,
-            AppendSize: imageSize(splitBase64Str[index]),
-            AppendComplete: (index + 1) == splitBase64Str.length ? 'True' : 'False',
-            base64Str: splitBase64Str[index]
-          }
-          picture.setUpLoadFile(p).then(res => {
-            if (res.OK == 'False') {
-              ElMessage({
-                showClose: true,
-                message: res.Message,
-                type: 'error',
-              })
-            } else {
-              if (index + 1 == splitBase64Str.length) {
-                picture.setImagesCustom({ FileName: FileName2 }).then(e => {
-                  if (e.OK == 'True') {
-                    ElMessage({
-                      showClose: true,
-                      message: '上传成功',
-                      type: 'success',
-                    })
-                  } else {
-                    ElMessage({
-                      showClose: true,
-                      message: res.Message,
-                      type: 'error',
-                    })
-                  }
-                })
-              }
-            }
-          })
-        }
-      })
-    }
-  }
-
-  // setTimeout(() => {
-  //   document.getElementById(id).src = result;
-  // }, 10);
-  // setUpLoadFile()
-}
 // 获取选取图片
 const getFile = (file) => {
   if (!file) {
@@ -218,7 +151,7 @@ const getFile = (file) => {
       const {
         result
       } = event.target;
-      setUpLoadFile(result)
+      setUpLoadFile(result, imageList)
       // imageList.push({
       //   id: id,
       //   src: result,
@@ -231,22 +164,7 @@ const getFile = (file) => {
     }
   };
 }
-const imageSize = (base64Str) => {
-  const indexBase64 = base64Str.indexOf('base64,') == -1 ? base64Str : base64Str.indexOf('base64,');
-  if (indexBase64 < 0) return -1;
-  const str = base64Str.substr(indexBase64 + 6);
-  return (str.length * 0.75).toFixed(0);
-}
-const splitBase64 = (base64String, chunkSize) => {
-  var result = [];
-  var index = 0;
-  while (index < base64String.length) {
-    var chunk = base64String.slice(index, index + chunkSize);
-    result.push(chunk);
-    index += chunkSize;
-  }
-  return result;
-}
+
 const HANDLEMAP = {
   // 插入图片
   insertImg: function () {

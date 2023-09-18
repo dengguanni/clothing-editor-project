@@ -92,59 +92,100 @@ const setAuxiliaryLine = () => {
 
 const setLine = () => {
   state.line = !state.line
-  if (state.line) {
+  const imageURL = 'http://8.140.206.30:8089/ImageSource/Other/Grid.png'
+  if (!state.line) {
     const line = canvasEditor.canvas.getObjects().find((item) =>
       item.id === '0'
     );
     canvasEditor.canvas.remove(line)
   } else {
-    imgToBase64('http://127.0.0.1:3000/src/assets/png/bg-line.png').then(res => {
-      if (res) {
-        let imgInstance
-        const imgEl = document.createElement('img');
-        imgEl.src = res;
-        document.body.appendChild(imgEl);
-        imgInstance = new fabric.Image(imgEl, {
-          id: '0',
-          name: '网格'
-        })
-        imgInstance.scaleX = (703 / imgInstance.width);
-        imgInstance.scaleY = (703 / imgInstance.height);
-        imgInstance.hasControls = false
-        imgInstance.set('selectable', false);
-        imgInstance.set('hasControls', false);
-        imgInstance.set('isDragging', false);
-        imgInstance.hoverCursor = 'default';
-        lockAttrs.forEach((key) => {
-          imgInstance[key] = true;
-        });
-        console.log('imgInstance', imgInstance)
-        imgEl.onload = () => {
-          canvasEditor.canvas.add(imgInstance);
-          canvasEditor.canvas.renderAll();
-          imgEl.remove();
-          // canvasEditor.canvas.on('mouse:wheel', opt => {
-          //   const delta = opt.e.deltaY
-          //   let zoom = canvasEditor.canvas.getZoom()
-          //   zoom = 0.999 * delta
-          //   if (zoom > 20) zoom = 20
-          //   if (zoom < 0.01) zoom = 0.01
-          //   if (delta > 0) {
-          //     imgInstance.scaleX = imgInstance.scaleX + 0.1
-          //     imgInstance.scaleY = imgInstance.scaleY + 0.1
-          //   } else {
-          //     imgInstance.scaleX = imgInstance.scaleX - 0.1
-          //     imgInstance.scaleY = imgInstance.scaleY - 0.1
-          //   }
-          //   canvasEditor.canvas.renderAll();
-          //   console.log(opt.e.deltaY, zoom)
+    let callback = (image, isError) => {
+      if (!isError) {
+        // image.name = item.Title
+        // image.cutPartsType = cutPartsType.value
+        image.id = '0'
+        // image.moveTo(0)
 
-          // })
-        };
+        image.ImageUrl = imageURL
+        image.scaleX = (703 / image.width);
+        image.scaleY = (703 / image.height);
+        image.hasControls = false
+        image.set('selectable', false);
+        image.set('hasControls', false);
+        image.set('isDragging', false);
+        image.hoverCursor = 'default';
+        lockAttrs.forEach((key) => {
+          image[key] = true;
+        });
+        // image.name = item.FileName
+        // image.FilePath = item.FilePath
+        // canvasEditor.workspaceSendToBack()
+        canvasEditor.canvas.add(image);
+
+        const line = canvasEditor.canvas.getObjects().find((item) =>
+          item.id === '0'
+        );
+        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+        // canvasEditor.canvas.sendBackwards(line)
+        line.sendToBack()
+        workspace.sendToBack()
+        // canvasEditor.canvas.moveTo(line, 3)
+        canvasEditor.canvas.requestRenderAll();
       }
-    }).catch(err => {
-      console.log('这里是错误', err);
-    });
+    };
+    const properties = {
+      left: 0,
+      top: 0
+    };
+    fabric.Image.fromURL(imageURL, callback, properties);
+
+    // imgToBase64('http://127.0.0.1:3000/src/assets/png/bg-line.png').then(res => {
+    //   if (res) {
+    //     let imgInstance
+    //     const imgEl = document.createElement('img');
+    //     imgEl.src = res;
+    //     document.body.appendChild(imgEl);
+    //     imgInstance = new fabric.Image(imgEl, {
+    //       id: '0',
+    //       name: '网格'
+    //     })
+    //     imgInstance.scaleX = (703 / imgInstance.width);
+    //     imgInstance.scaleY = (703 / imgInstance.height);
+    //     imgInstance.hasControls = false
+    //     imgInstance.set('selectable', false);
+    //     imgInstance.set('hasControls', false);
+    //     imgInstance.set('isDragging', false);
+    //     imgInstance.hoverCursor = 'default';
+    //     lockAttrs.forEach((key) => {
+    //       imgInstance[key] = true;
+    //     });
+    //     console.log('imgInstance', imgInstance)
+    //     imgEl.onload = () => {
+    //       imgInstance.moveTo(2)
+    //       canvasEditor.canvas.add(imgInstance);
+    //       canvasEditor.canvas.renderAll();
+    //       imgEl.remove();
+    //       // canvasEditor.canvas.on('mouse:wheel', opt => {
+    //       //   const delta = opt.e.deltaY
+    //       //   let zoom = canvasEditor.canvas.getZoom()
+    //       //   zoom = 0.999 * delta
+    //       //   if (zoom > 20) zoom = 20
+    //       //   if (zoom < 0.01) zoom = 0.01
+    //       //   if (delta > 0) {
+    //       //     imgInstance.scaleX = imgInstance.scaleX + 0.1
+    //       //     imgInstance.scaleY = imgInstance.scaleY + 0.1
+    //       //   } else {
+    //       //     imgInstance.scaleX = imgInstance.scaleX - 0.1
+    //       //     imgInstance.scaleY = imgInstance.scaleY - 0.1
+    //       //   }
+    //       //   canvasEditor.canvas.renderAll();
+    //       //   console.log(opt.e.deltaY, zoom)
+    //       // })
+    //     };
+    //   }
+    // }).catch(err => {
+    //   console.log('这里是错误', err);
+    // });
   }
 
 };

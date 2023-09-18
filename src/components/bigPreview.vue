@@ -18,8 +18,8 @@
                     <img :src="item.src" style="width: 96px; height: 96px;">
                 </div>
             </div>
-            <Icon type="ios-arrow-dropup-circle" size="36" color="#DCE1E9" class="up" />
-            <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" />
+            <Icon type="ios-arrow-dropup-circle" size="36" color="#DCE1E9" class="up" @click="changeImage('up')" />
+            <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" @click="changeImage('down')" />
         </div>
         <div class="color-selection">
             <div :class="colorSelection == item ? 'item-active' : 'item'" v-for="item in colorList" :key="item"
@@ -56,32 +56,61 @@ let imageActive = ref('')
 const list = reactive([0, 2, 34, 6, 9])
 onMounted(() => {
     is3D.value = props.is3D === 4 ? true : false
-    load3DScene.init(scene, camera, renderer, 'big-3d', () => {
+    LoadScene.change3dBox('big-3d', () => {
         screenshotList = []
-        let arr = load3DScene.setCameraAngle()
+        let arr = LoadScene.getImages()
         arr.forEach(element => {
             screenshotList.push(element)
         });
         imageActive.value = screenshotList[0].src
         directionSelection.value = screenshotList[0].id
-        LoadScene.loadModel('', 'duanxiu')
+        //     LoadScene.loadModel('', 'duanxiu')
     })
-
-
+    // load3DScene.init(scene, camera, renderer, 'big-3d', () => {
+    //     screenshotList = []
+    //     let arr = LoadScene.getImages()
+    //     arr.forEach(element => {
+    //         screenshotList.push(element)
+    //     });
+    //     imageActive.value = screenshotList[0].src
+    //     directionSelection.value = screenshotList[0].id
+    //     LoadScene.loadModel('', 'duanxiu')
+    // })
 })
 
 onUnmounted(() => {
-    load3DScene.destroyScene()
+    // load3DScene.destroyScene()
+    LoadScene.change3dBox('small-3d')
 })
 const changeDirection = (item) => {
     directionSelection.value = item.id
     imageActive.value = item.src
 }
+const changeImage = (val) => {
+    if (val == 'up') {
+        screenshotList.forEach((el, index) => {
+            if (el.id == directionSelection.value && screenshotList[index - 1]) {
+                directionSelection.value = screenshotList[index - 1].id
+                imageActive.value = screenshotList[index - 1].src
+            }
+        })
+    } else {
+        let key = 0
+        screenshotList.forEach((el, index) => {
+            console.log(directionSelection.value, screenshotList[index + 1])
+            if (el.id == directionSelection.value && screenshotList[index + 1]) {
+                key = index + 1
+            }
+        })
+        directionSelection.value = screenshotList[key].id
+        imageActive.value = screenshotList[key].src
+    }
+}
 const changeColor = (item) => {
     colorSelection.value = item
     load3DScene.setModelColor(item, () => {
         screenshotList = []
-        let arr = load3DScene.setCameraAngle()
+        let arr = LoadScene.getImages()
         arr.forEach(element => {
             screenshotList.push(element)
         });
@@ -91,6 +120,14 @@ const changeColor = (item) => {
 }
 const changeMode = (val) => {
     is3D.value = val
+    if (!is3D.value) {
+        screenshotList = []
+        let arr = LoadScene.getImages()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+        changeDirection(screenshotList[0])
+    }
 }
 </script>
 <style lang="less" scoped>

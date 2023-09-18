@@ -2,7 +2,7 @@
   <div>
     <!-- <Divider plain orientation="left">{{ $t('common_elements') }}</Divider> -->
     <div class="tool-box">
-      <div class="btn-1" @click="() => addText()" >
+      <div class="btn-1" @click="() => addText()">
         <Icon type="md-add" size="15" color="#4E5969 " />
         <span>添加文字</span>
       </div>
@@ -112,7 +112,7 @@
     </div>
     <!-- <Divider plain orientation="left">{{ $t('draw_elements') }}</Divider> -->
     <!-- <div class="tool-box"> -->
-      <!-- <span
+    <!-- <span
         @click="drawingLineModeSwitch(false)"
         :class="state.isDrawingLineMode && !state.isArrow && 'bg'"
       >
@@ -138,7 +138,7 @@
           ></path>
         </svg>
       </span> -->
-      <!-- <span
+    <!-- <span
         @click="drawingLineModeSwitch(true)"
         :class="state.isDrawingLineMode && state.isArrow && 'bg'"
       >
@@ -169,6 +169,7 @@ import { v4 as uuid } from 'uuid';
 import { getPolygonVertices } from '@/utils/math';
 import useSelect from '@/hooks/select';
 import { useI18n } from 'vue-i18n';
+import mitts from '@/utils/mitts'
 
 // 默认属性
 const defaultPosition = { shadow: '', fontFamily: 'arial' };
@@ -179,18 +180,24 @@ const dragOption = {
 };
 const { t } = useI18n();
 const { fabric, canvasEditor } = useSelect();
+const cutPartsType = ref('')
 const state = reactive({
   isDrawingLineMode: false,
   isArrow: false,
 });
 // let drawHandler = null;
-
+onMounted(() => {
+  mitts.on('cutPartsType', val => {
+    cutPartsType.value = val
+  })
+})
 const addText = (option) => {
   const text = new fabric.IText(t('everything_is_fine'), {
     ...defaultPosition,
     ...option,
     fontSize: 80,
     id: uuid(),
+    cutPartsType: cutPartsType.value
   });
   canvasEditor.canvas.add(text);
   if (!option) {

@@ -14,10 +14,10 @@
       <div class="header-1">
         <div class="serach-box">
           <!-- <Icon type="ios-search" size="20" /> -->
-          <Input search enter-button="搜索" placeholder="Enter something..." prefix="ios-contact" v-model="searchKey"
+          <Input search enter-button="搜索" placeholder="搜索版型" prefix="ios-contact" v-model="searchKey"
             @on-search="searchGoods"></Input>
         </div>
-        <button class="reset">重置</button>
+        <button class="reset" @click="searchKey= ''" style="cursor: pointer;">重置</button>
       </div>
       <div class="content">
         <div class="conten-item" v-for="item in goodList" :key="item.GUID" @click="getGoodsId(item)">

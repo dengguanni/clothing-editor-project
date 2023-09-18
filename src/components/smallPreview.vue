@@ -1,5 +1,5 @@
 <template>
-    <div class="bg">
+    <div class="bg" v-show="cutPartsType">
         <div class="small-preview">
             <div class="change-mode">
                 <div class="btn-box">
@@ -9,11 +9,11 @@
             </div>
             <!-- <div class="content"> -->
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
-                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;">
-                    <img :src="item.src" style="height: 280px; width: 280px;" />
+                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;"  v-loading="loadScreenshotList" >
+                    <img :src="item.src" style="height: 280px; width: 280px;"  />
                 </CarouselItem>
             </Carousel>
-            <div v-show="is3D" class="preview-3d" id="small-3d"></div>
+            <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="load3d"></div>
             <!-- </div> -->
             <button class="preview" @click="preview">预览</button>
         </div>
@@ -31,30 +31,45 @@ let scene, renderer, camera
 const emit = defineEmits()
 let is3D = ref(true)
 let carousel = ref(0)
+const load3d = ref(true)
+const loadScreenshotList = ref(true)
+let cutPartsType = ref('')
 const changeMode = () => {
     is3D.value = !is3D.value
+    if (!is3D.value) {
+        screenshotList = []
+        let arr = LoadScene.getImages()
+        arr.forEach(element => {
+            screenshotList.push(element)
+        });
+    }
 }
 const preview = () => {
     emit('preview', is3D.value)
 }
-onBeforeMount(()=>{
-  mitts.on('changeModelColor',(e)=>{
-    load3DScene.setModelColor(e, () => {
-        screenshotList = []
-        let arr = load3DScene.setCameraAngle()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
+onBeforeMount(() => {
+    mitts.on('changeModelColor', (e) => {
+        load3DScene.setModelColor(e, () => {
+            screenshotList = []
+            let arr = LoadScene.getImages()
+            arr.forEach(element => {
+                screenshotList.push(element)
+            });
+        })
     })
-  })
 })
 onMounted(() => {
+    mitts.on('cutPartsType', (val) => {
+        cutPartsType.value = val
+    })
     load3DScene.init(scene, camera, renderer, 'small-3d', () => {
         screenshotList = []
-        let arr = load3DScene.setCameraAngle()
+        let arr = LoadScene.setCameraAngle()
         arr.forEach(element => {
             screenshotList.push(element)
         });
+        load3d.value = false
+        loadScreenshotList.value = false
     })
 
 })

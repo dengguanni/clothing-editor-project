@@ -1,8 +1,7 @@
 <template>
-    <div class="canvas-menu-1">
+    <div class="canvas-menu-1" v-if="cutParts.length > 0">
         <!-- <button @click="changeSelection(0)" :class="0 == active ? 'btn-active' : 'btn'">整体设计</button> -->
         <div class="menu-list">
-
             <div v-for="item in cutParts" :key="item.Title" class="menu-item">
                 <div :class="item.Title == active ? 'active-image' : 'image'" @click="changeSelection(item)">
                     <div class="thumbnail">
@@ -23,7 +22,6 @@ const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
-let cutPartsType = ref('')
 const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
     sizeList: {
@@ -36,26 +34,41 @@ const props = defineProps({
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
+let cutPartsType = ref('')
+
 onUnmounted(() => {
     mitts.off('changeSize', '')
 })
 onMounted(() => {
+    init()
     setTimeout(() => {
+        canvasEditor.canvas.on('mouse:up', () => {
+            const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+            const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+            if (cutPartsType.value) {
+                // workspace.visible = false
+                // mask.visible = false
+                // canvasEditor.canvas.requestRenderAll();
+                LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
+                    // workspace.visible = true
+                    // mask.visible = true
+                    // canvasEditor.canvas.requestRenderAll();
+                })
+            }
+        })
+        canvasEditor.canvas.on('mouse:up', () => {
+            upDateTexture()
+        })
+        canvasEditor.canvas.on('dragover', () => {
+            // upDateTexture()
+        })
+        canvasEditor.canvas.on('object:removed', () => {
+            // upDateTexture()
+        })
+    }, 1000);
 
-        // canvasEditor.canvas.setOverlayColor(
-        //     {
-        //         source: 'scr/assets/png/01前片.png',
-        //         repeat: 'no-repeat', // 不重复
-        //     },
-        //     canvasEditor.canvas.renderAll.bind(canvasEditor.canvas),
-        //     {
-        //         width: 100
-        //     }
-        // )
-        // console.log('OverlayColor', canvasEditor.canvas)
-    }, 2000)
-
-
+})
+const init = () => {
     mitts.on('changeSize', (e) => {
         console.log('on')
         let arr = []
@@ -74,11 +87,27 @@ onMounted(() => {
             cutPartsType.value = cutParts.value[0].Title
             mitts.emit('cutPartsType', cutPartsType.value)
             mitts.emit('cutParts', cutParts.value)
+            changeSelection(arr[0])
         })
+       
     })
-})
+}
+const upDateTexture = () => {
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+    if (cutPartsType.value) {
+        // workspace.visible = false
+        // mask.visible = false
+        // canvasEditor.canvas.requestRenderAll();
+        LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
+            // workspace.visible = true
+            // mask.visible = true
+            // canvasEditor.canvas.requestRenderAll();
+        })
+    }
+}
 const changeSelection = (item) => {
-    console.log('选择裁片')
+    mitts.emit('cutPartsType', item.Title)
     load3DScene.setModelCamera(item.Title)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = item.Title
@@ -138,7 +167,14 @@ const changeSelection = (item) => {
             canvasEditor.canvas.renderAll()
             canvasEditor.canvas.requestRenderAll();
         });
+        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+        // workspace.visible = false
+        // mask.visible = false
+        // canvasEditor.canvas.requestRenderAll();
+        // const url = canvasEditor.saveImg()
+        LoadScene.setTexture(item.Title, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
 
+        })
     };
 
 }

@@ -6,7 +6,8 @@
       <!-- 颜色、字号、字体 -->
       <Row align="middle" justify="space-between">
         <Col>
-        <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)"></colorSelector>
+        <!-- <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)"></colorSelector> -->
+        <ElColorPicker  v-model="baseAttr.fill"  @change="changeCommon('fill', baseAttr.fill)"></ElColorPicker>
         </Col>
         <Col>
         <Select v-model="fontAttr.fontFamily" @on-change="changeFontFamily" style="width: 130px;">
@@ -19,7 +20,9 @@
             </div>
           </Option>
         </Select>
+       
         </Col>
+        <!-- <ElSelect></ElSelect> -->
         <Col>
         <Select v-model="fontAttr.fontSize" @on-change="(value) => changeCommon('fontSize', value)" style="width: 64px;">
           <Option :value="item" key="item" v-for="item in fontSizeList"></Option>
@@ -82,7 +85,8 @@
         </Col>
         <Col>
         <!-- <colorSelector :color="baseAttr.stroke" @change="(value) => changeCommon('stroke', value)"></colorSelector> -->
-        <ColorPicker v-model="baseAttr.stroke" @on-change="(value) => changeCommon('stroke', value)" />
+        <!-- <ColorPicker v-model="baseAttr.stroke" @on-change="(value) => changeCommon('stroke', value)" /> -->
+          <ElColorPicker  v-model="baseAttr.stroke"  @change="changeCommon('stroke', baseAttr.stroke)"></ElColorPicker>
         </Col>
       </Row>
       <!-- 对齐 -->
@@ -237,6 +241,7 @@ import axios from 'axios';
 import { getPolygonVertices } from '@/utils/math';
 import InputNumber from '@/components/inputNumber';
 import { Spin } from 'view-ui-plus';
+import { ElColorPicker, ElSelect} from 'element-plus'
 
 const event = inject('event');
 const update = getCurrentInstance();
@@ -395,7 +400,7 @@ const getFreeFontList = () => {
   axios.get(`${repoSrc}/font/free-font.json`).then((res) => {
     fontFamilyList.value = [
       ...fontFamilyList.value,
-      ...Object.entries(res.data).map(([, value]) => value),
+      // ...Object.entries(res.data).map(([, value]) => value),
     ];
   });
 };
@@ -497,6 +502,7 @@ const changeCommon = (key, value) => {
 
   // 更新属性
   getObjectAttr();
+  
 };
 
 // 边框设置

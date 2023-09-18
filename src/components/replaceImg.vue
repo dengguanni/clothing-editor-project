@@ -8,14 +8,15 @@
 
 <template>
   <div v-if="mixinState.mSelectMode === 'one' && type === 'image'">
-    <Button @click="repleace" type="text" long class="btn-02">{{ $t('repleaceImg') }}</Button>
+    <Button @click="replace" type="text" long class="btn-02">图片替换 </Button>
   </div>
 </template>
 
 <script setup name="ReplaceImg">
 import useSelect from '@/hooks/select';
-
+import { getImagesCustom, setUpLoadFile } from '@/core/2D/handleImages.ts'
 import { getImgStr, selectFiles, insertImgFile } from '@/utils/utils';
+import mitts from '@/utils/mitts'
 
 const update = getCurrentInstance();
 const event = inject('event');
@@ -23,7 +24,7 @@ const { mixinState, canvasEditor } = useSelect();
 const type = ref('');
 
 // 替换图片
-const repleace = async () => {
+const replace = async () => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   if (activeObject && activeObject.type === 'image') {
     // 图片
@@ -32,15 +33,9 @@ const repleace = async () => {
     const fileStr = await getImgStr(file);
     // 字符串转El
     const imgEl = await insertImgFile(fileStr);
-    const width = activeObject.get('width');
-    const height = activeObject.get('height');
-    const scaleX = activeObject.get('scaleX');
-    const scaleY = activeObject.get('scaleY');
-    activeObject.setSrc(imgEl.src, () => {
-      activeObject.set('scaleX', (width * scaleX) / imgEl.width);
-      activeObject.set('scaleY', (height * scaleY) / imgEl.height);
-      canvasEditor.canvas.renderAll();
-    });
+    // console.log('上传图片', imgEl)
+    // insertImgFile(imgEl)
+    mitts.emit('replaceImages', imgEl.src)
     imgEl.remove();
   }
 };
