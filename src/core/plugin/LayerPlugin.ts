@@ -28,6 +28,15 @@ class LayerPlugin {
     const workspace = this._getWorkspace();
     workspace && workspace.sendToBack();
   }
+  _lineSendToBack() {
+    const line = this.canvas.getObjects().find((item) => item.id === '0');
+    line && line.sendToBack();
+  }
+  _maskBringToFront() {
+    const mask = this.canvas.getObjects().find((item) => item.isMask);
+    mask && mask.bringToFront();
+
+  }
 
   up() {
     const actives = this.canvas.getActiveObjects();
@@ -35,7 +44,9 @@ class LayerPlugin {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.bringForward();
       this.canvas.renderAll();
+      this._lineSendToBack()
       this._workspaceSendToBack();
+      this._maskBringToFront()
     }
   }
 
@@ -45,8 +56,9 @@ class LayerPlugin {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.bringToFront();
       this.canvas.renderAll();
-      console.log(this);
+      this._lineSendToBack()
       this._workspaceSendToBack();
+      this._maskBringToFront()
     }
   }
 
@@ -56,7 +68,9 @@ class LayerPlugin {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.sendBackwards();
       this.canvas.renderAll();
+      this._lineSendToBack()
       this._workspaceSendToBack();
+      this._maskBringToFront()
     }
   }
 
@@ -66,7 +80,9 @@ class LayerPlugin {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.sendToBack();
       this.canvas.renderAll();
+      this._lineSendToBack()
       this._workspaceSendToBack();
+      this._maskBringToFront()
     }
   }
 

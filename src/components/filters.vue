@@ -110,35 +110,23 @@ const props = defineProps({
 watch(
   () => props.singleFilters,
   (val) => {
-    console.log('singleFilters', val)
     changeFilters('Contrast', val)
   }
 );
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
-  fabric.Image.fromURL('http://8.140.206.30:8089/UploadFile/images_library/6c4e5caa-4bd2-11ee-b1c4-00163e10d08e.png', function (img) {
-    img.filters.push(new fabric.Image.filters.Grayscale());
-    console.log('iimg.applyFiltersmg', img.applyFilters)
-    img.crossOrigin = 'anonymous'
-    img.applyFilters();
-    
-    canvasEditor.canvas.add(img);
-    canvasEditor.canvas.renderAll();
-  });
-  canvasEditor.canvas.renderAll();
 
-
-
-  // const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  // state.noParamsFilters[type] = value;
-  // if (value) {
-  //   const itemFilter = _getFilter(activeObject, type);
-  //   if (!itemFilter) {
-  //     _createFilter(activeObject, type);
-  //   }
-  // } else {
-  //   _removeFilter(activeObject, type);
-  // }
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  console.log(type, value, activeObject)
+  state.noParamsFilters[type] = value;
+  if (value) {
+    const itemFilter = _getFilter(activeObject, type);
+    if (!itemFilter) {
+      _createFilter(activeObject, type);
+    }
+  } else {
+    _removeFilter(activeObject, type);
+  }
 };
 // 有参数与组合滤镜修改
 const changeFiltersByParams = (type) => {
@@ -202,7 +190,7 @@ onBeforeUnmount(() => {
 
 // 图片地址拼接
 function getImageUrl(name) {
-  return ` http://8.140.206.30:8089/ImageSource/Filters/${name}.png`
+  return `http://8.140.206.30:8089/ImageSource/Filters/${name}.png`
 }
 const goBack = () => {
   emit('goBack', 'filters')
@@ -219,8 +207,6 @@ function _changeAttr(type, key, value) {
     imgFilter[key] = value;
   }
   activeObject.applyFilters();
-
-
 }
 
 function _changeAttrByHandler(moduleInfo) {
@@ -241,23 +227,19 @@ function _changeAttrByHandler(moduleInfo) {
  * @private
  */
 function _createFilter(sourceImg, type, options = null) {
-  // let filterObj;
-  // // capitalize first letter for matching with fabric image filter name
-  // const fabricType = _getFabricFilterType(type);
-  // const ImageFilter = fabric.Image.filters[fabricType];
-  // if (ImageFilter) {
-  //   filterObj = new ImageFilter(options);
-  //   filterObj.options = options;
-  //   sourceImg.filters.push(filterObj);
+  let filterObj;
+  // capitalize first letter for matching with fabric image filter name
+  const fabricType = _getFabricFilterType(type);
+  const ImageFilter = fabric.Image.filters[fabricType];
+  if (ImageFilter) {
+    filterObj = new ImageFilter(options);
+    filterObj.options = options;
+    sourceImg.filters.push(filterObj);
 
-  // }
-  // sourceImg.applyFilters();
-  // canvasEditor.canvas.renderAll();
-  // return filterObj;
-
-
-
-
+  }
+  sourceImg.applyFilters();
+  canvasEditor.canvas.renderAll();
+  return filterObj;
 }
 /**
  * Get applied filter instance

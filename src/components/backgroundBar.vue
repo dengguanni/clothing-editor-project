@@ -28,7 +28,7 @@ import { v4 as uuid } from 'uuid';
 import getPicture from '@/api/picture.ts'
 import mitts from '@/utils/mitts'
 import LoadScene from '@/core/3D/loadScene.ts'
-const fakeInfo = ref({ ImageUrl: 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', Title: 'xingqiu', FileName: '', FilePath: '' })
+const fakeInfo = ref({ ImageUrl: 'http://192.168.1.3/src/assets/png/xingqiu.png', Title: 'xingqiu', FileName: '', FilePath: '' })
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -75,9 +75,11 @@ const getImagesLibrary = (QueryKeyWord) => {
     getPicture.getImagesLibrary(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
+        console.log('imageList', imageList.value)
     }).catch(err => {
         loading.value = false
     })
+
 }
 const upDateTexture = () => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
@@ -105,7 +107,7 @@ const addItem = (item) => {
         })
     } else {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        const imageURL = item.ImageUrl;
+        const imageURL = 'http://192.168.1.3/' + item.ImageUrl_Path;
         let callback = (image, isError) => {
             if (!isError) {
                 image.name = item.Title
@@ -137,7 +139,11 @@ const addItem = (item) => {
 // 拖拽添加
 const dragItem = (event) => {
     if (!props.isBg) {
-        const imageURL = event.toElement.currentSrc;
+        const URL = event.toElement.currentSrc;
+        const imageURL = URL.replace('http://8.140.206.30:8089/', 'http://192.168.1.3/')
+        // const imageURL = 'http://192.168.1.3/' + 'UploadFile/images_library/654db8d2-4bd2-11ee-b1c4-00163e10d08e.png'
+        console.log('imageURL', imageURL)
+        console.log('event', event)
         let callback = (image, isError) => {
             if (!isError) {
                 const { left, top } = canvasEditor.canvas.getSelectionElement().getBoundingClientRect();

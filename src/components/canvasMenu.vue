@@ -57,7 +57,7 @@ onMounted(() => {
             }
         })
         canvasEditor.canvas.on('mouse:up', () => {
-            upDateTexture()
+            // upDateTexture()
         })
         canvasEditor.canvas.on('dragover', () => {
             // upDateTexture()
@@ -73,11 +73,13 @@ const init = () => {
         console.log('on')
         let arr = []
         picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
+            console.log('123456', res.Tag[0])
             if (res.Tag[0]) {
                 res.Tag[0].Table.forEach(el => {
                     arr.push({
                         Title: el.Title,
-                        ImageUrl: baseUrl + el.ImageUrl
+                        ImageUrl: el.ImageUrl,
+                        ImageUrl_Path: el.ImageUrl_Path
                     })
                     // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
                 })
@@ -89,7 +91,7 @@ const init = () => {
             mitts.emit('cutParts', cutParts.value)
             changeSelection(arr[0])
         })
-       
+
     })
 }
 const upDateTexture = () => {
@@ -127,8 +129,8 @@ const changeSelection = (item) => {
 
 
     var img = new Image();
-    // img.src = item.ImageUrl
-    img.src = 'src/assets/png/01前片.jpg'
+    img.src = 'http://192.168.1.3/' + item.ImageUrl_Path
+    // img.src = 'src/assets/png/01前片.jpg'
     workspace.clone((cloned) => {
         canvasEditor.canvas.clipPath = cloned;
         canvasEditor.canvas.requestRenderAll();

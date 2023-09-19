@@ -21,7 +21,7 @@
             <div class="layer-box">
               <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
                 @click="select(item.id, item1)">
-                <div v-if="item.cutPartsType == item1.Title">
+                <div v-if="item.cutPartsType == item1.Title && !item.isMask">
                   <Tooltip :content="item.name || item.text || item.type" placement="left">
                     <div class="ellipsis">
                       <div style="display:flex;">
@@ -195,13 +195,14 @@ const getList = () => {
   ]
     .reverse()
     .map((item) => {
-      const { type, id, name, text, cutPartsType } = item;
+      const { type, id, name, text, cutPartsType, isMask } = item;
       return {
         type,
         id,
         name,
         text,
-        cutPartsType
+        cutPartsType,
+        isMask
       };
     });
   // console.log('list', list.value)

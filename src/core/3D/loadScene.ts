@@ -16,14 +16,14 @@ class LoadScene {
                 if (c.isGroup) {
                     console.log('asdfghj')
                     LoadScene.scene.remove(c);
-                    // c.geometry.dispose();
-                    // c.material.dispose();
                 }
             })
         }
 
         const loader = new GLTFLoader();
-        loader.load('public/static/duanxiu1.glb', object => {
+        // ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb 
+        // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
+        loader.load('http://192.168.1.3/public/static/changxiu.glb', object => {
             const color = new THREE.Color('0xffffff')
             object.name = name
             LoadScene.scene.add(object.scene);
@@ -66,7 +66,7 @@ class LoadScene {
         LoadScene.renderer = renderer
         LoadScene.scene = new THREE.Scene();
         LoadScene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
-        LoadScene.camera.position.z = 3;
+        LoadScene.camera.position.z = -3;
         LoadScene.scene.add(LoadScene.camera);
         LoadScene.scene.background = new THREE.Color("#F5F5F5");
         const light1 = new THREE.DirectionalLight(0xffffff);
@@ -183,7 +183,6 @@ class LoadScene {
                 c.rotation.y = 0
             }
         })
-        console.log(' LoadScene.scene', LoadScene.scene)
         console.log('更新，照片', LoadScene.screenshotList)
         return LoadScene.screenshotList
     }

@@ -83,7 +83,6 @@ const replaceImage = (str) => {
       left: 0,
       top: 0
     };
-    console.log(imageList.value, FileName)
     let callback2 = (item => {
       activeObject.setSrc(item.ImageUrl, () => {
         activeObject.set('name', item.Title);
@@ -228,7 +227,8 @@ async function imgToBase64(url) {
   })
 }
 const addItem = (item) => {
-  const imageURL = item.ImageUrl;
+  console.log('item', item)
+  const imageURL = 'http://192.168.1.3/' + item.ImageUrl_Path;
   let callback = (image, isError) => {
     if (!isError) {
       image.name = item.Title
@@ -236,6 +236,7 @@ const addItem = (item) => {
       canvasEditor.canvas.add(image);
       image.name = item.FileName
       image.FilePath = item.FilePath
+
       const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
       canvasEditor.canvas.discardActiveObject();
       canvasEditor.canvas.setActiveObject(info);

@@ -150,57 +150,93 @@ class ControlsTile {
     static handelRepeat(clonedObj, flipY, flipX, offsetX, offsetY) {
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
-        let { topCount,
-            bottomCount,
-            leftCount,
-            rightCount,
-            width,
-            height } = this.getCount(clonedObj)
-        console.log('offsetX', offsetX)
-        // const rect = new fabric.Rect({
-        //     left: 50,
-        //     top: 50,
-        //     width: 50,
-        //     height: 50,
-        //     fill: "yellow",
-        //     originX: 'center',//调整中心点的X轴坐标
-        //     originY: 'center'//调整中心点的Y轴坐标
-        //   });
-        //   this.canvas.add(rect);
-        // this.canvas.setOverlayImage('http://127.0.0.1:3000/src/assets/png/bg-01.png', this.canvas.renderAll.bind(this.canvas),{ originX: 'left', originY: 'top' } );
-        this.setUpDownCloned(clonedObj, topCount, bottomCount, height, width, flipY, offsetX, 0)
-        for (let i = 1; i < leftCount + 1; i++) {
-            clonedObj.clone((cloned: any) => {
-                cloned.set({
-                    left: cloned.left - width * i,
-                    top: cloned.top + offsetY,
-                    evented: true,
-                    id: uuid(),
-                    flipX: flipX,
+        const seft = this
+
+        activeObject.clone(cloned => {
+            cloned.set({
+                id: uuid(),
+                top: 0,
+                left: 0,
+                width: cloned.width,
+                height: cloned.height,
+                scaleX: cloned.scaleX,
+                scaleY: cloned.scaleY
+            });
+            var patternSourceCanvas = new fabric.StaticCanvas();
+            patternSourceCanvas.add(cloned);
+            patternSourceCanvas.setDimensions({
+                width: cloned.getScaledWidth() + 1,
+                height: cloned.getScaledHeight() + 1,
+            });
+            patternSourceCanvas.renderAll();
+            var pattern = new fabric.Pattern({
+                source: patternSourceCanvas.getElement(),
+                repeat: 'repeat',
+                left: cloned.left,
+                top: cloned.top,
+                hasControls: false,
+                ...this.lockObj,
+            });
+            const rect = new fabric.Rect(
+                {
+                    width: 703,
+                    height: 703,
+                    left: 0,
+                    top: 0,
+                    fill: pattern,
                     isRepeat: true,
                     hasControls: false,
-                    ...this.lockObj
-                });
-                this.canvas.add(cloned);
-                this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
-            })
-        }
-        for (let i = 1; i < rightCount + 1; i++) {
-            clonedObj.clone((cloned: any) => {
-                cloned.set({
-                    left: cloned.left + width * i,
-                    top: cloned.top + offsetY,
-                    evented: true,
-                    id: uuid(),
-                    flipX: flipX,
-                    isRepeat: true,
-                    hasControls: false,
-                    ...this.lockObj
-                });
-                this.canvas.add(cloned);
-                this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
-            })
-        }
+                    ...this.lockObj,
+                    // objectCaching: false,
+                },
+            )
+            rect.sendBackwards()
+            seft.canvas.add(rect);
+        })
+
+
+
+        // let { topCount,
+        //     bottomCount,
+        //     leftCount,
+        //     rightCount,
+        //     width,
+        //     height } = this.getCount(clonedObj)
+
+
+        // this.setUpDownCloned(clonedObj, topCount, bottomCount, height, width, flipY, offsetX, 0)
+        // for (let i = 1; i < leftCount + 1; i++) {
+        //     clonedObj.clone((cloned: any) => {
+        //         cloned.set({
+        //             left: cloned.left - width * i,
+        //             top: cloned.top + offsetY,
+        //             evented: true,
+        //             id: uuid(),
+        //             flipX: flipX,
+        //             isRepeat: true,
+        //             hasControls: false,
+        //             ...this.lockObj
+        //         });
+        //         this.canvas.add(cloned);
+        //         this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
+        //     })
+        // }
+        // for (let i = 1; i < rightCount + 1; i++) {
+        //     clonedObj.clone((cloned: any) => {
+        //         cloned.set({
+        //             left: cloned.left + width * i,
+        //             top: cloned.top + offsetY,
+        //             evented: true,
+        //             id: uuid(),
+        //             flipX: flipX,
+        //             isRepeat: true,
+        //             hasControls: false,
+        //             ...this.lockObj
+        //         });
+        //         this.canvas.add(cloned);
+        //         this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
+        //     })
+        // }
         this.canvas.requestRenderAll();
     }
 
