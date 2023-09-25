@@ -31,11 +31,12 @@ const props = defineProps({
         }
     }
 })
+const base = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
 let cutPartsType = ref('')
-
+let SizeGUID = ref('')
 onUnmounted(() => {
     mitts.off('changeSize', '')
 })
@@ -46,13 +47,13 @@ onMounted(() => {
             const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
             const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
             if (cutPartsType.value) {
+                setAllCuts()
                 // workspace.visible = false
                 // mask.visible = false
                 // canvasEditor.canvas.requestRenderAll();
-                LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
-                    // workspace.visible = true
-                    // mask.visible = true
-                    // canvasEditor.canvas.requestRenderAll();
+
+
+                LoadScene.setTexture(cutPartsType.value, base.value, () => {
                 })
             }
         })
@@ -68,12 +69,54 @@ onMounted(() => {
     }, 1000);
 
 })
+const setAllCuts = () => {
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    const mask = canvasEditor.canvas.getActiveObjects()[0]
+    let p = {
+        SizeGUID: SizeGUID.value,
+        Canvas_zoom: '0.08',
+        Part_name: cutPartsType.value,
+        Images: []
+    }
+    canvasEditor.canvas.getObjects().forEach(image => {
+        if (image.id !== 'workspace' && !image.isMask) {
+            console.log('image', image)
+            const obj = {
+                // Canvas_width: workspace.width,
+                // Canvas_height: workspace.height,
+                Image_fullName: image.FilePath + '/' + image.FileName,
+                Image_width: image.width * image.scaleX + '',
+                Image_height: image.height * image.scaleY + '',
+                Image_left: image.left + '',
+                Image_top: image.top + '',
+                Image_angle: image.angle + '',
+                bgc_r: '0',
+                bgc_g:'0',
+                bgc_b:"0",
+                // Mask_name: maskRect.name,
+                // Mask_width: maskRect.width,
+                // Mask_height: maskRect.height,
+                // Mask_left: maskRect.left,
+                // Mask_top: maskRect.top,
+                // Mask_angle: maskRect.angle
+            }
+            p.Images.push(obj)
+        }
+
+    })
+
+    console.log('总的剪裁参数', p)
+    picture.setCutAllParts(p).then(res => {
+        console.log('res', res)
+        base.value = 'data:image/jpeg;base64,' + res.Tag[0].base64
+    })
+}
 const init = () => {
     mitts.on('changeSize', (e) => {
-        console.log('on')
         let arr = []
+        SizeGUID.value = e.GUID
         picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
-            console.log('123456', res.Tag[0])
             if (res.Tag[0]) {
                 res.Tag[0].Table.forEach(el => {
                     arr.push({
@@ -91,8 +134,8 @@ const init = () => {
             mitts.emit('cutParts', cutParts.value)
             changeSelection(arr[0])
         })
-
     })
+
 }
 const upDateTexture = () => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
@@ -140,7 +183,7 @@ const changeSelection = (item) => {
         var maskRect = new fabric.Rect(
             {
                 scaleX: 0.08,
-                scaleY: 0.08,
+                scaleY: 0.075,
                 width: img.width,
                 height: img.height,
                 fill: pattern,

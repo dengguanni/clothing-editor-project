@@ -142,7 +142,6 @@ class WorkspacePlugin {
   _initResizeObserve() {
     const resizeObserver = new ResizeObserver(
       throttle(() => {
-        console.log(22233)
         this.auto();
       }, 50)
     );

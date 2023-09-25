@@ -173,10 +173,10 @@ onMounted(() => {
         cutPartsType.value = val
     })
     MouseEventEventListener.setMouseupFn = () => { }
-    // ControlsTile.setRepeat()
     ControlsTile.canvas = canvasEditor.canvas
-
     ControlsTile.setCanvasObserve(canvasEditor.canvas)
+    MouseEventEventListener.rmMouseup()
+    event.off('selectOne', init);
 })
 const init = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
@@ -214,7 +214,7 @@ const setCopyTo = (item) => {
     canvasEditor.canvas.renderAll();
     state.copyTo = false
     Message.success('复制成功');
-    
+
 }
 const menuList1Click = (type) => {
     switch (type) {
@@ -225,7 +225,7 @@ const menuList1Click = (type) => {
             //   state.isShowCropping = true
             break;
         case 'clearness':
-            //   changeFilters()
+
             break;
         case 'mirror':
             ControlsTile.setRepeat('mirror')
@@ -350,11 +350,6 @@ const menu3Click = (type) => {
         default:
     }
 }
-
-onMounted(() => {
-    MouseEventEventListener.rmMouseup()
-    event.off('selectOne', init);
-})
 
 
 </script>

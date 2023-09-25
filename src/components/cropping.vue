@@ -84,13 +84,14 @@ onMounted(() => {
     })
 })
 const handelCutParts = (image) => {
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const mask = canvasEditor.canvas.getActiveObjects()[0]
     if (mask) {
         const p = {
             Canvas_width: workspace.width,
             Canvas_height: workspace.height,
-            Image_fullName: image.FilePath + '/' + image.name,
+            Image_fullName: image.FilePath + '/' + image.FileName,
             Image_width: image.width * image.scaleX,
             Image_height: image.height * image.scaleY,
             Image_left: image.left,
@@ -130,8 +131,11 @@ const handelCutParts = (image) => {
             imgInstance.ImageUrl = image.ImageUrl
             imgInstance.skewX = image.skewX
             imgInstance.skewY = image.skewY
+            console.log('maskRect', maskRect)
+
             imgEl.onload = () => {
                 canvasEditor.canvas.add(imgInstance);
+                canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.renderAll();
                 imgEl.remove();
             }
@@ -158,6 +162,7 @@ const handelCutParts = (image) => {
 }
 const restore = () => {
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
         const imageURL = activeObjects.parentUrl;
         let callback = (image, isError) => {
@@ -172,12 +177,14 @@ const restore = () => {
                 image.angle = activeObjects.angle
                 image.FilePath = activeObjects.FilePath
                 image.ImageUrl = activeObjects.ImageUrl
+                image.cutPartsType = activeObjects.cutPartsType
                 image.visible = true
                 croppedImage.value = image
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
+                canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
             }
         };
@@ -198,16 +205,11 @@ const addItem = (item) => {
     // const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     // canvasEditor.canvas.setOverlayColor({ source: 'src/assets/png/01.png', repeat: 'no-repeat' }, canvasEditor.canvas.renderAll.bind(canvasEditor.canvas), { width: 100, height: 100 })
     // state.hasCropping = true
-
     // clipImage()
-
-
     const objects = canvasEditor.canvas.getObjects();
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
-    console.log('activeObjects', activeObjects)
-
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
-        console.log('第二次剪裁')
         const imageURL = activeObjects.parentUrl;
         let callback = (image, isError) => {
             if (!isError) {
@@ -227,6 +229,7 @@ const addItem = (item) => {
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
+                canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
 
             }
@@ -236,11 +239,9 @@ const addItem = (item) => {
             top: 0
         };
         fabric.Image.fromURL(imageURL, callback, properties);
-        // croppedImage.value = 
     } else {
         croppedImage.value = state.hasCropping ? croppedImage.value : activeObjects
     }
-
     objects.map((item) => {
         if (item.hasCropping) {
             canvasEditor.canvas.remove(item)
@@ -263,6 +264,7 @@ const addItem = (item) => {
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
             canvasEditor.canvas.discardActiveObject();
             canvasEditor.canvas.setActiveObject(info);
+            canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.requestRenderAll();
             state.hasCropping = true
             info.on('remove', () => {

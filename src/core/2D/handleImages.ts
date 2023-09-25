@@ -64,11 +64,6 @@ export const setUpLoadFile = (str, imageList, callback) => {
                     picture.setImagesCustom({ FileName }).then(e => {
                         if (e.OK == 'True') {
                             callback ? callback(FileName) : ''
-                            ElMessage({
-                                showClose: true,
-                                message: '上传成功',
-                                type: 'success',
-                            })
                         }
                     })
                 }
@@ -116,11 +111,6 @@ export const setUpLoadFile = (str, imageList, callback) => {
                                     if (e.OK == 'True') {
                                         getImagesCustom(imageList)
                                         callback ? callback(FileName2) : ''
-                                        ElMessage({
-                                            showClose: true,
-                                            message: '上传成功',
-                                            type: 'success',
-                                        })
                                     } else {
                                         ElMessage({
                                             showClose: true,

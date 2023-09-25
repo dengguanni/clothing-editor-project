@@ -39,7 +39,7 @@ let loading = ref(true)
 const { fabric, canvasEditor } = useSelect();
 const page = ref(1)
 const imageList = ref([])
-let queryKeyWord = ref('')
+const queryKeyWord = ref('')
 const cutPartsType = ref('')
 onMounted(() => {
     init()
@@ -85,7 +85,6 @@ const upDateTexture = () => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
     if (cutPartsType.value) {
-        console.log('添加运行')
         // workspace.visible = false
         // mask.visible = false
         // canvasEditor.canvas.requestRenderAll();
@@ -112,21 +111,17 @@ const addItem = (item) => {
             if (!isError) {
                 image.name = item.Title
                 image.cutPartsType = cutPartsType.value
-                image.crossOrigin = "anonymous"
                 image.id = uuid()
                 image.ImageUrl = item.ImageUrl
-                image.name = item.FileName
+                image.FileName = item.FileName
                 image.FilePath = item.FilePath
-                image.mask = maskRect
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.requestRenderAll();
-
             }
-            console.log('isError', isError)
         };
         const properties = {
             left: 100,
@@ -139,11 +134,11 @@ const addItem = (item) => {
 // 拖拽添加
 const dragItem = (event) => {
     if (!props.isBg) {
+        const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const URL = event.toElement.currentSrc;
         const imageURL = URL.replace('http://8.140.206.30:8089/', 'http://192.168.1.3/')
-        // const imageURL = 'http://192.168.1.3/' + 'UploadFile/images_library/654db8d2-4bd2-11ee-b1c4-00163e10d08e.png'
-        console.log('imageURL', imageURL)
-        console.log('event', event)
+        const ImageUrl_Path = URL.replace('http://8.140.206.30:8089/', '')
+        const obj = imageList.value.filter(el => el.ImageUrl_Path == ImageUrl_Path)[0]
         let callback = (image, isError) => {
             if (!isError) {
                 const { left, top } = canvasEditor.canvas.getSelectionElement().getBoundingClientRect();
@@ -154,16 +149,20 @@ const dragItem = (event) => {
                 };
                 const pointerVpt = canvasEditor.canvas.restorePointerVpt(point);
                 image.id = uuid()
-                // image.name = item.FileName
-                // image.FilePath = item.FilePath
+                image.name = obj.Title
                 image.cutPartsType = cutPartsType.value
-                console.log('image.cutPartsType', image.cutPartsType)
+                image.ImageUrl = obj.ImageUrl
+                image.FileName = obj.FileName
+                image.FilePath = obj.FilePath
+
+                console.log('添加',obj)
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
+                canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
                 upDateTexture()
             }

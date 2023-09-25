@@ -43,6 +43,12 @@ const getCutParts = function (params: any = '') {
 const setCutParts = function (params: any = '') {
     return http.get(`/Plugin_Text?ClassName=Plug_in_ofs.DrawTools.Cut`, params)
 }
+//web-画布-剪裁所有元素到裁片
+// 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=be775ae6-28a7-4a7c-bfc4-f42d0c40948f
+const setCutAllParts = function (params: any = '') {
+    return http.post(`/Plugin_Text?ClassName=Plug_in_ofs.DrawTools.DrawPart`, params)
+}
+
 
 const getPicture = {
     getImagesBackground,
@@ -52,6 +58,7 @@ const getPicture = {
     setImagesCustom,
     delImagesCustom,
     getCutParts,
-    setCutParts
+    setCutParts,
+    setCutAllParts
 }
 export default getPicture

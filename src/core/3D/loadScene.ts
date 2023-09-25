@@ -14,7 +14,6 @@ class LoadScene {
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
                 if (c.isGroup) {
-                    console.log('asdfghj')
                     LoadScene.scene.remove(c);
                 }
             })
@@ -23,40 +22,45 @@ class LoadScene {
         const loader = new GLTFLoader();
         // ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb 
         // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
-        loader.load('http://192.168.1.3/public/static/changxiu.glb', object => {
+        loader.load('http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
             const color = new THREE.Color('0xffffff')
             object.name = name
             LoadScene.scene.add(object.scene);
             LoadScene.setCameraAngle()
         });
+
     }
     static getImages = () => {
         this.setCameraAngle()
         return this.screenshotList
     }
     static setTexture = (name, url, callback) => {
-        console.log('LoadScene.scene', LoadScene.scene)
+        // console.log('LoadScene.scene', LoadScene.scene)
+        // const drawingCanvas = document.getElementById('canvas');
+        // const drawingContext = drawingCanvas.getContext('2d');
+        // drawingContext.fillStyle = '#FFFFFF';
+        // drawingContext.fillRect(10, 10, 10, 10);
 
-        const drawingCanvas = document.getElementById('canvas');
-        const drawingContext = drawingCanvas.getContext('2d');
-        drawingContext.fillStyle = '#FFFFFF';
-        drawingContext.fillRect(10, 10, 10, 10);
+        // image.addEventListener('load', function (event) { texture.needsUpdate = true; });
+        if (url) {
+            LoadScene.scene.traverse((child: any) => {
+                if (child.isMesh && child.name == name) {
+                    const mapTexture = new THREE.TextureLoader().load(url)
+                    // const mapTexture = new THREE.TextureLoader().load(url)
+                    // const mapTexture = new THREE.CanvasTexture(drawingCanvas)
+                    mapTexture.encoding = THREE.sRGBEncoding
+                    // mapTexture.offset.y = -80
+                    console.log('mapTexture', mapTexture)
+                    mapTexture.repeat.set(1, 1)
+                    child.material = new THREE.MeshLambertMaterial({
+                        map: mapTexture,
+                        transparent: true, // 允许材质可透明
+                        // color
+                    })
+                }
+            })
+        }
 
-        LoadScene.scene.traverse((child: any) => {
-            if (child.isMesh && child.name == name) {
-                // const mapTexture = new THREE.TextureLoader().load(url)
-                const mapTexture = new THREE.CanvasTexture(drawingCanvas)
-                mapTexture.encoding = THREE.sRGBEncoding
-                // mapTexture.offset.y = -80
-                console.log('mapTexture', mapTexture)
-                mapTexture.repeat.set(1, 1)
-                child.material = new THREE.MeshLambertMaterial({
-                    map: mapTexture,
-                    transparent: true, // 允许材质可透明
-                    // color
-                })
-            }
-        })
         LoadScene.setCameraAngle()
         callback ? callback() : ''
     }

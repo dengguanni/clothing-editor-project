@@ -52,10 +52,14 @@ const state = reactive({
   svgStr: '',
   showDelIcon: ''
 });
+const cutPartsType = ref('')
 let showDelIcon = ref('')
 onMounted(() => {
-  mitts.on('replaceImages', (val) => {
-    replaceImage(val)
+  mitts.on('replaceImages', (val, fileHeaderPath) => {
+    replaceImage(val, fileHeaderPath)
+  })
+  mitts.on('cutPartsType', (val) => {
+    cutPartsType.value = val
   })
   document.getElementById("myInput").addEventListener("change", getFile, true)
   getImagesCustom(imageList)
@@ -70,15 +74,14 @@ onMounted(() => {
 const showIcon = (item) => {
   showDelIcon.value = item.GUID
 }
-
-const replaceImage = (str) => {
+// 替换图片
+const replaceImage = (str, fileHeaderPath) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   const callback = (FileName) => {
     const width = activeObject.get('width');
     const height = activeObject.get('height');
     const scaleX = activeObject.get('scaleX');
     const scaleY = activeObject.get('scaleY');
-
     const properties = {
       left: 0,
       top: 0
@@ -89,33 +92,15 @@ const replaceImage = (str) => {
         activeObject.set('id', uuid());
         activeObject.set('FileName', item.FileName);
         activeObject.set('FilePath', item.FilePath);
-        // activeObject.set('scaleX', (width * scaleX) / imgEl.width);
-        // activeObject.set('scaleY', (height * scaleY) / imgEl.height);
         canvasEditor.canvas.renderAll();
       });
     })
-    // imageList.value.forEach(el => {
-    // if (el.FileName == FileName) {
     getImagesCustom(imageList, FileName, callback2)
-
-    // let callback2 = (image, isError) => {
-    //   if (!isError) {
-    //     image.name = el.Title
-    //     image.id = uuid()
-    //     image.name = el.FileName
-    //     image.width = width
-    //     image.height = height
-    //     image.FilePath = el.FilePath
-    //     canvasEditor.canvas.add(image);
-    //     const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-    //     canvasEditor.canvas.discardActiveObject();
-    //     canvasEditor.canvas.setActiveObject(info);
-    //     canvasEditor.canvas.requestRenderAll();
-    //   }
-    // };
-    // fabric.Image.fromURL(el.ImageUrl, callback2, properties);
-    // }
-    // })
+    ElMessage({
+      showClose: true,
+      message: '上传成功',
+      type: 'success',
+    })
   }
   setUpLoadFile(str, imageList, callback)
 
@@ -228,6 +213,15 @@ async function imgToBase64(url) {
 }
 const addItem = (item) => {
   console.log('item', item)
+  if (!cutPartsType.value) {
+    ElMessage({
+      showClose: true,
+      message: '请先选择版型',
+      type: 'error',
+    })
+    return
+  }
+  const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
   const imageURL = 'http://192.168.1.3/' + item.ImageUrl_Path;
   let callback = (image, isError) => {
     if (!isError) {
@@ -236,7 +230,9 @@ const addItem = (item) => {
       canvasEditor.canvas.add(image);
       image.name = item.FileName
       image.FilePath = item.FilePath
-
+      image.cutPartsType = cutPartsType.value
+      image.mask = maskRect
+      canvasEditor.canvas.bringToFront(maskRect)
       const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
       canvasEditor.canvas.discardActiveObject();
       canvasEditor.canvas.setActiveObject(info);

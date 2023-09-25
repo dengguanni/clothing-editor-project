@@ -22,6 +22,7 @@
           {{ $t('filters.' + key) }}
         </Checkbox>
       </div>
+      <img :src="url">
     </div>
     <!-- <Collapse>
 
@@ -75,12 +76,16 @@
 
 <script name="Filter" setup>
 import useSelect from '@/hooks/select';
+import guid from '@/utils/guiId.ts'
 import { uiType, paramsFilters, combinationFilters } from '@/config/constants/filter';
-
+import mitts from '@/utils/mitts'
+import { v4 as uuid } from 'uuid';
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
 const update = getCurrentInstance();
+
+let url = ref('')
 // 无参数滤镜
 const noParamsFilters = {
   BlackWhite: false,
@@ -110,12 +115,35 @@ const props = defineProps({
 watch(
   () => props.singleFilters,
   (val) => {
-    changeFilters('Contrast', val)
+    setSharpening(val)
   }
 );
+// 锐化
+const setSharpening = (val) => {
+  const obj = canvasEditor.canvas.getActiveObjects()[0];
+  function applyFilter(index, filter) {
+    obj.filters[index] = filter;
+    var timeStart = +new Date();
+    obj.applyFilters();
+    var timeEnd = +new Date();
+    var dimString = obj.width + ' x ' +
+      obj.height;
+    var $ = function (id) { return document.getElementById(id) };
+    // $('bench').innerHTML = dimString + 'px ' +
+    //   parseFloat(timeEnd - timeStart) + 'ms';
+    canvasEditor.canvas.renderAll();
+  }
+  const f = fabric.Image.filters
+  applyFilter(12, val && new f.Convolute({
+    matrix: [0, -1, 0,
+      -1, 5, -1,
+      0, -1, 0]
+  }));
+
+}
+
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
-
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   console.log(type, value, activeObject)
   state.noParamsFilters[type] = value;
@@ -228,17 +256,46 @@ function _changeAttrByHandler(moduleInfo) {
  */
 function _createFilter(sourceImg, type, options = null) {
   let filterObj;
-  // capitalize first letter for matching with fabric image filter name
   const fabricType = _getFabricFilterType(type);
   const ImageFilter = fabric.Image.filters[fabricType];
   if (ImageFilter) {
     filterObj = new ImageFilter(options);
     filterObj.options = options;
     sourceImg.filters.push(filterObj);
-
   }
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  url.value = activeObject.toDataURL({
+    width: activeObject.width,
+    height: activeObject.height,
+    angle: activeObject.angle,
+    scaleX: activeObject.scaleX,
+    scaleY: activeObject.scaleY,
+    multiplier: 1,
+  });
+  canvasEditor.canvas.requestRenderAll();
+  // const width = activeObject.get('width');
+  // const height = activeObject.get('height');
+  // const scaleX = activeObject.get('scaleX');
+  // const scaleY = activeObject.get('scaleY');
+  // const properties = {
+  //   left: 0,
+  //   top: 0
+  // }
+  const FilePath = 'temp//' + guid()
+  activeObject.setSrc(url.value, () => {
+    activeObject.set('name', activeObject.Title);
+    activeObject.set('id', uuid());
+    activeObject.set('width', activeObject.width);
+    activeObject.set('height', activeObject.height);
+    activeObject.set('scaleX', activeObject.scaleX);
+    activeObject.set('scaleY', activeObject.scaleY);
+    activeObject.set('FileName', activeObject.FileName);
+    activeObject.set('FilePath', activeObject.FilePath);
+    canvasEditor.canvas.renderAll();
+  });
+  // mitts.emit('replaceImages', url.value, 'temp//')
   return filterObj;
 }
 /**

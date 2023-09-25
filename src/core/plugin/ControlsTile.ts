@@ -1,3 +1,4 @@
+import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
 class ControlsTile {
     static lockObj = {
@@ -47,9 +48,21 @@ class ControlsTile {
                 ControlsTile.canvas.getObjects().forEach(el => {
                     if (el.isRepeat) {
                         ControlsTile.canvas.remove(el)
+
                     }
                 })
-                ControlsTile.setRepeat(type, true)
+                if (ControlsTile.isRepeat) {
+                    if (ControlsTile.repeatType == 'basic') {
+                        ControlsTile.newHandelRepeat()
+                    } else if (ControlsTile.repeatType == 'mirror') {
+                        ControlsTile.newRepeatMirror()
+                    } else if (ControlsTile.repeatType == 'transverse') {
+                        ControlsTile.newRepeatX()
+                    } else if (ControlsTile.repeatType == 'direction') {
+                        ControlsTile.newRepeatY()
+                    }
+                    ControlsTile.canvas.requestRenderAll();
+                }
             }
 
         })
@@ -58,64 +71,6 @@ class ControlsTile {
         const activeObject = this.canvas.getActiveObjects()[0];
         const type = repeatType ? repeatType : this.repeatType
         this.repeatType = type
-        // var Rect = new fabric.Rect({//绘制圆形
-        //     fill: 'grba(0,0,0,0)',
-        //     height: 703,
-        //     width: 703,
-        //     opacity: 0,
-
-
-        // });
-        // var text = new fabric.Text('Hello World', {//绘制文本
-        //     fontSize: 30,
-        //     originX: 'center',
-        //     originY: 'center'
-        // })
-
-
-        // this.groupRepeat = new fabric.Group([], {
-        //     // left: activeObject.left - 351.5 +activeObject.width/2,
-        //     // top: activeObject.top -351.5 +activeObject.height/2,
-
-        //     height: 703,
-        //     width: 703,
-        //     evented: true,
-        //     id: uuid(),
-        //     isRepeat: true,
-
-        // });
-        // activeObject?.clone(c => {
-        //     c.set({
-        //         left: -351 + 100,
-        //         top: -351,
-
-        //         evented: true,
-        //         id: uuid(),
-        //     });
-        //     this.groupRepeat.add(c)
-        // })
-        // activeObject?.clone(c => {
-        //     c.set({
-        //         left: -351 + 100,
-        //         top: -351 + 100,
-        //         evented: true,
-        //         id: uuid(),
-
-
-        //         // flipX: flipX,
-        //         isRepeat: true,
-        //         // hasControls: false,
-        //         // ...this.lockObj,
-        //         opacity: 1
-        //     });
-        //     this.groupRepeat.add(c)
-        //     this.canvas.add(this.groupRepeat)
-        //     this.canvas.requestRenderAll();
-        // })
-
-        //         // this.canvas.add(group);
-        //         this.canvas.requestRenderAll();
-
         this.activeObject = activeObject
         activeObject?.clone((cloned: any) => {
             if (cloned.left === undefined || cloned.top === undefined) return;
@@ -134,25 +89,49 @@ class ControlsTile {
             })
             if (this.isRepeat) {
                 if (type == 'basic') {
-                    this.handelRepeat(cloned, false, false, 0, 0)
+                    this.newHandelRepeat()
                 } else if (type == 'mirror') {
-                    this.handelRepeat(cloned, true, true, 0, 0)
+                    ControlsTile.newRepeatMirror()
                 } else if (type == 'transverse') {
-                    this.handelRepeat(cloned, false, false, (cloned.width * cloned.scaleX) / 2, 0)
+                    ControlsTile.newRepeatX()
                 } else if (type == 'direction') {
-                    this.handelRepeat(cloned, false, false, 0, (cloned.height * cloned.scaleY) / 2)
+                    ControlsTile.newRepeatY()
                 }
-                // this.canvas.add(group);
                 this.canvas.requestRenderAll();
             }
         });
     }
-    static handelRepeat(clonedObj, flipY, flipX, offsetX, offsetY) {
+    static getMaxCount = (cloned: any) => {
+        const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
+        let maxXcount, maxYcount
+        const left = cloned.left < 0 ? cloned.left * -1 : cloned.left
+        const top = cloned.top < 0 ? cloned.top * -1 : cloned.top
+        if (left < workspace.width - cloned.width * cloned.scaleX - left) {
+            const n = Math.ceil((workspace.width - cloned.width * cloned.scaleX - left) / (cloned.width * cloned.scaleX))
+            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 43
+        } else {
+            const n = Math.ceil(left / (cloned.width * cloned.scaleX))
+            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
+        }
+        if (top < workspace.height - (cloned.height * cloned.scaleY) - top) {
+            const n = Math.ceil((workspace.height - cloned.height - top * cloned.scaleY) / (cloned.height * cloned.scaleY))
+            maxYcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
+        } else {
+            const n = Math.ceil(top / (cloned.height * cloned.scaleY))
+            maxYcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
+        }
+
+        return { maxXcount, maxYcount }
+    }
+    static newHandelRepeat() {
+        const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
-        const seft = this
-
         activeObject.clone(cloned => {
+            const { maxXcount, maxYcount } = self.getMaxCount(cloned)
+            cloned.rotate(0)
+            const left = cloned.left - (cloned.width * cloned.scaleX)
+            const top = cloned.top - (cloned.height * cloned.scaleY)
             cloned.set({
                 id: uuid(),
                 top: 0,
@@ -160,86 +139,440 @@ class ControlsTile {
                 width: cloned.width,
                 height: cloned.height,
                 scaleX: cloned.scaleX,
-                scaleY: cloned.scaleY
+                scaleY: cloned.scaleY,
             });
             var patternSourceCanvas = new fabric.StaticCanvas();
             patternSourceCanvas.add(cloned);
             patternSourceCanvas.setDimensions({
-                width: cloned.getScaledWidth() + 1,
-                height: cloned.getScaledHeight() + 1,
+                width: cloned.getScaledWidth(),
+                height: cloned.getScaledHeight(),
             });
             patternSourceCanvas.renderAll();
             var pattern = new fabric.Pattern({
                 source: patternSourceCanvas.getElement(),
                 repeat: 'repeat',
-                left: cloned.left,
-                top: cloned.top,
+                hasControls: false,
+                ...this.lockObj,
+
+            });
+            const rect = new fabric.Rect(
+                {
+                    width: cloned.width * cloned.scaleX * maxXcount,
+                    height: cloned.height * maxYcount * cloned.scaleY,
+                    left: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
+                    top: top - (((maxYcount - 1) / 2) - 1) * cloned.height * cloned.scaleY,
+                    fill: pattern,
+                    isRepeat: true,
+                    hasControls: false,
+                    ...this.lockObj,
+                    selectable: false,
+                    evented: false,
+
+                },
+            )
+            rect.cutPartsType = activeObject.cutPartsType
+            rect.rotate(activeObject.angle)
+            rect.sendBackwards()
+            self.canvas.add(rect);
+        })
+        this.canvas.requestRenderAll();
+    }
+
+    static newRepeatX = () => {
+        const self = this
+        const activeObject = this.canvas.getActiveObjects()[0];
+        this.observeObj(activeObject)
+        const createPattern = () => {
+            let isOffsetX = false
+            activeObject.clone(cloned => {
+                let { maxXcount, maxYcount } = self.getMaxCount(cloned)
+                cloned.rotate(0)
+                const left = cloned.left - (cloned.width * cloned.scaleX)
+                const top = cloned.top - (cloned.height * cloned.scaleY)
+                cloned.set({
+                    id: uuid(),
+                    top: 0,
+                    left: 0,
+                    width: cloned.width,
+                    height: cloned.height,
+                    scaleX: cloned.scaleX,
+                    scaleY: cloned.scaleY,
+                });
+                for (let num = 1; num < (maxYcount + 1) / 2; num++) {
+                    console.log('maxYcount', maxYcount)
+                    var patternSourceCanvas = new fabric.StaticCanvas();
+                    const heightNum = num == 1 ? 0 : (num * 2) - 3
+                    patternSourceCanvas.add(cloned);
+                    patternSourceCanvas.setDimensions({
+                        width: cloned.getScaledWidth(),
+                        height: cloned.getScaledHeight() + cloned.height * cloned.scaleY * heightNum,
+                    });
+                    patternSourceCanvas.renderAll();
+                    var pattern = new fabric.Pattern({
+                        source: patternSourceCanvas.getElement(),
+                        repeat: 'repeat',
+                        hasControls: false,
+                        ...this.lockObj,
+                    });
+                    pattern.offsetX = isOffsetX ? (cloned.width * cloned.scaleX) / 2 : 0
+                    isOffsetX = !isOffsetX
+                    const rectTop = num == 1 ? top + cloned.height * cloned.scaleY : top - cloned.height * cloned.scaleY * (num - 2)
+                    const rect = new fabric.Rect(
+                        {
+                            width: cloned.width * cloned.scaleX * maxXcount,
+                            height: cloned.height * cloned.scaleY * (2 * num - 1),
+                            left: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
+                            top: rectTop,
+                            fill: pattern,
+                            isRepeat: true,
+                            hasControls: false,
+                            ...this.lockObj,
+                            selectable: false,
+                            evented: false,
+
+                        },
+                    )
+                    rect.cutPartsType = activeObject.cutPartsType
+                    rect.rotate(activeObject.angle)
+                    rect.sendBackwards()
+                    self.canvas.add(rect);
+
+                }
+            })
+        }
+        createPattern()
+        this.canvas.requestRenderAll();
+    }
+    static newRepeatY = () => {
+        const self = this
+        const activeObject = this.canvas.getActiveObjects()[0];
+        this.observeObj(activeObject)
+        const createPattern2 = () => {
+            const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
+            let left
+            let top
+            let arr1 = []
+            let maxYcount = (workspace.height / (activeObject.height * activeObject.scaleY))
+            maxYcount = (Math.ceil(maxYcount) % 2 == 0 ? Math.ceil(maxYcount) + 1 : Math.ceil(maxYcount)) + 2
+            let maxXcount = (workspace.width / (activeObject.width * activeObject.scaleX))
+            maxXcount = (Math.ceil(maxXcount) % 2 == 0 ? Math.ceil(maxXcount) + 1 : Math.ceil(maxXcount)) + 2
+            activeObject.clone(cloned => {
+                cloned.rotate(0)
+                left = cloned.left
+                top = cloned.top
+                cloned.set({
+                    id: uuid(),
+                    top: 0,
+                    left: 0,
+                    width: cloned.width,
+                    height: cloned.height,
+                    scaleX: cloned.scaleX,
+                    scaleY: cloned.scaleY,
+                });
+                var patternSourceCanvas = new fabric.StaticCanvas();
+                patternSourceCanvas.add(cloned);
+                patternSourceCanvas.setDimensions({
+                    width: cloned.getScaledWidth(),
+                    height: cloned.getScaledHeight(),
+                });
+                patternSourceCanvas.renderAll();
+                var pattern = new fabric.Pattern({
+                    source: patternSourceCanvas.getElement(),
+                    repeat: 'repeat-y',
+                    hasControls: false,
+                    ...this.lockObj,
+                });
+                const rect = new fabric.Rect(
+                    {
+                        width: cloned.width * cloned.scaleX,
+                        height: cloned.height * cloned.scaleY * maxYcount,
+                        left: cloned.width * cloned.scaleX,
+                        top: 0,
+                        fill: pattern,
+                        isRepeat: true,
+                        hasControls: false,
+                        ...this.lockObj,
+                        selectable: false,
+                        evented: false,
+                    }
+                )
+                arr1.push(rect)
+            })
+            activeObject.clone(cloned => {
+                cloned.rotate(0)
+                left = cloned.left
+                top = cloned.top
+                cloned.set({
+                    id: uuid(),
+                    top: 0,
+                    left: 0,
+                    width: cloned.width,
+                    height: cloned.height,
+                    scaleX: cloned.scaleX,
+                    scaleY: cloned.scaleY,
+                });
+                var patternSourceCanvas = new fabric.StaticCanvas();
+                patternSourceCanvas.add(cloned);
+                patternSourceCanvas.setDimensions({
+                    width: cloned.getScaledWidth(),
+                    height: cloned.getScaledHeight(),
+                });
+                patternSourceCanvas.renderAll();
+                var pattern = new fabric.Pattern({
+                    source: patternSourceCanvas.getElement(),
+                    repeat: 'repeat-y',
+                    hasControls: false,
+                    ...this.lockObj,
+                });
+                pattern.offsetY = (cloned.height * cloned.scaleY) / 2
+                const rect = new fabric.Rect(
+                    {
+                        width: cloned.width * cloned.scaleX,
+                        height: cloned.height * cloned.scaleY * maxYcount,
+                        left: 0,
+                        top: 0,
+                        fill: pattern,
+                        isRepeat: true,
+                        hasControls: false,
+                        ...this.lockObj,
+                        selectable: false,
+                        evented: false,
+                    }
+                )
+                arr1.push(rect)
+            })
+            activeObject.clone(cloned => {
+                cloned.rotate(0)
+                left = cloned.left
+                top = cloned.top
+                cloned.set({
+                    id: uuid(),
+                    top: 0,
+                    left: 0,
+                    width: cloned.width,
+                    height: cloned.height,
+                    scaleX: cloned.scaleX,
+                    scaleY: cloned.scaleY,
+                });
+                var patternSourceCanvas = new fabric.StaticCanvas();
+                patternSourceCanvas.add(cloned);
+                patternSourceCanvas.setDimensions({
+                    width: cloned.getScaledWidth(),
+                    height: cloned.getScaledHeight(),
+                });
+                patternSourceCanvas.renderAll();
+                var pattern = new fabric.Pattern({
+                    source: patternSourceCanvas.getElement(),
+                    repeat: 'repeat-y',
+                    hasControls: false,
+                    ...this.lockObj,
+                });
+                pattern.offsetY = (cloned.height * cloned.scaleY) / 2
+                const rect = new fabric.Rect(
+                    {
+                        width: cloned.width * cloned.scaleX,
+                        height: cloned.height * cloned.scaleY * maxYcount,
+                        left: cloned.width * cloned.scaleX * 2,
+                        top: 0,
+                        fill: pattern,
+                        isRepeat: true,
+                        hasControls: false,
+                        ...this.lockObj,
+                        selectable: false,
+                        evented: false,
+                    }
+                )
+                arr1.push(rect)
+            })
+
+            const group = new fabric.Group(arr1, {
+                top: 0,
+                left: 0,
+                width: activeObject.width * activeObject.scaleX * maxXcount,
+                height: activeObject.height * activeObject.scaleY * maxYcount,
+                isRepeat: true,
+            })
+            var patternSourceCanvas = new fabric.StaticCanvas();
+            patternSourceCanvas.add(group);
+            patternSourceCanvas.setDimensions({
+                width: group.getScaledWidth(),
+                height: group.getScaledHeight(),
+            });
+            patternSourceCanvas.renderAll();
+            var pattern = new fabric.Pattern({
+                source: patternSourceCanvas.getElement(),
+                repeat: 'repeat',
                 hasControls: false,
                 ...this.lockObj,
             });
             const rect = new fabric.Rect(
                 {
-                    width: 703,
-                    height: 703,
-                    left: 0,
-                    top: 0,
+                    width: activeObject.width * activeObject.scaleX * maxXcount,
+                    height: activeObject.height * activeObject.scaleY * maxYcount,
+                    left: left - activeObject.width * activeObject.scaleX * ((maxXcount - 1) / 2),
+                    top: top - activeObject.height * activeObject.scaleY * ((maxYcount - 1) / 2),
                     fill: pattern,
                     isRepeat: true,
                     hasControls: false,
                     ...this.lockObj,
-                    // objectCaching: false,
-                },
+                    selectable: false,
+                    evented: false,
+                }
             )
+            rect.cutPartsType = activeObject.cutPartsType
+            rect.rotate(activeObject.angle)
             rect.sendBackwards()
-            seft.canvas.add(rect);
-        })
-
-
-
-        // let { topCount,
-        //     bottomCount,
-        //     leftCount,
-        //     rightCount,
-        //     width,
-        //     height } = this.getCount(clonedObj)
-
-
-        // this.setUpDownCloned(clonedObj, topCount, bottomCount, height, width, flipY, offsetX, 0)
-        // for (let i = 1; i < leftCount + 1; i++) {
-        //     clonedObj.clone((cloned: any) => {
-        //         cloned.set({
-        //             left: cloned.left - width * i,
-        //             top: cloned.top + offsetY,
-        //             evented: true,
-        //             id: uuid(),
-        //             flipX: flipX,
-        //             isRepeat: true,
-        //             hasControls: false,
-        //             ...this.lockObj
-        //         });
-        //         this.canvas.add(cloned);
-        //         this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
-        //     })
-        // }
-        // for (let i = 1; i < rightCount + 1; i++) {
-        //     clonedObj.clone((cloned: any) => {
-        //         cloned.set({
-        //             left: cloned.left + width * i,
-        //             top: cloned.top + offsetY,
-        //             evented: true,
-        //             id: uuid(),
-        //             flipX: flipX,
-        //             isRepeat: true,
-        //             hasControls: false,
-        //             ...this.lockObj
-        //         });
-        //         this.canvas.add(cloned);
-        //         this.setUpDownCloned(cloned, topCount, bottomCount, height, width, flipY, offsetX, offsetY)
-        //     })
-        // }
+            self.canvas.add(rect);
+        }
+        createPattern2()
         this.canvas.requestRenderAll();
     }
+    // 镜像
+    static newRepeatMirror = () => {
+        const self = this
+        const activeObject = this.canvas.getActiveObjects()[0];
+        this.observeObj(activeObject)
+        const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
+        let newObjArr1 = []
+        let newObjArr2 = []
+        let left
+        let top
+        activeObject.clone(cloned => {
+            cloned.rotate(0)
+            cloned.set({
+                id: uuid(),
+                top: 0,
+                left: 0,
+                width: cloned.width,
+                height: cloned.height,
+                scaleX: cloned.scaleX,
+                scaleY: cloned.scaleY,
+                flipX: true,
+            });
+            newObjArr1.push(cloned)
+        })
+        activeObject.clone(cloned => {
+            cloned.rotate(0)
+            left = cloned.left
+            top = cloned.top
+            cloned.set({
+                id: uuid(),
+                top: 0,
+                left: cloned.width * cloned.scaleX,
+                width: cloned.width,
+                height: cloned.height,
+                scaleX: cloned.scaleX,
+                scaleY: cloned.scaleY,
+                // flipY: flipY
+            });
+            newObjArr1.push(cloned)
+        })
+        activeObject.clone(cloned => {
+            cloned.rotate(0)
+            cloned.set({
+                id: uuid(),
+                top: 0,
+                left: cloned.width * 2 * cloned.scaleX,
+                width: cloned.width,
+                height: cloned.height,
+                scaleX: cloned.scaleX,
+                scaleY: cloned.scaleY,
+                flipX: true,
+                flipY: true
+            });
+            newObjArr1.push(cloned)
+        })
+        const group1: fabric.Group = new fabric.Group(newObjArr1, {
+            left: 0,
+            id: uuid(),
+            top: activeObject.height * activeObject.scaleY,
+            width: activeObject.width * 3 * activeObject.scaleX,
+            height: activeObject.height * activeObject.scaleY,
+        })
 
+        group1.clone(cloned => {
+            cloned.set({
+                id: uuid(),
+                left: 0,
+                top: activeObject.height * activeObject.scaleY * 2,
+                width: activeObject.width * 3 * activeObject.scaleX,
+                height: activeObject.height * activeObject.scaleY,
+                flipY: true,
+                angle: 0,
+            })
+            newObjArr2.push(group1, cloned)
+        })
+        group1.clone(cloned => {
+            cloned.rotate(0)
+            cloned.set({
+                id: uuid(),
+                left: 0,
+                top: 0,
+                angle: 0,
+                width: activeObject.width * 3 * activeObject.scaleX,
+                height: activeObject.height * activeObject.scaleY,
+                flipY: true
+            })
+            newObjArr2.push(cloned)
+        })
+        const group2: fabric.Group = new fabric.Group(newObjArr2, {
+            left: 0,
+            top: 0,
+            angle: 0,
+            width: activeObject.width * 3 * activeObject.scaleX,
+            height: activeObject.height * 3 * activeObject.scaleY,
+        })
+        var patternSourceCanvas = new fabric.StaticCanvas();
+        patternSourceCanvas.add(group2);
+        patternSourceCanvas.setDimensions({
+            width: group2.getScaledWidth(),
+            height: group2.getScaledHeight(),
+        });
+        patternSourceCanvas.renderAll();
+        var pattern = new fabric.Pattern({
+            source: patternSourceCanvas.getElement(),
+            repeat: 'repeat',
+            hasControls: false,
+            ...this.lockObj,
+        });
+        const numX = workspace.width / (group2.width * group2.scaleX)
+        const numY = workspace.width / (group2.height * group2.scaleY)
+        let num = Math.ceil(numX > numY ? numX : numY)
+        num = (num % 2 == 0 ? num + 1 : num) + 2
+        let rectLeft
+        let rectTop
+
+        if (num == 1) {
+            rectLeft = left - activeObject.width * activeObject.scaleX
+            rectTop = top - activeObject.height * activeObject.scaleY
+        } else {
+            rectLeft = left - ((num * 3 - 1) / 2) * activeObject.width * activeObject.scaleX
+            rectTop = top - ((num * 3 - 1) / 2) * activeObject.height * activeObject.scaleY
+        }
+        console.log('num', num)
+        const rect = new fabric.Rect(
+            {
+                width: group2.width * group2.scaleX * num,
+                height: group2.height * group2.scaleY * num,
+                left: rectLeft,
+                top: rectTop,
+                fill: pattern,
+                isRepeat: true,
+                hasControls: false,
+                ...this.lockObj,
+                selectable: false,
+                evented: false,
+            },
+        )
+        rect.cutPartsType = activeObject.cutPartsType
+        rect.rotate(activeObject.angle)
+        rect.sendBackwards()
+        self.canvas.add(rect);
+        this.canvas.requestRenderAll();
+    }
+    static setImageRepeat = () => {
+
+    }
     static getCount(cloned: any) {
         let topCount = 0
         let bottomCount = 0
@@ -253,7 +586,6 @@ class ControlsTile {
             bottomCount = Math.ceil((workspace.height - cloned.top - height) / height)
             leftCount = Math.ceil(cloned.left / width)
             rightCount = Math.ceil((workspace.width - width - cloned.left) / width)
-            console.log('(workspace.width - width - cloned.left) / width', (workspace.width - width - cloned.left) / width)
         } else if (cloned.top > 0 && cloned.left < 0) {
             topCount = Math.ceil(cloned.top / height)
             bottomCount = Math.ceil((workspace.height - cloned.top - height) / height)
@@ -307,8 +639,6 @@ class ControlsTile {
                     isRepeat: true,
                     hasControls: false,
                     ...this.lockObj,
-
-
                 });
                 this.canvas.add(cloned3);
             })
@@ -316,23 +646,8 @@ class ControlsTile {
     }
     static observeObj(obj: any) {
         const Canvas = this.canvas
-        //对象被加入监听事件
-        obj.on('mouseup', function () {
-            // let type = ''
-            // const activeObject = ControlsTile.canvas.getActiveObjects()[0];
-            // if (ControlsTile.isRepeat && activeObject && activeObject.id === ControlsTile.activeObject.id) {
-            //     for (let key in ControlsTile.stateRepeat) {
-            //         if (ControlsTile.stateRepeat[key]) {
-            //             type = key
-            //         }
-            //     }
-            //     ControlsTile.canvas.getObjects().forEach(el => {
-            //         if (el.isRepeat) {
-            //             ControlsTile.canvas.remove(el)
-            //         }
-            //     })
-            //     ControlsTile.setRepeat(type, true)
-            // }
+        obj.on('rotating', function () {
+            console.log('rotating');
         });
         // rotated
         //对象被移除监听事件
