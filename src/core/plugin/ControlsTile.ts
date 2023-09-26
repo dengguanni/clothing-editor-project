@@ -1,5 +1,7 @@
 import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
+import guid from '@/utils/guiId.ts'
+import { setUpLoadFile } from '@/core/2D/handleImages.ts'
 class ControlsTile {
     static lockObj = {
         'lockMovementX': false,
@@ -106,9 +108,10 @@ class ControlsTile {
         let maxXcount, maxYcount
         const left = cloned.left < 0 ? cloned.left * -1 : cloned.left
         const top = cloned.top < 0 ? cloned.top * -1 : cloned.top
+        console.log('clonedleft', left, 'clonedtop', top)
         if (left < workspace.width - cloned.width * cloned.scaleX - left) {
             const n = Math.ceil((workspace.width - cloned.width * cloned.scaleX - left) / (cloned.width * cloned.scaleX))
-            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 43
+            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
         } else {
             const n = Math.ceil(left / (cloned.width * cloned.scaleX))
             maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
@@ -129,6 +132,7 @@ class ControlsTile {
         this.observeObj(activeObject)
         activeObject.clone(cloned => {
             const { maxXcount, maxYcount } = self.getMaxCount(cloned)
+            console.log('maxXcount', maxXcount, 'maxYcount', maxYcount)
             cloned.rotate(0)
             const left = cloned.left - (cloned.width * cloned.scaleX)
             const top = cloned.top - (cloned.height * cloned.scaleY)
@@ -159,25 +163,63 @@ class ControlsTile {
                 {
                     width: cloned.width * cloned.scaleX * maxXcount,
                     height: cloned.height * maxYcount * cloned.scaleY,
-                    left: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
-                    top: top - (((maxYcount - 1) / 2) - 1) * cloned.height * cloned.scaleY,
+                    // left: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
+                    // top: top - (((maxYcount - 1) / 2) - 1) * cloned.height * cloned.scaleY,
                     fill: pattern,
                     isRepeat: true,
                     hasControls: false,
                     ...this.lockObj,
                     selectable: false,
                     evented: false,
-
                 },
             )
-            rect.cutPartsType = activeObject.cutPartsType
-            rect.rotate(activeObject.angle)
-            rect.sendBackwards()
-            self.canvas.add(rect);
+            this.replaceImage(rect, left, top, maxXcount, maxYcount)
         })
-        this.canvas.requestRenderAll();
     }
-
+    static replaceImage = (rect: fabric.Rect, left: number, top: number, maxXcount: number, maxYcount: number) => {
+        console.log('maxXcount', maxXcount, 'maxYcount', maxYcount)
+        const FileName = guid() + '.png'
+        const url = rect.toDataURL({
+            width: rect.width,
+            height: rect.height,
+            angle: rect.angle,
+            scaleX: rect.scaleX,
+            scaleY: rect.scaleY,
+            multiplier: 1,
+        });
+        let callback1 = () => {
+            const activeObject = this.canvas.getActiveObjects()[0];
+            const imageURL = 'http://192.168.1.3/UploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
+            console.log('imageURL', imageURL)
+            let callback = (image: any, isError: boolean) => {
+                if (!isError) {
+                    image.cutPartsType = activeObject.cutPartsType
+                    image.set({
+                        ...this.lockObj,
+                        selectable: false,
+                        evented: false,
+                        isRepeat: true,
+                    })
+                    image.cutPartsType = activeObject.cutPartsType
+                    image.sendBackwards()
+                    image.id = uuid()
+                    image.FileName = FileName
+                    image.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                    image.left = left - (((maxXcount - 1) / 2) - 1) * activeObject.width * activeObject.scaleX
+                    image.top = top - (((maxYcount - 1) / 2) - 1) * activeObject.height * activeObject.scaleY
+                    image.rotate(activeObject.angle)
+                    this.canvas.add(image);
+                    this.canvas.requestRenderAll();
+                }
+            };
+            const properties = {
+                left: 100,
+                top: 100
+            };
+            fabric.Image.fromURL(imageURL, callback, properties);
+        }
+        setUpLoadFile(url, FileName, 'images_temp//', callback1)
+    }
     static newRepeatX = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
@@ -236,7 +278,6 @@ class ControlsTile {
                     rect.rotate(activeObject.angle)
                     rect.sendBackwards()
                     self.canvas.add(rect);
-
                 }
             })
         }
@@ -247,57 +288,58 @@ class ControlsTile {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
-        const createPattern2 = () => {
-            const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
-            let left
-            let top
-            let arr1 = []
-            let maxYcount = (workspace.height / (activeObject.height * activeObject.scaleY))
-            maxYcount = (Math.ceil(maxYcount) % 2 == 0 ? Math.ceil(maxYcount) + 1 : Math.ceil(maxYcount)) + 2
-            let maxXcount = (workspace.width / (activeObject.width * activeObject.scaleX))
-            maxXcount = (Math.ceil(maxXcount) % 2 == 0 ? Math.ceil(maxXcount) + 1 : Math.ceil(maxXcount)) + 2
-            activeObject.clone(cloned => {
-                cloned.rotate(0)
-                left = cloned.left
-                top = cloned.top
-                cloned.set({
-                    id: uuid(),
+        const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
+        let left
+        let top
+        let arr1 = []
+        let maxYcount = (workspace.height / (activeObject.height * activeObject.scaleY))
+        maxYcount = (Math.ceil(maxYcount) % 2 == 0 ? Math.ceil(maxYcount) + 1 : Math.ceil(maxYcount)) + 2
+        let maxXcount = (workspace.width / (activeObject.width * activeObject.scaleX))
+        maxXcount = (Math.ceil(maxXcount) % 2 == 0 ? Math.ceil(maxXcount) + 1 : Math.ceil(maxXcount)) + 2
+        activeObject.clone(cloned => {
+            cloned.rotate(0)
+            left = cloned.left
+            top = cloned.top
+            cloned.set({
+                id: uuid(),
+                top: 0,
+                left: 0,
+                width: cloned.width,
+                height: cloned.height,
+                scaleX: cloned.scaleX,
+                scaleY: cloned.scaleY,
+            });
+            var patternSourceCanvas = new fabric.StaticCanvas();
+            patternSourceCanvas.add(cloned);
+            patternSourceCanvas.setDimensions({
+                width: cloned.getScaledWidth(),
+                height: cloned.getScaledHeight(),
+            });
+            patternSourceCanvas.renderAll();
+            var pattern = new fabric.Pattern({
+                source: patternSourceCanvas.getElement(),
+                repeat: 'repeat-y',
+                hasControls: false,
+                ...this.lockObj,
+            });
+            const rect = new fabric.Rect(
+                {
+                    width: cloned.width * cloned.scaleX,
+                    height: cloned.height * cloned.scaleY * maxYcount,
+                    left: cloned.width * cloned.scaleX,
                     top: 0,
-                    left: 0,
-                    width: cloned.width,
-                    height: cloned.height,
-                    scaleX: cloned.scaleX,
-                    scaleY: cloned.scaleY,
-                });
-                var patternSourceCanvas = new fabric.StaticCanvas();
-                patternSourceCanvas.add(cloned);
-                patternSourceCanvas.setDimensions({
-                    width: cloned.getScaledWidth(),
-                    height: cloned.getScaledHeight(),
-                });
-                patternSourceCanvas.renderAll();
-                var pattern = new fabric.Pattern({
-                    source: patternSourceCanvas.getElement(),
-                    repeat: 'repeat-y',
+                    fill: pattern,
+                    isRepeat: true,
                     hasControls: false,
                     ...this.lockObj,
-                });
-                const rect = new fabric.Rect(
-                    {
-                        width: cloned.width * cloned.scaleX,
-                        height: cloned.height * cloned.scaleY * maxYcount,
-                        left: cloned.width * cloned.scaleX,
-                        top: 0,
-                        fill: pattern,
-                        isRepeat: true,
-                        hasControls: false,
-                        ...this.lockObj,
-                        selectable: false,
-                        evented: false,
-                    }
-                )
-                arr1.push(rect)
-            })
+                    selectable: false,
+                    evented: false,
+                }
+            )
+            arr1.push(rect)
+            fn1()
+        })
+        const fn1 = () => {
             activeObject.clone(cloned => {
                 cloned.rotate(0)
                 left = cloned.left
@@ -340,7 +382,11 @@ class ControlsTile {
                     }
                 )
                 arr1.push(rect)
+                fn2()
             })
+        }
+
+        const fn2 = () => {
             activeObject.clone(cloned => {
                 cloned.rotate(0)
                 left = cloned.left
@@ -383,8 +429,10 @@ class ControlsTile {
                     }
                 )
                 arr1.push(rect)
+                fn3()
             })
-
+        }
+        const fn3 = () => {
             const group = new fabric.Group(arr1, {
                 top: 0,
                 left: 0,
@@ -423,9 +471,9 @@ class ControlsTile {
             rect.rotate(activeObject.angle)
             rect.sendBackwards()
             self.canvas.add(rect);
+            this.canvas.requestRenderAll();
         }
-        createPattern2()
-        this.canvas.requestRenderAll();
+
     }
     // 镜像
     static newRepeatMirror = () => {
@@ -439,139 +487,136 @@ class ControlsTile {
         let top
         activeObject.clone(cloned => {
             cloned.rotate(0)
-            cloned.set({
-                id: uuid(),
-                top: 0,
-                left: 0,
-                width: cloned.width,
-                height: cloned.height,
-                scaleX: cloned.scaleX,
-                scaleY: cloned.scaleY,
-                flipX: true,
-            });
-            newObjArr1.push(cloned)
-        })
-        activeObject.clone(cloned => {
-            cloned.rotate(0)
             left = cloned.left
             top = cloned.top
+            console.log('left', left)
             cloned.set({
                 id: uuid(),
                 top: 0,
-                left: cloned.width * cloned.scaleX,
-                width: cloned.width,
-                height: cloned.height,
-                scaleX: cloned.scaleX,
-                scaleY: cloned.scaleY,
-                // flipY: flipY
-            });
-            newObjArr1.push(cloned)
-        })
-        activeObject.clone(cloned => {
-            cloned.rotate(0)
-            cloned.set({
-                id: uuid(),
-                top: 0,
-                left: cloned.width * 2 * cloned.scaleX,
+                left: 0,
                 width: cloned.width,
                 height: cloned.height,
                 scaleX: cloned.scaleX,
                 scaleY: cloned.scaleY,
                 flipX: true,
-                flipY: true
             });
             newObjArr1.push(cloned)
-        })
-        const group1: fabric.Group = new fabric.Group(newObjArr1, {
-            left: 0,
-            id: uuid(),
-            top: activeObject.height * activeObject.scaleY,
-            width: activeObject.width * 3 * activeObject.scaleX,
-            height: activeObject.height * activeObject.scaleY,
-        })
+            activeObject.clone(cloned => {
+                cloned.rotate(0)
+                cloned.set({
+                    id: uuid(),
+                    top: 0,
+                    left: cloned.width * cloned.scaleX,
+                    width: cloned.width,
+                    height: cloned.height,
+                    scaleX: cloned.scaleX,
+                    scaleY: cloned.scaleY,
+                });
+                newObjArr1.push(cloned)
+                activeObject.clone(cloned => {
+                    cloned.rotate(0)
+                    cloned.set({
+                        id: uuid(),
+                        top: 0,
+                        left: cloned.width * 2 * cloned.scaleX,
+                        width: cloned.width,
+                        height: cloned.height,
+                        scaleX: cloned.scaleX,
+                        scaleY: cloned.scaleY,
+                        flipX: true,
+                        flipY: true
+                    });
+                    newObjArr1.push(cloned)
+                    const group1: fabric.Group = new fabric.Group(newObjArr1, {
+                        left: 0,
+                        id: uuid(),
+                        top: activeObject.height * activeObject.scaleY,
+                        width: activeObject.width * 3 * activeObject.scaleX,
+                        height: activeObject.height * activeObject.scaleY,
+                    })
+                    group1.clone(cloned => {
+                        cloned.set({
+                            id: uuid(),
+                            left: 0,
+                            top: activeObject.height * activeObject.scaleY * 2,
+                            width: activeObject.width * 3 * activeObject.scaleX,
+                            height: activeObject.height * activeObject.scaleY,
+                            flipY: true,
+                            angle: 0,
+                        })
+                        newObjArr2.push(group1, cloned)
+                        console.log('4')
+                    })
+                    group1.clone(cloned => {
+                        cloned.rotate(0)
+                        cloned.set({
+                            id: uuid(),
+                            left: 0,
+                            top: 0,
+                            angle: 0,
+                            width: activeObject.width * 3 * activeObject.scaleX,
+                            height: activeObject.height * activeObject.scaleY,
+                            flipY: true
+                        })
+                        newObjArr2.push(cloned)
+                        console.log('5')
+                        const group2: fabric.Group = new fabric.Group(newObjArr2, {
+                            left: 0,
+                            top: 0,
+                            angle: 0,
+                            width: activeObject.width * 3 * activeObject.scaleX,
+                            height: activeObject.height * 3 * activeObject.scaleY,
+                        })
+                        var patternSourceCanvas = new fabric.StaticCanvas();
+                        patternSourceCanvas.add(group2);
+                        patternSourceCanvas.setDimensions({
+                            width: group2.getScaledWidth(),
+                            height: group2.getScaledHeight(),
+                        });
+                        patternSourceCanvas.renderAll();
+                        var pattern = new fabric.Pattern({
+                            source: patternSourceCanvas.getElement(),
+                            repeat: 'repeat',
+                            hasControls: false,
+                            ...this.lockObj,
+                        });
+                        const numX = workspace.width / (group2.width * group2.scaleX)
+                        const numY = workspace.width / (group2.height * group2.scaleY)
+                        let num = Math.ceil(numX > numY ? numX : numY)
+                        num = (num % 2 == 0 ? num + 1 : num) + 2
+                        let rectLeft
+                        let rectTop
+                        if (num == 1) {
+                            rectLeft = left - activeObject.width * activeObject.scaleX
+                            rectTop = top - activeObject.height * activeObject.scaleY
+                        } else {
+                            rectLeft = left - ((num * 3 - 1) / 2) * activeObject.width * activeObject.scaleX
+                            rectTop = top - ((num * 3 - 1) / 2) * activeObject.height * activeObject.scaleY
+                        }
 
-        group1.clone(cloned => {
-            cloned.set({
-                id: uuid(),
-                left: 0,
-                top: activeObject.height * activeObject.scaleY * 2,
-                width: activeObject.width * 3 * activeObject.scaleX,
-                height: activeObject.height * activeObject.scaleY,
-                flipY: true,
-                angle: 0,
+                        const rect = new fabric.Rect(
+                            {
+                                width: group2.width * group2.scaleX * num,
+                                height: group2.height * group2.scaleY * num,
+                                left: rectLeft,
+                                top: rectTop,
+                                fill: pattern,
+                                isRepeat: true,
+                                hasControls: false,
+                                ...this.lockObj,
+                                selectable: false,
+                                evented: false,
+                            },
+                        )
+                        rect.cutPartsType = activeObject.cutPartsType
+                        rect.rotate(activeObject.angle)
+                        rect.sendBackwards()
+                        self.canvas.add(rect);
+                        this.canvas.requestRenderAll();
+                    })
+                })
             })
-            newObjArr2.push(group1, cloned)
         })
-        group1.clone(cloned => {
-            cloned.rotate(0)
-            cloned.set({
-                id: uuid(),
-                left: 0,
-                top: 0,
-                angle: 0,
-                width: activeObject.width * 3 * activeObject.scaleX,
-                height: activeObject.height * activeObject.scaleY,
-                flipY: true
-            })
-            newObjArr2.push(cloned)
-        })
-        const group2: fabric.Group = new fabric.Group(newObjArr2, {
-            left: 0,
-            top: 0,
-            angle: 0,
-            width: activeObject.width * 3 * activeObject.scaleX,
-            height: activeObject.height * 3 * activeObject.scaleY,
-        })
-        var patternSourceCanvas = new fabric.StaticCanvas();
-        patternSourceCanvas.add(group2);
-        patternSourceCanvas.setDimensions({
-            width: group2.getScaledWidth(),
-            height: group2.getScaledHeight(),
-        });
-        patternSourceCanvas.renderAll();
-        var pattern = new fabric.Pattern({
-            source: patternSourceCanvas.getElement(),
-            repeat: 'repeat',
-            hasControls: false,
-            ...this.lockObj,
-        });
-        const numX = workspace.width / (group2.width * group2.scaleX)
-        const numY = workspace.width / (group2.height * group2.scaleY)
-        let num = Math.ceil(numX > numY ? numX : numY)
-        num = (num % 2 == 0 ? num + 1 : num) + 2
-        let rectLeft
-        let rectTop
-
-        if (num == 1) {
-            rectLeft = left - activeObject.width * activeObject.scaleX
-            rectTop = top - activeObject.height * activeObject.scaleY
-        } else {
-            rectLeft = left - ((num * 3 - 1) / 2) * activeObject.width * activeObject.scaleX
-            rectTop = top - ((num * 3 - 1) / 2) * activeObject.height * activeObject.scaleY
-        }
-        console.log('num', num)
-        const rect = new fabric.Rect(
-            {
-                width: group2.width * group2.scaleX * num,
-                height: group2.height * group2.scaleY * num,
-                left: rectLeft,
-                top: rectTop,
-                fill: pattern,
-                isRepeat: true,
-                hasControls: false,
-                ...this.lockObj,
-                selectable: false,
-                evented: false,
-            },
-        )
-        rect.cutPartsType = activeObject.cutPartsType
-        rect.rotate(activeObject.angle)
-        rect.sendBackwards()
-        self.canvas.add(rect);
-        this.canvas.requestRenderAll();
-    }
-    static setImageRepeat = () => {
-
     }
     static getCount(cloned: any) {
         let topCount = 0

@@ -85,13 +85,7 @@ const upDateTexture = () => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
     if (cutPartsType.value) {
-        // workspace.visible = false
-        // mask.visible = false
-        // canvasEditor.canvas.requestRenderAll();
-        LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
-            // workspace.visible = true
-            // mask.visible = true
-            // canvasEditor.canvas.requestRenderAll();
+        LoadScene.setTexture(cutPartsType.value, '', () => {
         })
     }
 }
@@ -155,7 +149,7 @@ const dragItem = (event) => {
                 image.FileName = obj.FileName
                 image.FilePath = obj.FilePath
 
-                console.log('添加',obj)
+                console.log('添加', obj)
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);

@@ -18,7 +18,7 @@ const getImagesCustom = function (params: any = '') {
 }
 
 //web-设计-文件上传
-// 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=b1e73c7e-63ac-4764-9043-61ca033f53a2
+// http://8.140.206.30:8011/UpLoadFile?FileName=pfe32383-4bdc-11ee-b1c4-00163e10d08e.png&FilePath=images_temp\p&AppendSize=1048596&AppendComplete=false
 const setUpLoadFile = function (params: any = '') {
     return http.post(`/UpLoadFile?FileName=${params.FileName}&FilePath=${params.FilePath}&AppendSize=${params.AppendSize}&AppendComplete=${params.AppendComplete}`, params.base64Str)
 }

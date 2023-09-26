@@ -77,7 +77,8 @@ const showIcon = (item) => {
 // 替换图片
 const replaceImage = (str, fileHeaderPath) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  const callback = (FileName) => {
+  const FileName = guid() + '.png'
+  const callback = () => {
     const width = activeObject.get('width');
     const height = activeObject.get('height');
     const scaleX = activeObject.get('scaleX');
@@ -90,20 +91,27 @@ const replaceImage = (str, fileHeaderPath) => {
       activeObject.setSrc(item.ImageUrl, () => {
         activeObject.set('name', item.Title);
         activeObject.set('id', uuid());
-        activeObject.set('FileName', item.FileName);
+        activeObject.set('width', width);
+        activeObject.set('height', height);
+        activeObject.set('FileName', FileName);
         activeObject.set('FilePath', item.FilePath);
+        activeObject.set('cutPartsType', activeObject.cutPartsType);
         canvasEditor.canvas.renderAll();
       });
     })
-    getImagesCustom(imageList, FileName, callback2)
+    picture.setImagesCustom({ FileName }).then(e => {
+      if (e.OK == 'True') {
+        getImagesCustom(imageList, FileName, callback2)
+      }
+    })
+
     ElMessage({
       showClose: true,
       message: '上传成功',
       type: 'success',
     })
   }
-  setUpLoadFile(str, imageList, callback)
-
+  setUpLoadFile(str, FileName, 'images_custom\\', callback)
 }
 const delImage = (item) => {
   picture.delImagesCustom({ GUID: item.GUID }).then(res => {
@@ -135,7 +143,19 @@ const getFile = (file) => {
       const {
         result
       } = event.target;
-      setUpLoadFile(result, imageList)
+      const FileName = guid() + '.png'
+      setUpLoadFile(result, FileName, 'images_custom\\', () => {
+        picture.setImagesCustom({ FileName }).then(e => {
+          if (e.OK == 'True') {
+            getImagesCustom(imageList)
+          }
+        })
+        ElMessage({
+          showClose: true,
+          message: '上传成功',
+          type: 'success',
+        })
+      })
       // imageList.push({
       //   id: id,
       //   src: result,

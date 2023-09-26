@@ -1,4 +1,6 @@
 
+// 版型信息
+
 import http from '@/api/request'
 
 // web-版型-选择版型-获取左侧分类
@@ -22,13 +24,18 @@ const getGoodsDetails = function (params: any) {
 const getGoodsSizeDetails = function (params: any) {
     return http.get(`/QueryData?SqlCmdName=Web\\get_sizeListByGoodGUID&DBC=d1`, params)
 }
-
+// // web-版型-颜色
+//http://8.140.206.30:8011/SqlCmdDocument?GUID=a235545a-7c6c-42e6-9603-8b49f3c5c3c6
+const getColorListByGoodGUID = function (params: any) {
+    return http.get(`/QueryData?SqlCmdName=Web\\get_colorListByGoodGUID `, params)
+}
 
 const commodityApi = {
     getLeftClassificationList,
     getGoodsImageListByTreeNode,
     getGoodsDetails,
-    getGoodsSizeDetails
+    getGoodsSizeDetails,
+    getColorListByGoodGUID
 }
 
 

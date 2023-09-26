@@ -20,8 +20,10 @@ import { reactive, } from 'vue'
 import { v4 as uuid } from 'uuid';
 const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
+import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
+// import { setAllCuts } from '@/core/2D/handleImages.ts'
 const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
     sizeList: {
@@ -31,7 +33,6 @@ const props = defineProps({
         }
     }
 })
-const base = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
@@ -48,13 +49,6 @@ onMounted(() => {
             const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
             if (cutPartsType.value) {
                 setAllCuts()
-                // workspace.visible = false
-                // mask.visible = false
-                // canvasEditor.canvas.requestRenderAll();
-
-
-                LoadScene.setTexture(cutPartsType.value, base.value, () => {
-                })
             }
         })
         canvasEditor.canvas.on('mouse:up', () => {
@@ -66,7 +60,7 @@ onMounted(() => {
         canvasEditor.canvas.on('object:removed', () => {
             // upDateTexture()
         })
-    }, 1000);
+    }, 1500);
 
 })
 const setAllCuts = () => {
@@ -81,10 +75,7 @@ const setAllCuts = () => {
     }
     canvasEditor.canvas.getObjects().forEach(image => {
         if (image.id !== 'workspace' && !image.isMask) {
-            console.log('image', image)
             const obj = {
-                // Canvas_width: workspace.width,
-                // Canvas_height: workspace.height,
                 Image_fullName: image.FilePath + '/' + image.FileName,
                 Image_width: image.width * image.scaleX + '',
                 Image_height: image.height * image.scaleY + '',
@@ -92,24 +83,18 @@ const setAllCuts = () => {
                 Image_top: image.top + '',
                 Image_angle: image.angle + '',
                 bgc_r: '0',
-                bgc_g:'0',
-                bgc_b:"0",
-                // Mask_name: maskRect.name,
-                // Mask_width: maskRect.width,
-                // Mask_height: maskRect.height,
-                // Mask_left: maskRect.left,
-                // Mask_top: maskRect.top,
-                // Mask_angle: maskRect.angle
+                bgc_g: '0',
+                bgc_b: "0",
             }
             p.Images.push(obj)
         }
 
     })
-
     console.log('总的剪裁参数', p)
     picture.setCutAllParts(p).then(res => {
         console.log('res', res)
-        base.value = 'data:image/jpeg;base64,' + res.Tag[0].base64
+        const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
+        LoadScene.setTexture(cutPartsType.value, url)
     })
 }
 const init = () => {
@@ -126,7 +111,8 @@ const init = () => {
                     })
                     // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
                 })
-                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName)
+                const color = 'rgb(' + GoodsInfo.modelColorList[0].R + ',' + GoodsInfo.modelColorList[0].G + ',' + GoodsInfo.modelColorList[0].B + ')'
+                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
             }
             cutParts.value = [...arr]
             cutPartsType.value = cutParts.value[0].Title
@@ -144,7 +130,7 @@ const upDateTexture = () => {
         // workspace.visible = false
         // mask.visible = false
         // canvasEditor.canvas.requestRenderAll();
-        LoadScene.setTexture(cutPartsType.value, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
+        LoadScene.setTexture(cutPartsType.value, '', () => {
             // workspace.visible = true
             // mask.visible = true
             // canvasEditor.canvas.requestRenderAll();
@@ -217,7 +203,7 @@ const changeSelection = (item) => {
         // mask.visible = false
         // canvasEditor.canvas.requestRenderAll();
         // const url = canvasEditor.saveImg()
-        LoadScene.setTexture(item.Title, 'http://127.0.0.1:3000/src/assets/png/xingqiu.png', () => {
+        LoadScene.setTexture(item.Title, '', () => {
 
         })
     };

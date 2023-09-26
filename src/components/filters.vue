@@ -80,6 +80,7 @@ import guid from '@/utils/guiId.ts'
 import { uiType, paramsFilters, combinationFilters } from '@/config/constants/filter';
 import mitts from '@/utils/mitts'
 import { v4 as uuid } from 'uuid';
+import { setUpLoadFile } from '@/core/2D/handleImages.ts'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
@@ -207,7 +208,61 @@ const handleSelectOne = () => {
     update?.proxy?.$forceUpdate();
   }
 };
-
+// 上传并替换滤镜图片
+const replaceImage = (url, type) => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  const FileName = guid() + '.png'
+  const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
+  const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
+  let filtersList = activeObject.filtersList ? activeObject.filtersList : []
+  filtersList.push(type)
+  let callback = () => {
+    activeObject.setSrc(url, () => {
+      activeObject.set('name', activeObject.Title);
+      activeObject.set('id', uuid());
+      activeObject.set('width', activeObject.width);
+      activeObject.set('height', activeObject.height);
+      activeObject.set('scaleX', activeObject.scaleX);
+      activeObject.set('filtersList', filtersList);
+      activeObject.set('scaleY', activeObject.scaleY);
+      activeObject.set('filters', []);
+      activeObject.set('FileName', FileName);
+      activeObject.set('oldFileName', oldFileName);
+      activeObject.set('cutPartsType', activeObject.cutPartsType);
+      activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
+      activeObject.set('oldFilePath', oldFilePath)
+      activeObject.applyFilters()
+      canvasEditor.canvas.renderAll();
+    });
+  }
+  setUpLoadFile(url, FileName, 'images_temp//', callback)
+}
+// 恢复无滤镜状态/回退滤镜
+const restoreImage = () => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  if (activeObject.filtersList.length > 0) {
+    activeObject.filtersList.forEach(element => {
+      _createFilter(activeObject, element)
+    });
+  } else {
+    const url = 'http://192.168.1.3/UploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
+    activeObject.setSrc(url, () => {
+      activeObject.set('name', activeObject.Title);
+      activeObject.set('id', uuid());
+      activeObject.set('filters', []);
+      activeObject.set('width', activeObject.width);
+      activeObject.set('height', activeObject.height);
+      activeObject.set('height', activeObject.height);
+      activeObject.set('scaleX', activeObject.scaleX);
+      activeObject.set('FileName', activeObject.oldFileName);
+      activeObject.set('cutPartsType', activeObject.cutPartsType);
+      activeObject.set('FilePath', activeObject.oldFilePath);
+      activeObject.set('oldFilePath', null)
+      activeObject.applyFilters()
+      canvasEditor.canvas.renderAll();
+    });
+  }
+}
 onMounted(() => {
   event.on('selectOne', handleSelectOne);
 });
@@ -243,6 +298,7 @@ function _changeAttrByHandler(moduleInfo) {
   _removeFilter(activeObject, moduleInfo.type);
   // 创建
   const params = moduleInfo.params.map((item) => item.value);
+
   _createFilter(activeObject, moduleInfo.type, moduleInfo.handler(...params));
 }
 
@@ -275,27 +331,7 @@ function _createFilter(sourceImg, type, options = null) {
     multiplier: 1,
   });
   canvasEditor.canvas.requestRenderAll();
-  // const width = activeObject.get('width');
-  // const height = activeObject.get('height');
-  // const scaleX = activeObject.get('scaleX');
-  // const scaleY = activeObject.get('scaleY');
-  // const properties = {
-  //   left: 0,
-  //   top: 0
-  // }
-  const FilePath = 'temp//' + guid()
-  activeObject.setSrc(url.value, () => {
-    activeObject.set('name', activeObject.Title);
-    activeObject.set('id', uuid());
-    activeObject.set('width', activeObject.width);
-    activeObject.set('height', activeObject.height);
-    activeObject.set('scaleX', activeObject.scaleX);
-    activeObject.set('scaleY', activeObject.scaleY);
-    activeObject.set('FileName', activeObject.FileName);
-    activeObject.set('FilePath', activeObject.FilePath);
-    canvasEditor.canvas.renderAll();
-  });
-  // mitts.emit('replaceImages', url.value, 'temp//')
+  replaceImage(url.value, type)
   return filterObj;
 }
 /**
@@ -332,7 +368,9 @@ function _removeFilter(sourceImg, type) {
   const fabricType = _getFabricFilterType(type);
   sourceImg.filters = sourceImg.filters.filter((value) => value.type !== fabricType);
   sourceImg.applyFilters();
+  sourceImg.filtersList = sourceImg.filtersList.filter(el => el !== type)
   canvasEditor.canvas.renderAll();
+  restoreImage()
 }
 /**
  * Change filter class name to fabric's, especially capitalizing first letter

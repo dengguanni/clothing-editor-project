@@ -32,9 +32,12 @@
                         底板默认颜色
                         <template #content>
                             <div class="color-selection">
-                                <div v-for="item in colorList" :key="item"
-                                    :class="colorelected == item ? 'color-selected' : 'color'" @click="changeColor(item)"
-                                    :style="'background-color:' + item + ';'"></div>
+                                <div v-for="item in colorList" :key="item.GUID"
+                                    :class="colorSelected == item.GUID ? 'color-selected' : 'color'"
+                                    @click="changeColor(item)"
+                                    :style="'background-color:rgb(' + item.R + ',' + item.G + ',' + item.B + ');'">
+                                </div>
+
                             </div>
                             <!-- <ColorPicker v-model="color4" recommend /> -->
                             <!-- <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)">
@@ -53,6 +56,8 @@ import colorSelector from '@/components/colorSelector.vue';
 import { reactive, ref, onMounted, provide, watch, onUnmounted } from 'vue'
 import useSelect from '@/hooks/select';
 import mitts from '@/utils/mitts.js';
+import commodityApi from '@/api/commodity'
+import GoodsInfo from '@/core/objects/goods/goodsInfo'
 const { fabric, mixinState, canvasEditor } = useSelect();
 const info: any = ref({
     GUID: '',
@@ -84,7 +89,7 @@ let indeterminate = ref(true);
 let checkAll = ref(false);
 let checkAllGroup = reactive(['S'])
 const sizeSelected = ref('')
-const colorelected = ref('#ffff')
+const colorSelected = ref('')
 // const sizeList = reactive([
 //     'S',
 //     'M',
@@ -92,12 +97,10 @@ const colorelected = ref('#ffff')
 //     'XL',
 //     'XXL'
 // ]);
-const colorList = reactive([
-    '#ffff',
-    '#19be6b',
+const colorList = ref([
+
 
 ]);
-const color4 = ref('#19be6b')
 const activeObject = canvasEditor.canvas.getActiveObject();
 const baseAttr = reactive({
     id: '',
@@ -128,6 +131,7 @@ watch(
     (val) => {
         if (val.GUID) {
             info.value = { ...val }
+            getBgColor(val.GUID)
         }
     }
 );
@@ -155,16 +159,19 @@ const changeSize = (item: any) => {
     sizeSelected.value = item.GUID
     console.log('发送')
     mitts.emit('changeSize', item)
-
+    changeColor( colorSelected.value[0])
 }
 const changeColor = (item: String) => {
-    colorelected.value = item
-    mitts.emit('changeModelColor', item)
-
-    // GoodsInfo.setModelColor(item)
+    colorSelected.value = item.GUID
+    mitts.emit('changeModelColor', 'rgb(' + item.R + ',' + item.G + ',' + item.B + ')')
 }
-
-
+const getBgColor = (GUID: string) => {
+    commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
+        colorList.value = [...res.Tag[0].Table]
+        colorSelected.value = colorList.value[0].GUID
+        GoodsInfo.modelColorList = colorList.value
+    })
+}
 const handleCheckAll = () => {
     if (indeterminate) {
         checkAll.value = false;

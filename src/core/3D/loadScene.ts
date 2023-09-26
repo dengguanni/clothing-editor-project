@@ -10,7 +10,7 @@ class LoadScene {
     static scene: any
     static renderer: any
     static screenshotList: Array<any> = []
-    static loadModel(url: string, name: string) {
+    static loadModel(url: string, name: string, modelColor: any = null) {
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
                 if (c.isGroup) {
@@ -23,8 +23,14 @@ class LoadScene {
         // ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb 
         // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
         loader.load('http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
-            const color = new THREE.Color('0xffffff')
+
             object.name = name
+            object.scene.traverse(v => {
+                if (v.type == 'Mesh' && modelColor) {
+                    const color = new THREE.Color(modelColor)
+                    v.material.color = color
+                }
+            })
             LoadScene.scene.add(object.scene);
             LoadScene.setCameraAngle()
         });

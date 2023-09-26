@@ -1,4 +1,3 @@
-import { Message } from 'view-ui-plus';
 import axios from 'axios' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';

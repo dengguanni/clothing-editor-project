@@ -9,8 +9,9 @@
             </div>
             <!-- <div class="content"> -->
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
-                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;"  v-loading="loadScreenshotList" >
-                    <img :src="item.src" style="height: 280px; width: 280px;"  />
+                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;"
+                    v-loading="loadScreenshotList">
+                    <img :src="item.src" style="height: 280px; width: 280px;" />
                 </CarouselItem>
             </Carousel>
             <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="load3d"></div>
@@ -24,6 +25,7 @@
 import { ref, onMounted, onUnmounted, reactive, onBeforeMount } from 'vue'
 import { Carousel } from 'view-ui-plus'
 import LoadScene from '@/core/3D/loadScene.ts'
+import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import mitts from '@/utils/mitts.js';
 const load3DScene = new LoadScene()
 let screenshotList = reactive([])
@@ -62,6 +64,14 @@ onMounted(() => {
     mitts.on('cutPartsType', (val) => {
         cutPartsType.value = val
     })
+    // const modelColor = GoodsInfo.modelColorList[0]
+    // load3DScene.setModelColor('rgb(' + modelColor.R + ',' + modelColor.G + ',' + modelColor.B + ')', () => {
+    //     screenshotList = []
+    //     let arr = LoadScene.getImages()
+    //     arr.forEach(element => {
+    //         screenshotList.push(element)
+    //     });
+    // })
     load3DScene.init(scene, camera, renderer, 'small-3d', () => {
         screenshotList = []
         let arr = LoadScene.setCameraAngle()

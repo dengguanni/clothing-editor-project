@@ -17,7 +17,7 @@
           <Input search enter-button="搜索" placeholder="搜索版型" prefix="ios-contact" v-model="searchKey"
             @on-search="searchGoods"></Input>
         </div>
-        <button class="reset" @click="searchKey= ''" style="cursor: pointer;">重置</button>
+        <button class="reset" @click="searchKey = ''" style="cursor: pointer;">重置</button>
       </div>
       <div class="content">
         <div class="conten-item" v-for="item in goodList" :key="item.GUID" @click="getGoodsId(item)">
@@ -36,7 +36,8 @@
 import { TreeSelect, Page } from 'view-ui-plus'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTreeV2 } from 'element-plus'
-import getLeftClassificationList from '@/api/commodity.ts'
+import commodityApi from '@/api/commodity'
+
 const emit = defineEmits()
 let searchKey = ref('')
 let goodList = ref([])
@@ -57,7 +58,7 @@ const init = () => {
   getTreeInfo()
 }
 const getGoodsId = (item) => {
-  emit('senGoodsId', item)
+  emit('sendGoodsId', item)
 }
 const getCurrentNode = () => {
   console.log('getCurrentNode')
@@ -65,12 +66,12 @@ const getCurrentNode = () => {
 const searchGoods = (val) => {
   console.log(val)
   const p = {
-    TreeNodeGUID:currentParentNodeId.value ,
+    TreeNodeGUID: currentParentNodeId.value,
     Page_Index: 0,
     QueryKeyWord: val,
     Page_RowCount: 1
   }
-  getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+  commodityApi.getGoodsImageListByTreeNode(p).then(res => {
     let arr = []
     if (res.Tag[0].Table) {
       res.Tag[0].Table.forEach(el => {
@@ -78,13 +79,11 @@ const searchGoods = (val) => {
       })
       goodList.value = arr
     }
-    console.log('搜索', res.Tag[0].Table)
   })
 }
 const getNode = (val) => {
   if (val.HasChilds == '1') {
-    console.log('展开节点', val)
-    getLeftClassificationList.getLeftClassificationList({ PGUID: val.id }).then(res => {
+    commodityApi.getLeftClassificationList({ PGUID: val.id }).then(res => {
       let arr1 = []
       res.Tag[0].Table.forEach(el => {
         let children = []
@@ -101,7 +100,7 @@ const getNode = (val) => {
             QueryKeyWord: '',
             Page_RowCount: 1
           }
-          getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+          commodityApi.getGoodsImageListByTreeNode(p).then(res => {
             console.log('缩略图', res)
           })
         }
@@ -126,7 +125,7 @@ const selectNOde = (val) => {
     QueryKeyWord: '',
     Page_RowCount: 1
   }
-  getLeftClassificationList.getGoodsImageListByTreeNode(p).then(res => {
+  commodityApi.getGoodsImageListByTreeNode(p).then(res => {
     let arr = []
     if (res.Tag[0].Table) {
       res.Tag[0].Table.forEach(el => {
@@ -136,10 +135,17 @@ const selectNOde = (val) => {
       currentParentNodeId.value = val.id
     }
   })
+  // getBgColor()
 
 }
+// 获取颜色
+const getBgColor = (GUID) => {
+  commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
+    console.log('颜色', res)
+  })
+}
 const getTreeInfo = () => {
-  getLeftClassificationList.getLeftClassificationList({ PGUID: '' }).then(res => {
+  commodityApi.getLeftClassificationList({ PGUID: '' }).then(res => {
     console.log('res', res)
     let arr1 = []
     res.Tag[0].Table.forEach(el => {

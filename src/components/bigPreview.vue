@@ -22,9 +22,9 @@
             <Icon type="ios-arrow-dropdown-circle" size="36" color="#DCE1E9" class="down" @click="changeImage('down')" />
         </div>
         <div class="color-selection">
-            <div :class="colorSelection == item ? 'item-active' : 'item'" v-for="item in colorList" :key="item"
+            <div :class="colorSelection == item.GUID ? 'item-active' : 'item'" v-for="item in colorList" :key="item.GUID"
                 @click="changeColor(item)">
-                <div class="color" :style="'background-color: ' + item + ';'">
+                <div class="color" :style="'background-color:rgb(' + item.R + ',' + item.G + ',' + item.B + ');'">
                     <Icon type="ios-checkmark" size="20" color="#3064F2" v-if="colorSelection == item" />
                 </div>
             </div>
@@ -35,6 +35,8 @@
 <script setup>
 import { reactive, ref, onUnmounted, onMounted } from 'vue'
 import LoadScene from '@/core/3D/loadScene.ts'
+import mitts from '@/utils/mitts'
+import GoodsInfo from '@/core/objects/goods/goodsInfo'
 const load3DScene = new LoadScene()
 const props = defineProps({
     is3D: {
@@ -45,16 +47,18 @@ const props = defineProps({
 let screenshotList = reactive([])
 let scene, renderer, camera
 const is3D = ref(false)
-const colorSelection = ref('black')
-const colorList = reactive([
-    'black',
-    'red'
+const colorSelection = ref('')
+const colorList = ref([
+
 ])
 
 let directionSelection = ref('')
 let imageActive = ref('')
 const list = reactive([0, 2, 34, 6, 9])
 onMounted(() => {
+    colorList.value = [...GoodsInfo.modelColorList]
+    colorSelection.value = colorList.value[0].GUID
+    changeColor(colorList.value[0])
     is3D.value = props.is3D === 4 ? true : false
     LoadScene.change3dBox('big-3d', () => {
         screenshotList = []
@@ -107,8 +111,8 @@ const changeImage = (val) => {
     }
 }
 const changeColor = (item) => {
-    colorSelection.value = item
-    load3DScene.setModelColor(item, () => {
+    colorSelection.value = item.GUID
+    load3DScene.setModelColor('rgb(' + item.R + ',' + item.G + ',' + item.B + ')', () => {
         screenshotList = []
         let arr = LoadScene.getImages()
         arr.forEach(element => {

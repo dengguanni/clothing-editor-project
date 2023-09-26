@@ -1,6 +1,6 @@
 <template>
   <Dialog @closeDailog="closeDailog" v-if="showDailog">
-    <patternCard v-if="dialogType == 1" @senGoodsId="senGoodsId"></patternCard>
+    <patternCard v-if="dialogType == 1" @sendGoodsId="sendGoodsId"></patternCard>
     <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"
       :goodsId="goodsInfo.GUID"></productDetails>
     <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
@@ -381,11 +381,10 @@ const rulerSwitch = (val) => {
 const closeDailog = () => {
   showDailog.value = false
 }
-const senGoodsId = (val) => {
+const sendGoodsId = (val) => {
   showDailog.value = false
   goodsInfo.value = { ...val }
   getLeftClassificationList.getGoodsSizeDetails({ GUID: goodsInfo.value.GUID }).then(res => {
-    console.log('外部尺码', res)
     let arr = []
     res.Tag[0].Table.forEach(el => {
       arr.push({

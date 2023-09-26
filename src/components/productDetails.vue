@@ -14,7 +14,7 @@
                 <div class="item-1">
                     <div v-for="(item, key) in goodsDetailInfo">
                         <div class="details" :key="item" v-if="key !== 'GUID' && key !== '产品别名' && key !== '描述'">
-                            <div class="left" >{{ key }}</div>
+                            <div class="left">{{ key }}</div>
                             <div class="right">{{
                                 goodsDetailInfo[key]
                             }}</div>
@@ -102,7 +102,6 @@ const getSizeInfo = () => {
     }
     getLeftClassificationList.getGoodsSizeDetails(p).then(res => {
         sizeInfo.value = [...res.Tag[0].Table]
-        console.log('尺码', sizeInfo.value)
     })
 }
 const getGoodsDetails = () => {

@@ -186,7 +186,6 @@ class WorkspacePlugin {
   }
 
   _getScale() {
-    console.log('222')
     const viewPortWidth = this.workspaceEl.offsetWidth;
     const viewPortHeight = this.workspaceEl.offsetHeight;
     // 按照宽度
