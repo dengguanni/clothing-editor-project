@@ -97,10 +97,7 @@ const colorSelected = ref('')
 //     'XL',
 //     'XXL'
 // ]);
-const colorList = ref([
-
-
-]);
+const colorList = ref([]);
 const activeObject = canvasEditor.canvas.getActiveObject();
 const baseAttr = reactive({
     id: '',
@@ -163,7 +160,7 @@ const changeSize = (item: any) => {
 }
 const changeColor = (item: String) => {
     colorSelected.value = item.GUID
-    mitts.emit('changeModelColor', 'rgb(' + item.R + ',' + item.G + ',' + item.B + ')')
+    mitts.emit('changeModelColor', item)
 }
 const getBgColor = (GUID: string) => {
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {

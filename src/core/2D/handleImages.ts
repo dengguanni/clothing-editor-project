@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus';
 import guid from '@/utils/guiId.ts'
 import useSelect from '@/hooks/select';
 import LoadScene from '@/core/3D/loadScene.ts'
+import GoodsInfo from '@/core/objects/goods/goodsInfo'
 const { fabric, mixinState, canvasEditor } = useSelect();
 const load3DScene = new LoadScene()
 // 获取历史记录
@@ -77,6 +78,7 @@ const imageSize = (base64Str) => {
 export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
     const result = str.substring(str.indexOf(',') + 1,)
     const splitBase64Str = splitBase64(result, 1048596)
+    const FilePath = fileFirstName + FileName.substring(0, 1)
     if (splitBase64Str.length > 30 && fileFirstName == 'images_custom\\') {
         ElMessage({
             showClose: true,
@@ -87,7 +89,6 @@ export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
     } else {
         // 不分包
         if (splitBase64Str.length == 1) {
-            const FilePath = fileFirstName + FileName.substring(0, 1)
             const p = {
                 FileName: FileName,
                 FilePath: FilePath,
@@ -99,57 +100,43 @@ export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
                 console.log('上传', res)
                 if (res.OK == 'True') {
                     callback ? callback(FileName) : ''
-
                 }
+            }).catch(err => {
+                console.log(err)
             })
         } else {
-            const FilePath = fileFirstName + FileName.substring(0, 1)
+            // const FilePath = fileFirstName + FileName.substring(0, 1)
             let index = 0
-            // splitBase64Str.forEach((el, index) => {
-            // if (index == 0) {
-                
+            const fn = () => {
                 const size = splitBase64Str[index]
+                console.log('index', index, (index + 1) == splitBase64Str.length)
                 const p = {
                     FileName: FileName,
                     FilePath: FilePath,
                     AppendSize: imageSize(size),
-                    AppendComplete: 'False',
+                    AppendComplete: (index + 1) == splitBase64Str.length ? 'True' : 'False',
                     base64Str: splitBase64Str[index]
                 }
                 picture.setUpLoadFile(p).then(res => {
-                    if (res.OK == 'False') {
-                        ElMessage({
-                            showClose: true,
-                            message: res.Message,
-                            type: 'error',
-                        })
-                    }
-                })
-            // } else {
+                    if (res.OK == 'True') {
+                        if (index + 1 < splitBase64Str.length) {
+                            index = index + 1
+                            fn()
+                        } else {
+                            callback ? callback(FileName) : ''
+                        }
 
-            //     const p = {
-            //         FileName: FileName,
-            //         FilePath: FilePath,
-            //         AppendSize: imageSize(splitBase64Str[index]),
-            //         AppendComplete: (index + 1) == splitBase64Str.length ? 'True' : 'False',
-            //         base64Str: splitBase64Str[index]
-            //     }
-            //     console.log('p', index, p.AppendComplete)
-            //     picture.setUpLoadFile(p).then(res => {
-            //         if (res.OK == 'False') {
-            //             ElMessage({
-            //                 showClose: true,
-            //                 message: res.Message,
-            //                 type: 'error',
-            //             })
-            //         } else {
-            //             if (index + 1 == splitBase64Str.length) {
-            //                 callback ? callback(FileName) : ''
-            //             }
-            //         }
-            //     })
-            // }
-            // })
+                    }
+                }).catch(err => {
+                    console.log(err)
+                    ElMessage({
+                        showClose: true,
+                        message: err.Message,
+                        type: 'error',
+                    })
+                })
+            }
+            fn()
         }
     }
 }

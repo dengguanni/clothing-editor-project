@@ -10,6 +10,7 @@
                 </div>
                 <div class="text-1">{{ item.Title }} </div>
             </div>
+            <img :src="URLbase64" style="width: 200px; height: 200px; border: 1px solid black;">
         </div>
     </div>
 </template>
@@ -23,6 +24,8 @@ import LoadScene from '@/core/3D/loadScene.ts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
+import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import guid from '@/utils/guiId.ts'
 // import { setAllCuts } from '@/core/2D/handleImages.ts'
 const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
@@ -33,58 +36,106 @@ const props = defineProps({
         }
     }
 })
+const URLbase64 = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
 let cutPartsType = ref('')
 let SizeGUID = ref('')
+let bgColor = ref('')
 onUnmounted(() => {
     mitts.off('changeSize', '')
 })
 onMounted(() => {
     init()
-    setTimeout(() => {
-        canvasEditor.canvas.on('mouse:up', () => {
-            const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-            const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-            if (cutPartsType.value) {
-                setAllCuts()
-            }
-        })
-        canvasEditor.canvas.on('mouse:up', () => {
-            // upDateTexture()
-        })
-        canvasEditor.canvas.on('dragover', () => {
-            // upDateTexture()
-        })
-        canvasEditor.canvas.on('object:removed', () => {
-            // upDateTexture()
-        })
-    }, 1500);
+
+    watchCanvas()
+    mitts.on('changeModelColor', (e) => {
+        bgColor.value = { ...e }
+    })
+
 
 })
+const watchCanvas = () => {
+    const fn = () => {
+        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+        const objects = canvasEditor.canvas.getObjects()
+        let hasText = false
+        objects.forEach(el => {
+            if (el.type == 'text') {
+                hasText = true
+                const FileName = guid() + '.png'
+                el.clone(clone => {
+                    clone.set({
+                        angle: 0
+                    })
+                    const url = clone.toDataURL({
+                        width: clone.width,
+                        height: clone.height,
+                        scaleX: clone.scaleX,
+                        scaleY: clone.scaleY,
+                        multiplier: 1,
+                    })
+                    el.FileName = FileName
+                    el.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                    console.log('上传前', clone)
+                    let callback = () => {
+                        if (cutPartsType.value) {
+                            setAllCuts()
+                        }
+                    }
+                    setUpLoadFile(url, FileName, 'images_temp/', callback)
+                })
+
+
+            }
+        })
+        if (cutPartsType.value && !hasText) {
+            setAllCuts()
+        }
+    }
+    setTimeout(() => {
+        canvasEditor.canvas.on('object:added', () => {
+            console.log('added')
+            fn()
+        })
+        canvasEditor.canvas.on('object:modified', () => {
+            console.log('modified')
+            fn()
+        })
+        canvasEditor.canvas.on('object:removed', () => {
+            console.log('removed')
+            fn()
+        })
+    }, 1500);
+    // canvasEditor.canvas.on('object:removed', () => {
+    //     // upDateTexture()
+    // })
+}
 const setAllCuts = () => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    console.log('maskRect', maskRect)
     const mask = canvasEditor.canvas.getActiveObjects()[0]
     let p = {
         SizeGUID: SizeGUID.value,
         Canvas_zoom: '0.08',
         Part_name: cutPartsType.value,
-        Images: []
+        Images: [],
+        bgc_r: bgColor.value.R,
+        bgc_g: bgColor.value.G,
+        bgc_b: bgColor.value.B
     }
     canvasEditor.canvas.getObjects().forEach(image => {
         if (image.id !== 'workspace' && !image.isMask) {
             const obj = {
                 Image_fullName: image.FilePath + '/' + image.FileName,
-                Image_width: image.width * image.scaleX + '',
-                Image_height: image.height * image.scaleY + '',
-                Image_left: image.left + '',
-                Image_top: image.top + '',
-                Image_angle: image.angle + '',
-                bgc_r: '0',
-                bgc_g: '0',
-                bgc_b: "0",
+                Image_width: (image.width * image.scaleX).toFixed(5) + '',
+                Image_height: (image.height * image.scaleY).toFixed(5) + '',
+                Image_left: (image.left - maskRect.left).toFixed(5) + '',
+                Image_top: image.top.toFixed(5) + '',
+                Image_angle: image.angle.toFixed(5) + ''
             }
             p.Images.push(obj)
         }
@@ -92,8 +143,8 @@ const setAllCuts = () => {
     })
     console.log('总的剪裁参数', p)
     picture.setCutAllParts(p).then(res => {
-        console.log('res', res)
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
+        URLbase64.value = url
         LoadScene.setTexture(cutPartsType.value, url)
     })
 }
@@ -111,6 +162,7 @@ const init = () => {
                     })
                     // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
                 })
+                GoodsInfo.SizeGUID = e.GUID
                 const color = 'rgb(' + GoodsInfo.modelColorList[0].R + ',' + GoodsInfo.modelColorList[0].G + ',' + GoodsInfo.modelColorList[0].B + ')'
                 LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
             }

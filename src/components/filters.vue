@@ -117,9 +117,10 @@ watch(
   () => props.singleFilters,
   (val) => {
     setSharpening(val)
+
   }
 );
-// 锐化
+// 锐化、清晰
 const setSharpening = (val) => {
   const obj = canvasEditor.canvas.getActiveObjects()[0];
   function applyFilter(index, filter) {
@@ -140,6 +141,21 @@ const setSharpening = (val) => {
       -1, 5, -1,
       0, -1, 0]
   }));
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  const url = activeObject.toDataURL({
+    width: activeObject.width,
+    height: activeObject.height,
+    angle: activeObject.angle,
+    scaleX: activeObject.scaleX,
+    scaleY: activeObject.scaleY,
+    multiplier: 1,
+  });
+  if (val) {
+    replaceImage(url, 'Sharpen')
+  } else {
+    restoreImage()
+  }
+
 
 }
 
@@ -215,7 +231,7 @@ const replaceImage = (url, type) => {
   const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
   const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
   let filtersList = activeObject.filtersList ? activeObject.filtersList : []
-  filtersList.push(type)
+  type == 'Sharpen' ? '' : filtersList.push(type)
   let callback = () => {
     activeObject.setSrc(url, () => {
       activeObject.set('name', activeObject.Title);

@@ -58,6 +58,7 @@ const getImagesBackground = (QueryKeyWord) => {
     getPicture.getImagesBackground(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
+        console.log('背景', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -75,7 +76,7 @@ const getImagesLibrary = (QueryKeyWord) => {
     getPicture.getImagesLibrary(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
-        console.log('imageList', imageList.value)
+        console.log('图库', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -148,8 +149,6 @@ const dragItem = (event) => {
                 image.ImageUrl = obj.ImageUrl
                 image.FileName = obj.FileName
                 image.FilePath = obj.FilePath
-
-                console.log('添加', obj)
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);

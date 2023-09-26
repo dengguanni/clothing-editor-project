@@ -170,7 +170,8 @@ import { getPolygonVertices } from '@/utils/math';
 import useSelect from '@/hooks/select';
 import { useI18n } from 'vue-i18n';
 import mitts from '@/utils/mitts'
-
+import guid from '@/utils/guiId.ts'
+import { setUpLoadFile } from '@/core/2D/handleImages.ts'
 // 默认属性
 const defaultPosition = { shadow: '', fontFamily: 'arial' };
 // 拖拽属性
@@ -191,31 +192,42 @@ onMounted(() => {
     cutPartsType.value = val
   })
 })
+
 const addText = (option) => {
+  const active = canvasEditor.canvas.getActiveObjects()[0]
+  const FileName = guid() + '.png'
   const text = new fabric.IText(t('everything_is_fine'), {
     ...defaultPosition,
     ...option,
     fontSize: 80,
     id: uuid(),
-    cutPartsType: cutPartsType.value
+    cutPartsType: cutPartsType.value,
+    type: 'text',
+    FileName: FileName,
+    FilePath: 'images_temp/' + FileName.substring(0, 1)
   });
   canvasEditor.canvas.add(text);
+
   if (!option) {
     text.center();
   }
+ 
   canvasEditor.canvas.setActiveObject(text);
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  const url = activeObject.toDataURL({
+    width: activeObject.width,
+    height: activeObject.height,
+    angle: activeObject.angle,
+    scaleX: activeObject.scaleX,
+    scaleY: activeObject.scaleY,
+    multiplier: 1,
+  })
+  let callback = () => {
+    console.log('字体')
+  }
+  setUpLoadFile(url, FileName, 'images_temp/', callback)
 };
 
-// const addImg = (e) => {
-//   const imgEl = e.target.cloneNode(true);
-//   const imgInstance = new fabric.Image(imgEl, {
-//     ...defaultPosition,
-//     id: uuid(),
-//     name: '图片default',
-//   });
-//   canvasEditor.canvas.add(imgInstance);
-//   canvasEditor.canvas.renderAll();
-// };
 
 const addTextBox = (option) => {
   const text = new fabric.Textbox(t('everything_goes_well'), {
