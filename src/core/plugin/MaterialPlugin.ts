@@ -25,7 +25,6 @@ class MaterialPlugin {
 
   // 根据素材类型获取分类列表
   async getMaterialType(typeId: string) {
-    console.log('typeId', typeId)
     const url = this.apiMapUrl[typeId];
     const res = await axios.get(url, { params: { typeId } });
     return res.data.data;

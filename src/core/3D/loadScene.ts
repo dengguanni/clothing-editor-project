@@ -28,7 +28,10 @@ class LoadScene {
             object.scene.traverse(v => {
                 if (v.type == 'Mesh' && modelColor) {
                     const color = new THREE.Color(modelColor)
-                    v.material.color = color
+                    v.material = new THREE.MeshLambertMaterial({
+                        map: v.material.map, //获取原来材质的颜色贴图属性值
+                        color: color, //读取原来材质的颜色
+                    })
                 }
             })
             LoadScene.scene.add(object.scene);
@@ -134,32 +137,12 @@ class LoadScene {
         setTimeout(() => {
             callBack()
         }, 1000);
-        console.log('LoadScene.scene', LoadScene.scene)
     }
     static change3dBox = (id, callback) => {
         const height = id == 'big-3d' ? 600 : 280
         const width = id == 'big-3d' ? 600 : 280
         LoadScene.renderer.setSize(height, width);
-        // // 设置渲染的输出编码
-        // LoadScene.renderer.outputEncoding = THREE.sRGBEncoding;
-        // 将内容渲染到页面中
         document.getElementById(id)?.appendChild(LoadScene.renderer.domElement);
-
-        // // 创建轨道控制器
-        // const control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
-        // control.target.set(0, 0, 0);
-        // // 设置阻尼
-        // // control.enableDamping = true;
-        // // LoadScene.loadModel()
-        // // 创建渲染函数
-        // const render = () => {
-        //     control.update();
-        //     LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
-        //     // 通过动画帧来执行函数
-        //     requestAnimationFrame(render);
-        //     TWEEN.update()
-        // };
-        // render();
         callback ? callback() : ''
     }
 
@@ -193,7 +176,6 @@ class LoadScene {
                 c.rotation.y = 0
             }
         })
-        console.log('更新，照片', LoadScene.screenshotList)
         return LoadScene.screenshotList
     }
 

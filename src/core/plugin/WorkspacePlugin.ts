@@ -218,7 +218,7 @@ class WorkspacePlugin {
   auto() {
     if (!WorkspacePlugin.hasCut) {
       const scale = this._getScale();
-      this.setZoomAuto(scale - 0.08);
+      this.setZoomAuto(scale - 0.07);
     }
 
   }

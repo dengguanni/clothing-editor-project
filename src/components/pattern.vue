@@ -154,19 +154,20 @@ const changeCommon = (key, value) => {
 }
 const changeSize = (item: any) => {
     sizeSelected.value = item.GUID
-    console.log('发送')
+    console.log('changeSize', colorSelected.value[0])
     mitts.emit('changeSize', item)
-    changeColor( colorSelected.value[0])
 }
-const changeColor = (item: String) => {
+const changeColor = (item: any) => {
     colorSelected.value = item.GUID
     mitts.emit('changeModelColor', item)
+    
 }
 const getBgColor = (GUID: string) => {
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
         colorList.value = [...res.Tag[0].Table]
         colorSelected.value = colorList.value[0].GUID
         GoodsInfo.modelColorList = colorList.value
+        mitts.emit('changeModelColor', colorList.value[0])
     })
 }
 const handleCheckAll = () => {

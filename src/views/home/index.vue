@@ -394,8 +394,6 @@ const sendGoodsId = (val) => {
     })
     sizeList.value = [...arr]
   })
-
-  console.log('商品详情111', val)
 }
 // 点击滤镜或者剪裁时候返回
 const goBack = (val) => {

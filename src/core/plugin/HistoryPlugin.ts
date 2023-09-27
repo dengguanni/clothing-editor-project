@@ -41,6 +41,7 @@ class HistoryPlugin {
   }
 
   getHistory() {
+    console.log('this.history', this.history)
     return this.history;
   }
   _save(event) {
@@ -58,6 +59,7 @@ class HistoryPlugin {
 
   undo() {
     if (this.history.canUndo.value) {
+      console.log('this.history.canUndo.value', this.history.canUndo.value)
       this.renderCanvas();
       this.history.undo();
     }

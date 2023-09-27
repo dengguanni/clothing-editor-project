@@ -4,7 +4,6 @@
             @keyup.enter="searchImg" />
         <div class="line"></div>
         <div class="content">
-            <img class="item" src="src/assets/png/xingqiu.png" alt="1" @dragend="dragItem" />
             <img class="item" :src="item.ImageUrl" v-for="item in imageList" :key="item.GUID" @click="addItem(item)"
                 @dragend="dragItem">
         </div>
@@ -28,7 +27,7 @@ import { v4 as uuid } from 'uuid';
 import getPicture from '@/api/picture.ts'
 import mitts from '@/utils/mitts'
 import LoadScene from '@/core/3D/loadScene.ts'
-const fakeInfo = ref({ ImageUrl: 'http://192.168.1.3/src/assets/png/xingqiu.png', Title: 'xingqiu', FileName: '', FilePath: '' })
+import baseUrl from '@/config/constants/baseUrl'
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -58,7 +57,6 @@ const getImagesBackground = (QueryKeyWord) => {
     getPicture.getImagesBackground(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
-        console.log('背景', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -76,7 +74,6 @@ const getImagesLibrary = (QueryKeyWord) => {
     getPicture.getImagesLibrary(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         loading.value = false
-        console.log('图库', imageList.value)
     }).catch(err => {
         loading.value = false
     })
@@ -101,7 +98,7 @@ const addItem = (item) => {
         })
     } else {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        const imageURL = 'http://192.168.1.3/' + item.ImageUrl_Path;
+        const imageURL = baseUrl + item.ImageUrl_Path;
         let callback = (image, isError) => {
             if (!isError) {
                 image.name = item.Title
@@ -131,7 +128,7 @@ const dragItem = (event) => {
     if (!props.isBg) {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const URL = event.toElement.currentSrc;
-        const imageURL = URL.replace('http://8.140.206.30:8089/', 'http://192.168.1.3/')
+        const imageURL = URL.replace('http://8.140.206.30:8089/', baseUrl)
         const ImageUrl_Path = URL.replace('http://8.140.206.30:8089/', '')
         const obj = imageList.value.filter(el => el.ImageUrl_Path == ImageUrl_Path)[0]
         let callback = (image, isError) => {

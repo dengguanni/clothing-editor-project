@@ -114,7 +114,6 @@ const getNode = (val) => {
       })
       val.children = arr1
       treeData.value = [...treeData.value]
-      console.log('treeData.value', treeData.value)
     })
   }
 }
@@ -167,7 +166,6 @@ const getTreeInfo = () => {
       arr1.push(obj)
     })
     treeData.value = [...arr1]
-    console.log('treeData', treeData)
   })
 }
 

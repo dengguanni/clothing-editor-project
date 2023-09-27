@@ -195,7 +195,9 @@ const setCopyTo = (item) => {
                     c.set({
                         id: uuid(),
                         cutPartsType: el.Title,
-                        visible: false
+                        visible: false,
+                        FileName: activeObject.FileName,
+                        FilePath: activeObject.FilePath,
                     })
                     canvasEditor.canvas.add(c)
                 })
@@ -206,7 +208,9 @@ const setCopyTo = (item) => {
             c.set({
                 id: uuid(),
                 cutPartsType: item.Title,
-                visible: false
+                visible: false,
+                FileName: activeObject.FileName,
+                FilePath: activeObject.FilePath,
             })
             canvasEditor.canvas.add(c)
         })

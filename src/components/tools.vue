@@ -194,6 +194,14 @@ onMounted(() => {
 })
 
 const addText = (option) => {
+  if (!cutPartsType.value) {
+    ElMessage({
+      showClose: true,
+      message: '请先选择版型',
+      type: 'error',
+    })
+    return
+  }
   const active = canvasEditor.canvas.getActiveObjects()[0]
   const FileName = guid() + '.png'
   const text = new fabric.IText(t('everything_is_fine'), {
@@ -211,7 +219,7 @@ const addText = (option) => {
   if (!option) {
     text.center();
   }
- 
+
   canvasEditor.canvas.setActiveObject(text);
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   const url = activeObject.toDataURL({

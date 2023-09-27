@@ -60,16 +60,25 @@ class CopyPlugin {
     // 间距设置
     const grid = 10;
     const canvas = this.canvas;
+    const cutPartsType = activeObject.cutPartsType
+    const FileName = activeObject.FileName
+    const FilePath = activeObject.FilePath
+    console.log('fuzhiactiveObject', activeObject)
     activeObject?.clone((cloned: fabric.Object) => {
       if (cloned.left === undefined || cloned.top === undefined) return;
-      canvas.discardActiveObject();
+      
       // 设置位置信息
       cloned.set({
         left: cloned.left + grid,
         top: cloned.top + grid,
         evented: true,
         id: uuid(),
+        cutPartsType: cutPartsType,
+        FileName: FileName,
+        FilePath: FilePath
       });
+      canvas.discardActiveObject();
+      console.log('复制', cloned)
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();

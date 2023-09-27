@@ -80,6 +80,7 @@ import guid from '@/utils/guiId.ts'
 import { uiType, paramsFilters, combinationFilters } from '@/config/constants/filter';
 import mitts from '@/utils/mitts'
 import { v4 as uuid } from 'uuid';
+import baseUrl from '@/config/constants/baseUrl'
 import { setUpLoadFile } from '@/core/2D/handleImages.ts'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
@@ -261,7 +262,7 @@ const restoreImage = () => {
       _createFilter(activeObject, element)
     });
   } else {
-    const url = 'http://192.168.1.3/UploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
+    const url = baseUrl + 'UploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
     activeObject.setSrc(url, () => {
       activeObject.set('name', activeObject.Title);
       activeObject.set('id', uuid());

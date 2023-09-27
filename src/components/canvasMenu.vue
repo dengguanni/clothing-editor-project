@@ -26,8 +26,8 @@ import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
 import { setUpLoadFile } from '@/core/2D/handleImages.ts'
 import guid from '@/utils/guiId.ts'
+import baseUrl from '@/config/constants/baseUrl'
 // import { setAllCuts } from '@/core/2D/handleImages.ts'
-const baseUrl = 'http://8.140.206.30:8089/'
 const props = defineProps({
     sizeList: {
         type: Array,
@@ -48,13 +48,11 @@ onUnmounted(() => {
 })
 onMounted(() => {
     init()
-
     watchCanvas()
     mitts.on('changeModelColor', (e) => {
         bgColor.value = { ...e }
+        setAllCuts()
     })
-
-
 })
 const watchCanvas = () => {
     const fn = () => {
@@ -63,10 +61,11 @@ const watchCanvas = () => {
         const objects = canvasEditor.canvas.getObjects()
         let hasText = false
         objects.forEach(el => {
-            if (el.type == 'text') {
+            if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
                 hasText = true
                 const FileName = guid() + '.png'
                 el.clone(clone => {
+                    clone.rotate(0);
                     clone.set({
                         angle: 0
                     })
@@ -78,8 +77,9 @@ const watchCanvas = () => {
                         multiplier: 1,
                     })
                     el.FileName = FileName
+                    el.oldLeft = clone.left
+                    el.oldTop = clone.top
                     el.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                    console.log('上传前', clone)
                     let callback = () => {
                         if (cutPartsType.value) {
                             setAllCuts()
@@ -114,39 +114,51 @@ const watchCanvas = () => {
     // })
 }
 const setAllCuts = () => {
-    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-    console.log('maskRect', maskRect)
-    const mask = canvasEditor.canvas.getActiveObjects()[0]
-    let p = {
-        SizeGUID: SizeGUID.value,
-        Canvas_zoom: '0.08',
-        Part_name: cutPartsType.value,
-        Images: [],
-        bgc_r: bgColor.value.R,
-        bgc_g: bgColor.value.G,
-        bgc_b: bgColor.value.B
-    }
-    canvasEditor.canvas.getObjects().forEach(image => {
-        if (image.id !== 'workspace' && !image.isMask) {
-            const obj = {
-                Image_fullName: image.FilePath + '/' + image.FileName,
-                Image_width: (image.width * image.scaleX).toFixed(5) + '',
-                Image_height: (image.height * image.scaleY).toFixed(5) + '',
-                Image_left: (image.left - maskRect.left).toFixed(5) + '',
-                Image_top: image.top.toFixed(5) + '',
-                Image_angle: image.angle.toFixed(5) + ''
-            }
-            p.Images.push(obj)
+    if (cutPartsType.value) {
+        const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+        const mask = canvasEditor.canvas.getActiveObjects()[0]
+        let p = {
+            SizeGUID: SizeGUID.value,
+            Canvas_zoom: '0.07',
+            Part_name: cutPartsType.value,
+            Images: [],
+            bgc_r: bgColor.value.R,
+            bgc_g: bgColor.value.G,
+            bgc_b: bgColor.value.B
         }
 
-    })
-    console.log('总的剪裁参数', p)
-    picture.setCutAllParts(p).then(res => {
-        const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-        URLbase64.value = url
-        LoadScene.setTexture(cutPartsType.value, url)
-    })
+        canvasEditor.canvas.getObjects().forEach(image => {
+            if (image.id !== 'workspace' && !image.isMask && cutPartsType.value == image.cutPartsType) {
+                console.log('image', image)
+                const left = image.oldLeft ? image.oldLeft : image.left
+                const top = image.oldTop ? image.oldTop : image.top
+                const obj = {
+                    Image_fullName: image.FilePath + '/' + image.FileName,
+                    Image_width: (image.width * image.scaleX).toFixed(5) + '',
+                    Image_height: (image.height * image.scaleY).toFixed(5) + '',
+                    Image_left: (left - maskRect.left).toFixed(5) + '',
+                    Image_top: (top - maskRect.top).toFixed(5) + '',
+                    Image_angle: image.angle.toFixed(5) + ''
+                }
+                p.Images.push(obj)
+            }
+
+        })
+
+        console.log('总的剪裁参数', p)
+        picture.setCutAllParts(p).then(res => {
+            const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
+            load3DScene.setModelColor(color, () => {
+            })
+            const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
+            URLbase64.value = url
+            LoadScene.setTexture(cutPartsType.value, url)
+           
+
+        })
+    }
+
 }
 const init = () => {
     mitts.on('changeSize', (e) => {
@@ -210,8 +222,7 @@ const changeSelection = (item) => {
 
 
     var img = new Image();
-    img.src = 'http://192.168.1.3/' + item.ImageUrl_Path
-    // img.src = 'src/assets/png/01前片.jpg'
+    img.src = baseUrl + item.ImageUrl_Path
     workspace.clone((cloned) => {
         canvasEditor.canvas.clipPath = cloned;
         canvasEditor.canvas.requestRenderAll();
@@ -220,8 +231,8 @@ const changeSelection = (item) => {
         var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
         var maskRect = new fabric.Rect(
             {
-                scaleX: 0.08,
-                scaleY: 0.075,
+                scaleX: 0.07,
+                scaleY: 0.07,
                 width: img.width,
                 height: img.height,
                 fill: pattern,
@@ -229,8 +240,8 @@ const changeSelection = (item) => {
                 hasControls: false,
                 selectable: false,
                 evented: false,
-                left: workspace.width / 2 - (img.width * 0.08) / 2,
-                top: workspace.height / 2 - (img.height * 0.08) / 2,
+                left: workspace.width / 2 - (img.width * 0.07) / 2,
+                top: workspace.height / 2 - (img.height * 0.07) / 2,
             });
         maskRect.name = item.Title
         maskRect.cutPartsType = item.Title

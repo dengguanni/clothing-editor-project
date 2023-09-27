@@ -41,6 +41,7 @@ import { Modal } from 'view-ui-plus';
 import { useDateFormat } from '@vueuse/core';
 import useSelect from '@/hooks/select';
 import commonIcon from '@/components/commonIcon.vue'
+import baseUrl from '@/config/constants/baseUrl';
 const { canvasEditor, fabric } = useSelect();
 const { history, redoStack, undoStack } = reactive(canvasEditor.getHistory());
 const lockAttrs = [

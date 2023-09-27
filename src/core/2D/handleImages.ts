@@ -16,6 +16,7 @@ export const getImagesCustom = async (imageList: any, FileName: '', callback) =>
     }
     picture.getImagesCustom(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
+        console.log('历史记录',imageList.value)
         if (FileName) {
             imageList.value.forEach(element => {
                 if (element.FileName = FileName) {
@@ -41,7 +42,7 @@ export const setAllCuts = (SizeGUID) => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     let p = {
         SizeGUID: SizeGUID,
-        Canvas_zoom: '0.08',
+        Canvas_zoom: '0.07',
         Part_name: maskRect.cutPartsType,
         Images: []
     }

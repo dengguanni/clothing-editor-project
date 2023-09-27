@@ -451,7 +451,6 @@ const init = () => {
   event.on('selectCancel', selectCancel);
   event.on('selectOne', getObjectAttr);
   canvasEditor.canvas.on('object:modified', getObjectAttr);
-  console.log('fontAttr', fontAttr)
   getFontSizeList()
 };
 

@@ -46,6 +46,7 @@ import guid from '@/utils/guiId.ts'
 import { ElMessage } from 'element-plus';
 import { getImagesCustom, setUpLoadFile } from '@/core/2D/handleImages.ts'
 import mitts from '@/utils/mitts'
+import baseUrl from '@/config/constants/baseUrl'
 const { fabric, canvasEditor } = useSelect();
 const state = reactive({
   showModal: false,
@@ -63,14 +64,13 @@ onMounted(() => {
   })
   document.getElementById("myInput").addEventListener("change", getFile, true)
   getImagesCustom(imageList)
+
 })
 const closeIcon = (item) => {
   showDelIcon.value = ''
 }
 const imageList = ref([])
-onMounted(() => {
-  getImagesCustom(imageList)
-})
+
 const showIcon = (item) => {
   showDelIcon.value = item.GUID
 }
@@ -81,18 +81,20 @@ const replaceImage = (str, fileHeaderPath) => {
   const callback = () => {
     const width = activeObject.get('width');
     const height = activeObject.get('height');
-    const scaleX = activeObject.get('scaleX');
-    const scaleY = activeObject.get('scaleY');
     const properties = {
       left: 0,
       top: 0
     };
     let callback2 = (item => {
+      // const scaleX = width / item.width
+      // const scaleY = height / item.height
       activeObject.setSrc(item.ImageUrl, () => {
         activeObject.set('name', item.Title);
         activeObject.set('id', uuid());
         activeObject.set('width', width);
         activeObject.set('height', height);
+        activeObject.set('scaleX', activeObject.scaleX);
+        activeObject.set('scaleY', activeObject.scaleY);
         activeObject.set('FileName', FileName);
         activeObject.set('FilePath', item.FilePath);
         activeObject.set('cutPartsType', activeObject.cutPartsType);
@@ -232,7 +234,6 @@ async function imgToBase64(url) {
   })
 }
 const addItem = (item) => {
-  console.log('item', item)
   if (!cutPartsType.value) {
     ElMessage({
       showClose: true,
@@ -242,13 +243,13 @@ const addItem = (item) => {
     return
   }
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-  const imageURL = 'http://192.168.1.3/' + item.ImageUrl_Path;
+  const imageURL = baseUrl + item.ImageUrl_Path;
   let callback = (image, isError) => {
     if (!isError) {
       image.name = item.Title
       image.id = uuid()
       canvasEditor.canvas.add(image);
-      image.name = item.FileName
+      image.FileName = item.FileName
       image.FilePath = item.FilePath
       image.cutPartsType = cutPartsType.value
       image.mask = maskRect

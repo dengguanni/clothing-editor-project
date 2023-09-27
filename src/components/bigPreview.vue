@@ -112,15 +112,18 @@ const changeImage = (val) => {
 }
 const changeColor = (item) => {
     colorSelection.value = item.GUID
-    load3DScene.setModelColor('rgb(' + item.R + ',' + item.G + ',' + item.B + ')', () => {
-        screenshotList = []
+    mitts.emit('changeModelColor', item)
+    screenshotList = []
         let arr = LoadScene.getImages()
         arr.forEach(element => {
             screenshotList.push(element)
         });
         imageActive.value = screenshotList[0].src
         directionSelection.value = screenshotList[0].id
-    })
+    // load3DScene.setModelColor('rgb(' + item.R + ',' + item.G + ',' + item.B + ')', () => {
+
+       
+    // })
 }
 const changeMode = (val) => {
     is3D.value = val

@@ -2,6 +2,7 @@ import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
 import guid from '@/utils/guiId.ts'
 import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import baseUrl from '@/config/constants/baseUrl';
 class ControlsTile {
     static lockObj = {
         'lockMovementX': false,
@@ -108,7 +109,6 @@ class ControlsTile {
         let maxXcount, maxYcount
         const left = cloned.left < 0 ? cloned.left * -1 : cloned.left
         const top = cloned.top < 0 ? cloned.top * -1 : cloned.top
-        console.log('clonedleft', left, 'clonedtop', top)
         if (left < workspace.width - cloned.width * cloned.scaleX - left) {
             const n = Math.ceil((workspace.width - cloned.width * cloned.scaleX - left) / (cloned.width * cloned.scaleX))
             maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
@@ -132,7 +132,6 @@ class ControlsTile {
         this.observeObj(activeObject)
         activeObject.clone(cloned => {
             const { maxXcount, maxYcount } = self.getMaxCount(cloned)
-            console.log('maxXcount', maxXcount, 'maxYcount', maxYcount)
             cloned.rotate(0)
             const left = cloned.left - (cloned.width * cloned.scaleX)
             const top = cloned.top - (cloned.height * cloned.scaleY)
@@ -192,7 +191,7 @@ class ControlsTile {
         });
         let callback1 = () => {
             const activeObject = this.canvas.getActiveObjects()[0];
-            const imageURL = 'http://192.168.1.3/UploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
+            const imageURL = baseUrl +'UploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     image.cutPartsType = activeObject.cutPartsType

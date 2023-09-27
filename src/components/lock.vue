@@ -41,19 +41,19 @@ watch(
   }
 );
 const lock = () => {
+  console.log('lock', )
   // 修改自定义属性
   mixinState.mSelectActive.hasControls = false;
   // 修改默认属性
   lockAttrs.forEach((key) => {
     mixinState.mSelectActive[key] = true;
   });
-
   mixinState.mSelectActive.selectable = false;
-
   isLock.value = true;
   canvasEditor.canvas.renderAll();
 };
 const unLock = () => {
+  console.log('unLock', )
   // 修改自定义属性
   mixinState.mSelectActive.hasControls = true;
   // 修改默认属性

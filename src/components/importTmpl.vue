@@ -84,7 +84,6 @@ const state = reactive({
 // 获取素材分类
 try {
   canvasEditor.getMaterialType('template').then((list: materialTypeI[]) => {
-  console.log('111111', state);
   state.materialTypelist = [...list];
   state.materialist = list;
 }); 
