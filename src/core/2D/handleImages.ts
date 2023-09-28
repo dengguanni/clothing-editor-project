@@ -76,7 +76,7 @@ const imageSize = (base64Str) => {
     return (str.length * 0.75).toFixed(0);
 }
 
-export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
+export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
     const result = str.substring(str.indexOf(',') + 1,)
     const splitBase64Str = splitBase64(result, 1048596)
     const FilePath = fileFirstName + FileName.substring(0, 1)
@@ -97,7 +97,7 @@ export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
                 AppendComplete: 'True',
                 base64Str: splitBase64Str[0]
             }
-            picture.setUpLoadFile(p).then(res => {
+            picture.setUserUploadFile(p).then(res => {
                 console.log('上传', res)
                 if (res.OK == 'True') {
                     callback ? callback(FileName) : ''
@@ -118,7 +118,7 @@ export const setUpLoadFile = (str, FileName, fileFirstName, callback) => {
                     AppendComplete: (index + 1) == splitBase64Str.length ? 'True' : 'False',
                     base64Str: splitBase64Str[index]
                 }
-                picture.setUpLoadFile(p).then(res => {
+                picture.setUserUploadFile(p).then(res => {
                     if (res.OK == 'True') {
                         if (index + 1 < splitBase64Str.length) {
                             index = index + 1

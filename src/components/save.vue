@@ -13,39 +13,35 @@
     <!-- <Button style="margin-left: 10px" type="text" @click="beforeClear">
       {{ $t('empty') }}
     </Button> -->
-    <Dropdown style="margin-left: 10px" @on-click="saveWith">
-      <Button type="primary">
-        {{ $t('keep') }}
-        <!-- <Icon type="ios-arrow-down"></Icon> -->
-      </Button>
-      <template #list>
-        <DropdownMenu>
-          <DropdownItem name="clipboard">{{ $t('copy_to_clipboard') }}</DropdownItem>
-          <DropdownItem name="saveImg">{{ $t('save_as_picture') }}</DropdownItem>
-          <DropdownItem name="saveSvg">{{ $t('save_as_svg') }}</DropdownItem>
-          <DropdownItem name="saveJson" divided>{{ $t('save_as_json') }}</DropdownItem>
-        </DropdownMenu>
-      </template>
-    </Dropdown>
+    <!-- <Button type="primary" @click="getData">
+      拿取{{ count }} -->
+      <!-- <Icon type="ios-arrow-down"></Icon> -->
+    <!-- </Button> -->
+    <Button type="primary" @click="saveWith">
+      {{ $t('keep') }}
+      <!-- <Icon type="ios-arrow-down"></Icon> -->
+    </Button>
   </div>
 </template>
 
 <script setup name="save-bar">
 import { Modal } from 'view-ui-plus';
 import useSelect from '@/hooks/select';
-
+import historyAip from '@/api/history.ts'
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
-// import { downloadFile } from '@/utils/utils';
-
+import { useStore } from 'vuex'
+const store = useStore()
+const commodityInfo = computed(() => {
+  return store.state.commodityInfo
+})
+const aa = ref('')
 const { t } = useI18n();
-
 const { canvasEditor } = useSelect();
 const cbMap = {
   clipboard() {
     canvasEditor.clipboard();
   },
-
   saveJson() {
     canvasEditor.saveJson();
   },
@@ -59,8 +55,33 @@ const cbMap = {
   },
 };
 
+const getData = () => {
+  const p = {
+    ID: '6'
+  }
+  // store.commit('increment')
+  // historyAip.getHistory(p).then(res => {
+  //   console.log('res', res)
+  //   const aa = res.Tag[0].Table[0].JsonValue
+  //   console.log('aa', aa)
+  //   console.log('拿回', JSON.parse(aa))
+  // })
+}
 const saveWith = debounce(function (type) {
-  cbMap[type] && typeof cbMap[type] === 'function' && cbMap[type]();
+  console.log('保存', store)
+  console.log('commodityInfo', commodityInfo.value)
+  // const p = {
+  //   aa: {
+  //     cc: '214214',
+  //     sdsd: {
+  //       ww: '中文'
+  //     }
+  //   },
+  //   b: 'asfsfs'
+  // }
+  // historyAip.setHistory([{ 'JsonValue': JSON.stringify(p) }]).then(res => {
+  //   console.log('保存结果', res)
+  // })
 }, 300);
 
 /**

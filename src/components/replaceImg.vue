@@ -14,7 +14,7 @@
 
 <script setup name="ReplaceImg">
 import useSelect from '@/hooks/select';
-import { getImagesCustom, setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { getImagesCustom, setUserUploadFile } from '@/core/2D/handleImages.ts'
 import { getImgStr, selectFiles, insertImgFile } from '@/utils/utils';
 import mitts from '@/utils/mitts'
 

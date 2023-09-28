@@ -7,7 +7,7 @@
       <Row align="middle" justify="space-between">
         <Col>
         <!-- <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)"></colorSelector> -->
-        <ElColorPicker  v-model="baseAttr.fill"  @change="changeCommon('fill', baseAttr.fill)"></ElColorPicker>
+        <ElColorPicker v-model="baseAttr.fill" @change="changeCommon('fill', baseAttr.fill)"></ElColorPicker>
         </Col>
         <Col>
         <Select v-model="fontAttr.fontFamily" @on-change="changeFontFamily" style="width: 130px;">
@@ -20,7 +20,7 @@
             </div>
           </Option>
         </Select>
-       
+
         </Col>
         <!-- <ElSelect></ElSelect> -->
         <Col>
@@ -86,7 +86,7 @@
         <Col>
         <!-- <colorSelector :color="baseAttr.stroke" @change="(value) => changeCommon('stroke', value)"></colorSelector> -->
         <!-- <ColorPicker v-model="baseAttr.stroke" @on-change="(value) => changeCommon('stroke', value)" /> -->
-          <ElColorPicker  v-model="baseAttr.stroke"  @change="changeCommon('stroke', baseAttr.stroke)"></ElColorPicker>
+        <ElColorPicker v-model="baseAttr.stroke" @change="changeCommon('stroke', baseAttr.stroke)"></ElColorPicker>
         </Col>
       </Row>
       <!-- 对齐 -->
@@ -222,14 +222,16 @@
       </div>
     </div> -->
   </div>
-  <Row  justify="space-between" align="middle" style="margin: 24px 0px" v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
-          <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
-          <Col span="12">
-          <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)"></Slider>
-          </Col>
-          <Col span="1"></Col>
-          <Col span="6" ><Input v-model="baseAttr.angle"></Input></Col>
-        </Row>
+  <Row justify="space-between" align="middle" style="margin: 24px 0px"
+    v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
+    <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
+    <Col span="12">
+    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)"></Slider>
+    </Col>
+    <Col span="1">
+    </Col>
+    <Col span="6"><Input v-model="baseAttr.angle"></Input></Col>
+  </Row>
 </template>
 
 <script setup name="AttrBute">
@@ -241,11 +243,10 @@ import axios from 'axios';
 import { getPolygonVertices } from '@/utils/math';
 import InputNumber from '@/components/inputNumber';
 import { Spin } from 'view-ui-plus';
-import { ElColorPicker, ElSelect} from 'element-plus'
+import { ElColorPicker, ElSelect } from 'element-plus'
 
 const event = inject('event');
 const update = getCurrentInstance();
-const repoSrc = import.meta.env.APP_REPO;
 const props = defineProps({
   isText: {
     type: Boolean,
@@ -397,12 +398,13 @@ const getFontSizeList = () => {
 }
 
 const getFreeFontList = () => {
-  axios.get(`${repoSrc}/font/free-font.json`).then((res) => {
-    fontFamilyList.value = [
-      ...fontFamilyList.value,
-      // ...Object.entries(res.data).map(([, value]) => value),
-    ];
-  });
+  fontFamilyList.value = [
+    ...fontFamilyList.value,
+    // ...Object.entries(res.data).map(([, value]) => value),
+  ];
+  // axios.get(`${repoSrc}/font/free-font.json`).then((res) => {
+
+  // });
 };
 
 const getObjectAttr = (e) => {
@@ -501,7 +503,7 @@ const changeCommon = (key, value) => {
 
   // 更新属性
   getObjectAttr();
-  
+
 };
 
 // 边框设置

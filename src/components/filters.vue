@@ -81,7 +81,7 @@ import { uiType, paramsFilters, combinationFilters } from '@/config/constants/fi
 import mitts from '@/utils/mitts'
 import { v4 as uuid } from 'uuid';
 import baseUrl from '@/config/constants/baseUrl'
-import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
@@ -252,7 +252,7 @@ const replaceImage = (url, type) => {
       canvasEditor.canvas.renderAll();
     });
   }
-  setUpLoadFile(url, FileName, 'images_temp//', callback)
+  setUserUploadFile(url, FileName, 'images_temp//', callback)
 }
 // 恢复无滤镜状态/回退滤镜
 const restoreImage = () => {
@@ -262,7 +262,7 @@ const restoreImage = () => {
       _createFilter(activeObject, element)
     });
   } else {
-    const url = baseUrl + 'UploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
+    const url = baseUrl + 'UserUploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
     activeObject.setSrc(url, () => {
       activeObject.set('name', activeObject.Title);
       activeObject.set('id', uuid());

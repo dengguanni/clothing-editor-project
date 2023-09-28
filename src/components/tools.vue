@@ -171,7 +171,7 @@ import useSelect from '@/hooks/select';
 import { useI18n } from 'vue-i18n';
 import mitts from '@/utils/mitts'
 import guid from '@/utils/guiId.ts'
-import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 // 默认属性
 const defaultPosition = { shadow: '', fontFamily: 'arial' };
 // 拖拽属性
@@ -233,7 +233,7 @@ const addText = (option) => {
   let callback = () => {
     console.log('字体')
   }
-  setUpLoadFile(url, FileName, 'images_temp/', callback)
+  setUserUploadFile(url, FileName, 'images_temp/', callback)
 };
 
 

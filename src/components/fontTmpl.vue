@@ -36,32 +36,33 @@ import { useI18n } from 'vue-i18n';
 const repoSrc = import.meta.env.APP_REPO;
 const { fabric, canvasEditor } = useSelect();
 const { t } = useI18n();
+onMounted(() => {
+console.log('repoSrc', repoSrc)
+
+})
+// const list = [
+//   {
+//     label: '字体',
+//     tempUrl: `${repoSrc}font-tmpl/1.json`,
+//     src: `${repoSrc}font-tmpl/1.png`,
+//   },
+//   {
+//     label: '字体',
+//     tempUrl: `${repoSrc}font-tmpl/2.json`,
+//     src: `${repoSrc}font-tmpl/2.png`,
+//   }
+// ];
 const list = [
   {
     label: '字体',
-    tempUrl: `${repoSrc}font-tmpl/1.json`,
-    src: `${repoSrc}font-tmpl/1.png`,
+    tempUrl: ``,
+    src: ``,
   },
   {
     label: '字体',
-    tempUrl: `${repoSrc}font-tmpl/2.json`,
-    src: `${repoSrc}font-tmpl/2.png`,
-  },
-  {
-    label: '字体',
-    tempUrl: `${repoSrc}font-tmpl/3.json`,
-    src: `${repoSrc}font-tmpl/3.png`,
-  },
-  {
-    label: '字体',
-    tempUrl: `${repoSrc}font-tmpl/4.json`,
-    src: `${repoSrc}font-tmpl/4.png`,
-  },
-  {
-    label: '字体',
-    tempUrl: `${repoSrc}font-tmpl/5.json`,
-    src: `${repoSrc}font-tmpl/5.png`,
-  },
+    tempUrl: ``,
+    src: ``,
+  }
 ];
 
 // 插入文件

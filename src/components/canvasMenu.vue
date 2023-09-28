@@ -24,7 +24,7 @@ import LoadScene from '@/core/3D/loadScene.ts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import picture from '@/api/picture'
 import mitts from '@/utils/mitts'
-import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
 // import { setAllCuts } from '@/core/2D/handleImages.ts'
@@ -85,7 +85,7 @@ const watchCanvas = () => {
                             setAllCuts()
                         }
                     }
-                    setUpLoadFile(url, FileName, 'images_temp/', callback)
+                    setUserUploadFile(url, FileName, 'images_temp/', callback)
                 })
 
 

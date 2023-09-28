@@ -52,7 +52,7 @@ const config = ({ mode }) => {
   const envPrefix = 'APP_';
   const { APP_TITLE = '' } = loadEnv(mode, process.cwd(), envPrefix);
   return {
-    base: isProd ? '/vue-fabric-editor/' : '/',
+    base: './',
     plugins: [
       vue(),
       VitePWA({

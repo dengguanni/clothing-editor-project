@@ -44,7 +44,7 @@ import { Upload } from 'view-ui-plus';
 import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
 import { ElMessage } from 'element-plus';
-import { getImagesCustom, setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { getImagesCustom, setUserUploadFile } from '@/core/2D/handleImages.ts'
 import mitts from '@/utils/mitts'
 import baseUrl from '@/config/constants/baseUrl'
 const { fabric, canvasEditor } = useSelect();
@@ -113,7 +113,7 @@ const replaceImage = (str, fileHeaderPath) => {
       type: 'success',
     })
   }
-  setUpLoadFile(str, FileName, 'images_custom\\', callback)
+  setUserUploadFile(str, FileName, 'images_custom\\', callback)
 }
 const delImage = (item) => {
   picture.delImagesCustom({ GUID: item.GUID }).then(res => {
@@ -146,7 +146,7 @@ const getFile = (file) => {
         result
       } = event.target;
       const FileName = guid() + '.png'
-      setUpLoadFile(result, FileName, 'images_custom\\', () => {
+      setUserUploadFile(result, FileName, 'images_custom\\', () => {
         picture.setImagesCustom({ FileName }).then(e => {
           if (e.OK == 'True') {
             getImagesCustom(imageList)

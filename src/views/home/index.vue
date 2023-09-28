@@ -230,6 +230,7 @@ import { CanvasEventEmitter } from '@/utils/event/notifier';
 import canvasMenu from '@/components/canvasMenu.vue'
 // import { downFile } from '@/utils/utils';
 import { fabric } from 'fabric';
+import { useStore } from 'vuex'
 
 // api
 import getLeftClassificationList from '@/api/commodity.ts'
@@ -258,20 +259,19 @@ import Editor, {
   HistoryPlugin,
   FlipPlugin,
   RulerPlugin,
-  MaterialPlugin,
+  // MaterialPlugin,
 } from '@/core';
 let selectedProduct = ref(0)
 const dialogType = ref(0)
 const showDailog = ref(false)
-const repoSrc = import.meta.env.APP_REPO;
-const logoImg = `${repoSrc}font-tmpl/1.png`;
 const sizeList = ref([])
 let goodsInfo = ref({
   GUID: '',
   ImageUrl: '',
   Title: ''
 })
-console.log('repoSrc', repoSrc);
+const store = useStore()
+
 // 创建编辑器
 const canvasEditor = new Editor();
 
@@ -320,7 +320,7 @@ onMounted(() => {
   canvasEditor.use(HistoryPlugin);
   canvasEditor.use(FlipPlugin);
   canvasEditor.use(RulerPlugin);
-  canvasEditor.use(MaterialPlugin);
+  // canvasEditor.use(MaterialPlugin);
 
   event.init(canvas);
   state.show = true;

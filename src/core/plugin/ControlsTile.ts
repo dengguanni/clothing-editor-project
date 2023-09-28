@@ -1,7 +1,7 @@
 import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
 import guid from '@/utils/guiId.ts'
-import { setUpLoadFile } from '@/core/2D/handleImages.ts'
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import baseUrl from '@/config/constants/baseUrl';
 class ControlsTile {
     static lockObj = {
@@ -191,7 +191,7 @@ class ControlsTile {
         });
         let callback1 = () => {
             const activeObject = this.canvas.getActiveObjects()[0];
-            const imageURL = baseUrl +'UploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
+            const imageURL = baseUrl +'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     image.cutPartsType = activeObject.cutPartsType
@@ -219,7 +219,7 @@ class ControlsTile {
             };
             fabric.Image.fromURL(imageURL, callback, properties);
         }
-        setUpLoadFile(url, FileName, 'images_temp//', callback1)
+        setUserUploadFile(url, FileName, 'images_temp//', callback1)
     }
     static newRepeatX = () => {
         const self = this

@@ -4,6 +4,7 @@ import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import baseUrl from '@/config/constants/baseUrl';
 class LoadScene {
     static canvasId: string
     static camera: any
@@ -22,8 +23,7 @@ class LoadScene {
         const loader = new GLTFLoader();
         // ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb 
         // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
-        loader.load('http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
-
+        loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
             object.name = name
             object.scene.traverse(v => {
                 if (v.type == 'Mesh' && modelColor) {

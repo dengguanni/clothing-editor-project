@@ -37,7 +37,8 @@ import { TreeSelect, Page } from 'view-ui-plus'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTreeV2 } from 'element-plus'
 import commodityApi from '@/api/commodity'
-
+import { useStore } from 'vuex'
+const store = useStore()
 const emit = defineEmits()
 let searchKey = ref('')
 let goodList = ref([])
@@ -58,6 +59,7 @@ const init = () => {
   getTreeInfo()
 }
 const getGoodsId = (item) => {
+  store.commit('setGoodsId', item)
   emit('sendGoodsId', item)
 }
 const getCurrentNode = () => {
@@ -82,6 +84,7 @@ const searchGoods = (val) => {
   })
 }
 const getNode = (val) => {
+  console.log('getNode', val)
   if (val.HasChilds == '1') {
     commodityApi.getLeftClassificationList({ PGUID: val.id }).then(res => {
       let arr1 = []
@@ -118,6 +121,7 @@ const getNode = (val) => {
   }
 }
 const selectNOde = (val) => {
+  console.log('selectNOde', val)
   const p = {
     TreeNodeGUID: val.id,
     Page_Index: 0,
