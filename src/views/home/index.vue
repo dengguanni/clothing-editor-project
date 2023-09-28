@@ -234,6 +234,7 @@ import { useStore } from 'vuex'
 
 // api
 import getLeftClassificationList from '@/api/commodity.ts'
+import historyAip from '@/api/history.ts'
 
 // 3D
 import LoadScene from '@/core/3D/loadScene.ts'
@@ -284,13 +285,25 @@ const state = reactive({
   attrBarShow: true,
   select: null,
   ruler: false,
-  isDesign: true,
+  isDesign: false,
   isShowHeader: false,
   isShowFilters: false,
   isShowCropping: false,
   isContrast: false
 });
-
+const saveData = computed(() => {
+  return store.state.saveData
+})
+const goodsGUID = computed(() => {
+  console.log('变了')
+  return store.state.saveData.commodityInfo.GUID
+})
+// watch(
+//   () => goodsGUID,
+//   (val) => {
+//     console.log('id变了')
+//   }
+// );
 onMounted(() => {
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
@@ -325,6 +338,7 @@ onMounted(() => {
   event.init(canvas);
   state.show = true;
   state.isShowHeader = true;
+  getSaveData()
 });
 
 // 获取字体数据 新增字体样式使用
@@ -341,6 +355,21 @@ onMounted(() => {
 //     downFile(dataUrl, 'font.png');
 //   }
 // },
+const getSaveData = () => {
+  const p = {
+    ID: ''
+  }
+  historyAip.getHistory(p).then(res => {
+    const data = res.Tag[0].Table[0].JsonValue
+    const dataJson = JSON.parse(data)
+    if (dataJson.commodityInfo.GUID) {
+      sendGoodsId(dataJson.commodityInfo)
+      console.log('拿回', dataJson)
+    }
+    store.commit('setSaveData', dataJson)
+
+  })
+}
 const mapTileClick = (val) => {
   switch (val) {
     case 'filter':
@@ -393,6 +422,7 @@ const sendGoodsId = (val) => {
       })
     })
     sizeList.value = [...arr]
+    store.commit('setSizeList', arr)
   })
 }
 // 点击滤镜或者剪裁时候返回

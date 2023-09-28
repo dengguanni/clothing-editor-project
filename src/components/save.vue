@@ -13,10 +13,10 @@
     <!-- <Button style="margin-left: 10px" type="text" @click="beforeClear">
       {{ $t('empty') }}
     </Button> -->
-    <!-- <Button type="primary" @click="getData">
-      拿取{{ count }} -->
-      <!-- <Icon type="ios-arrow-down"></Icon> -->
-    <!-- </Button> -->
+    <Button type="primary" @click="getData">
+      拿取
+      <Icon type="ios-arrow-down"></Icon>
+    </Button>
     <Button type="primary" @click="saveWith">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
@@ -32,9 +32,13 @@ import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex'
 const store = useStore()
-const commodityInfo = computed(() => {
-  return store.state.commodityInfo
+const saveData = computed(() => {
+  return store.state.saveData
 })
+const saveSteps = computed(() => {
+  return store.state.saveSteps
+})
+
 const aa = ref('')
 const { t } = useI18n();
 const { canvasEditor } = useSelect();
@@ -56,32 +60,35 @@ const cbMap = {
 };
 
 const getData = () => {
+  // saveSteps.value.ID
   const p = {
-    ID: '6'
+    ID: ''
   }
-  // store.commit('increment')
-  // historyAip.getHistory(p).then(res => {
-  //   console.log('res', res)
-  //   const aa = res.Tag[0].Table[0].JsonValue
-  //   console.log('aa', aa)
-  //   console.log('拿回', JSON.parse(aa))
-  // })
+  historyAip.getHistory(p).then(res => {
+    const data = res.Tag[0].Table[0].JsonValue
+    console.log('data', data)
+    console.log('拿回', JSON.parse(data))
+  })
 }
 const saveWith = debounce(function (type) {
-  console.log('保存', store)
-  console.log('commodityInfo', commodityInfo.value)
-  // const p = {
-  //   aa: {
-  //     cc: '214214',
-  //     sdsd: {
-  //       ww: '中文'
-  //     }
-  //   },
-  //   b: 'asfsfs'
-  // }
-  // historyAip.setHistory([{ 'JsonValue': JSON.stringify(p) }]).then(res => {
-  //   console.log('保存结果', res)
-  // })
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask))
+  // store.commit('setCanvasObjects', objects)
+  let arr = []
+  objects.forEach(element => {
+    const obj = JSON.stringify(element.toJSON(['name']))
+    arr.push(obj)
+    console.log(JSON.parse(obj))
+  });
+  const JsonValue = {
+    saveData: JSON.stringify(saveData.value),
+    objects: arr
+  }
+ 
+  historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value) }]).then(res => {
+    store.commit('setSaveSteps', res.Tag[0].Table[0])
+    console.log('保存结果', res)
+
+  })
 }, 300);
 
 /**

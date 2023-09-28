@@ -58,7 +58,9 @@ import useSelect from '@/hooks/select';
 import mitts from '@/utils/mitts.js';
 import commodityApi from '@/api/commodity'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
-const { fabric, mixinState, canvasEditor } = useSelect();
+import { useStore } from 'vuex'
+const store = useStore()
+const { canvasEditor } = useSelect();
 const info: any = ref({
     GUID: '',
     ImageUrl: '',
@@ -83,20 +85,16 @@ const props = defineProps({
         }
     }
 })
+const bgColor = computed(() => {
+    return store.state.saveData.commodityInfo.bgColor
+})
+const sizeGUID = computed(() => {
+    return store.state.saveData.commodityInfo.sizeGUID
+})
 
 const value1 = ref('1')
-let indeterminate = ref(true);
-let checkAll = ref(false);
-let checkAllGroup = reactive(['S'])
 const sizeSelected = ref('')
 const colorSelected = ref('')
-// const sizeList = reactive([
-//     'S',
-//     'M',
-//     'L',
-//     'XL',
-//     'XXL'
-// ]);
 const colorList = ref([]);
 const activeObject = canvasEditor.canvas.getActiveObject();
 const baseAttr = reactive({
@@ -132,14 +130,24 @@ watch(
         }
     }
 );
+watch(sizeGUID, (newVal, oldVal) => {
+    console.log('sizeGUID', newVal)
+    if (newVal) changeSize({ GUID: newVal })
+}, { immediate: true, deep: true });
+watch(bgColor, (newVal, oldVal) => {
+    if (newVal) colorSelected.value = newVal.GUID
+}, { immediate: true, deep: true });
 watch(
     () => props.sizeList,
     (val) => {
         if (val.length > 0) {
-            sizeSelected.value = val[0].GUID
+            console.log('watch')
+            if (!sizeGUID.value) sizeSelected.value = val[0].GUID
+
         }
     }
 );
+
 const openDailog = (val) => {
     emit('openDailog', val)
 }
@@ -149,55 +157,31 @@ const getObjectAttr = () => {
 const changeCommon = (key, value) => {
     activeObject && activeObject.set(key, value);
     canvasEditor.canvas.renderAll();
-    // 更新属性
     getObjectAttr();
 }
 const changeSize = (item: any) => {
+    console.log('changeSize')
     sizeSelected.value = item.GUID
-    console.log('changeSize', colorSelected.value[0])
     mitts.emit('changeSize', item)
+    store.commit('setGoodsSizeGUID', item.GUID)
+    changeColor(bgColor.value)
 }
 const changeColor = (item: any) => {
     colorSelected.value = item.GUID
     mitts.emit('changeModelColor', item)
-    
+    store.commit('setBgColor', item)
 }
 const getBgColor = (GUID: string) => {
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
         colorList.value = [...res.Tag[0].Table]
-        colorSelected.value = colorList.value[0].GUID
-        GoodsInfo.modelColorList = colorList.value
-        mitts.emit('changeModelColor', colorList.value[0])
+        if (!bgColor.value) {
+            colorSelected.value = colorList.value[0].GUID
+            GoodsInfo.modelColorList = colorList.value
+            mitts.emit('changeModelColor', colorList.value[0])
+            store.commit('setBgColor', colorList.value[0])
+        }
+
     })
-}
-const handleCheckAll = () => {
-    if (indeterminate) {
-        checkAll.value = false;
-    } else {
-        checkAll.value = !checkAll;
-    }
-    indeterminate.value = false;
-    if (checkAll) {
-        checkAllGroup = ['S',
-            'M',
-            'L',
-            'XL',
-            'XXL'];
-    } else {
-        checkAllGroup = [];
-    }
-};
-const checkAllGroupChange = (data: any) => {
-    if (data.length === 3) {
-        indeterminate.value = false;
-        checkAll.value = true;
-    } else if (data.length > 0) {
-        indeterminate.value = true;
-        checkAll.value = false;
-    } else {
-        indeterminate.value = false;
-        checkAll.value = false;
-    }
 }
 </script>
   

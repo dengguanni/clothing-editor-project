@@ -27,6 +27,11 @@ import mitts from '@/utils/mitts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
+import { useStore } from 'vuex'
+const store = useStore()
+const cutPartsType = computed(() => {
+    return store.state.saveData.cutPartsType
+})
 // import { setAllCuts } from '@/core/2D/handleImages.ts'
 const props = defineProps({
     sizeList: {
@@ -40,18 +45,31 @@ const URLbase64 = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
-let cutPartsType = ref('')
 let SizeGUID = ref('')
-let bgColor = ref('')
+// let bgColor = ref('')
+const bgColor = computed(() => {
+    return store.state.saveData.commodityInfo.bgColor
+})
+const canvasObjects = computed(() => {
+    return store.state.saveData.canvasObjects
+})
+watch(bgColor, (newVal, oldVal) => {
+    if (newVal) {
+        bgColor.value = { ...newVal }
+        setTimeout(() => {
+            setAllCuts()
+        }, 100);
+    }
+}, { immediate: true, deep: true });
 onUnmounted(() => {
     mitts.off('changeSize', '')
 })
+
 onMounted(() => {
     init()
     watchCanvas()
     mitts.on('changeModelColor', (e) => {
-        bgColor.value = { ...e }
-        setAllCuts()
+
     })
 })
 const watchCanvas = () => {
@@ -154,7 +172,7 @@ const setAllCuts = () => {
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
             URLbase64.value = url
             LoadScene.setTexture(cutPartsType.value, url)
-           
+
 
         })
     }
@@ -166,6 +184,12 @@ const init = () => {
         SizeGUID.value = e.GUID
         picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
             if (res.Tag[0]) {
+                const modelInfo = {
+                    modelName: res.Tag[0].modelName,
+                    modelUrl: res.Tag[0].modelUrl,
+                    modelUrl_Path: res.Tag[0].modelUrl_Path
+                }
+                store.commit('setModelInfo', modelInfo)
                 res.Tag[0].Table.forEach(el => {
                     arr.push({
                         Title: el.Title,
@@ -175,12 +199,12 @@ const init = () => {
                     // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
                 })
                 GoodsInfo.SizeGUID = e.GUID
-                const color = 'rgb(' + GoodsInfo.modelColorList[0].R + ',' + GoodsInfo.modelColorList[0].G + ',' + GoodsInfo.modelColorList[0].B + ')'
+                const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
                 LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
             }
             cutParts.value = [...arr]
-            cutPartsType.value = cutParts.value[0].Title
-            mitts.emit('cutPartsType', cutPartsType.value)
+            store.commit('setCutPartsType', cutParts.value[0].Title)
+            store.commit('setCutParts', arr)
             mitts.emit('cutParts', cutParts.value)
             changeSelection(arr[0])
         })
@@ -202,7 +226,7 @@ const upDateTexture = () => {
     }
 }
 const changeSelection = (item) => {
-    mitts.emit('cutPartsType', item.Title)
+    store.commit('setCutPartsType', item.Title)
     load3DScene.setModelCamera(item.Title)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = item.Title
@@ -219,8 +243,6 @@ const changeSelection = (item) => {
             }
         }
     })
-
-
     var img = new Image();
     img.src = baseUrl + item.ImageUrl_Path
     workspace.clone((cloned) => {
@@ -262,14 +284,18 @@ const changeSelection = (item) => {
             canvasEditor.canvas.requestRenderAll();
         });
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-        // workspace.visible = false
-        // mask.visible = false
-        // canvasEditor.canvas.requestRenderAll();
-        // const url = canvasEditor.saveImg()
+        // loadCanvasObject()
         LoadScene.setTexture(item.Title, '', () => {
 
         })
     };
+    const loadCanvasObject = () => {
+        canvasObjects.value.forEach(el => {
+            console.log('el',el)
+            canvasEditor.canvas.add(el)
+        })
+        canvasEditor.canvas.requestRenderAll();
+    }
 
 }
 </script>

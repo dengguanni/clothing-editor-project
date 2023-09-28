@@ -29,7 +29,17 @@
         <Icon type="md-trash" class="icon" size="27" v-show="showDelIcon == item.GUID" @mouseenter="showIcon(item)"
           @click="delImage(item)" />
       </div>
-      <!-- <img class="item" id="myImage" @click="addItem" /> -->
+
+    </div>
+    <!-- <el-pagination small layout="prev, pager, next" :total="50"  /> -->
+    <div class="page-box">
+      <ElButton type="primary" text :icon="Delete" @click="changePage(false)" :disabled="pageIndex < 1"> <el-icon>
+          <ArrowLeft />
+        </el-icon></ElButton>
+      <div>{{ pageIndex + 1 }}</div>
+      <ElButton type="primary" text :disabled="imageList.length < 18" @click="changePage(true)"><el-icon>
+          <ArrowRight />
+        </el-icon></ElButton>
     </div>
 
   </div>
@@ -43,29 +53,41 @@ import { reactive, ref, onMounted } from 'vue';
 import { Upload } from 'view-ui-plus';
 import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElButton } from 'element-plus';
 import { getImagesCustom, setUserUploadFile } from '@/core/2D/handleImages.ts'
 import mitts from '@/utils/mitts'
 import baseUrl from '@/config/constants/baseUrl'
+import { useStore } from 'vuex'
+const store = useStore()
 const { fabric, canvasEditor } = useSelect();
 const state = reactive({
   showModal: false,
   svgStr: '',
   showDelIcon: ''
 });
-const cutPartsType = ref('')
+const cutPartsType = computed(() => {
+    return store.state.saveData.cutPartsType
+})
 let showDelIcon = ref('')
+const pageIndex = ref(0)
 onMounted(() => {
   mitts.on('replaceImages', (val, fileHeaderPath) => {
     replaceImage(val, fileHeaderPath)
   })
-  mitts.on('cutPartsType', (val) => {
-    cutPartsType.value = val
-  })
   document.getElementById("myInput").addEventListener("change", getFile, true)
-  getImagesCustom(imageList)
+  getImagesCustom(imageList, pageIndex.value)
 
 })
+const changePage = (val) => {
+  if (val) {
+    pageIndex.value = pageIndex.value +1
+    getImagesCustom(imageList, pageIndex.value)
+  } else {
+    pageIndex.value = pageIndex.value -1
+    getImagesCustom(imageList, pageIndex.value)
+  }
+
+}
 const closeIcon = (item) => {
   showDelIcon.value = ''
 }
@@ -103,7 +125,7 @@ const replaceImage = (str, fileHeaderPath) => {
     })
     picture.setImagesCustom({ FileName }).then(e => {
       if (e.OK == 'True') {
-        getImagesCustom(imageList, FileName, callback2)
+        getImagesCustom(imageList, pageIndex.value, callback2)
       }
     })
 
@@ -149,7 +171,7 @@ const getFile = (file) => {
       setUserUploadFile(result, FileName, 'images_custom\\', () => {
         picture.setImagesCustom({ FileName }).then(e => {
           if (e.OK == 'True') {
-            getImagesCustom(imageList)
+            getImagesCustom(imageList, pageIndex.value)
           }
         })
         ElMessage({
@@ -353,10 +375,19 @@ function insertSvgFile(svgFile) {
 
   }
 
+  .page-box {
+    position: absolute;
+    left: 45%;
+    bottom: 5%;
+    display: flex;
+    align-items: center;
+  }
+
   .image-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+
 
     .icon {
       position: absolute;

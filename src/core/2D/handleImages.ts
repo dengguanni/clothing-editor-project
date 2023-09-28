@@ -9,22 +9,15 @@ import GoodsInfo from '@/core/objects/goods/goodsInfo'
 const { fabric, mixinState, canvasEditor } = useSelect();
 const load3DScene = new LoadScene()
 // 获取历史记录
-export const getImagesCustom = async (imageList: any, FileName: '', callback) => {
+export const getImagesCustom = async (imageList: any, Page_Index: number | String = 0, callback) => {
     const p = {
-        Page_Index: 0,
-        Page_RowCount: 20
+        Page_Index: Page_Index,
+        Page_RowCount: 18
     }
     picture.getImagesCustom(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
-        console.log('历史记录',imageList.value)
-        if (FileName) {
-            imageList.value.forEach(element => {
-                if (element.FileName = FileName) {
-                    callback ? callback(element) : ''
-                }
-            });
-        }
-
+        callback ? callback() : ''
+        console.log('历史记录', res)
     })
 }
 const splitBase64 = (base64String, chunkSize) => {

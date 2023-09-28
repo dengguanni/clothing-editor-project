@@ -61,6 +61,11 @@ import { v4 as uuid } from 'uuid';
 import MouseEventEventListener from '@/utils/event/mouse.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import mitts from '@/utils/mitts'
+import { useStore } from 'vuex'
+const store = useStore()
+const cutPartsType = computed(() => {
+    return store.state.saveData.cutPartsType
+})
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
 const update = getCurrentInstance();
@@ -75,7 +80,6 @@ const state = reactive({
     firstClickLayer: false,
     copyTo: false
 })
-let cutPartsType = ref('')
 let stateRepeat = reactive({
     isRepeat: false,
     basic: false,
@@ -168,9 +172,6 @@ onMounted(() => {
     event.on('selectOne', init);
     mitts.on('cutParts', (val) => {
         cutParts.value = [...val]
-    })
-    mitts.on('cutPartsType', val => {
-        cutPartsType.value = val
     })
     MouseEventEventListener.setMouseupFn = () => { }
     ControlsTile.canvas = canvasEditor.canvas

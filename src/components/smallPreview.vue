@@ -27,6 +27,11 @@ import { Carousel } from 'view-ui-plus'
 import LoadScene from '@/core/3D/loadScene.ts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import mitts from '@/utils/mitts.js';
+import { useStore } from 'vuex'
+const store = useStore()
+const cutPartsType = computed(() => {
+    return store.state.saveData.cutPartsType
+})
 const load3DScene = new LoadScene()
 let screenshotList = reactive([])
 let scene, renderer, camera
@@ -35,7 +40,6 @@ let is3D = ref(true)
 let carousel = ref(0)
 const load3d = ref(true)
 const loadScreenshotList = ref(true)
-let cutPartsType = ref('')
 const changeMode = () => {
     is3D.value = !is3D.value
     if (!is3D.value) {
@@ -62,9 +66,6 @@ onBeforeMount(() => {
     // })
 })
 onMounted(() => {
-    mitts.on('cutPartsType', (val) => {
-        cutPartsType.value = val
-    })
     // const modelColor = GoodsInfo.modelColorList[0]
     // load3DScene.setModelColor('rgb(' + modelColor.R + ',' + modelColor.G + ',' + modelColor.B + ')', () => {
     //     screenshotList = []

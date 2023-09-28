@@ -37,6 +37,12 @@ import { reactive, ref, onUnmounted, onMounted } from 'vue'
 import LoadScene from '@/core/3D/loadScene.ts'
 import mitts from '@/utils/mitts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
+import { useStore } from 'vuex'
+const store = useStore()
+const bgColor = computed(() => {
+    return store.state.saveData.commodityInfo.bgColor
+})
+const colorSelection = ref('')
 const load3DScene = new LoadScene()
 const props = defineProps({
     is3D: {
@@ -47,7 +53,6 @@ const props = defineProps({
 let screenshotList = reactive([])
 let scene, renderer, camera
 const is3D = ref(false)
-const colorSelection = ref('')
 const colorList = ref([
 
 ])
@@ -55,10 +60,15 @@ const colorList = ref([
 let directionSelection = ref('')
 let imageActive = ref('')
 const list = reactive([0, 2, 34, 6, 9])
+watch(bgColor, (newVal, oldVal) => {
+    if (newVal) {
+        colorSelection.value = newVal.GUID
+        
+    }
+}, { immediate: true, deep: true });
 onMounted(() => {
     colorList.value = [...GoodsInfo.modelColorList]
-    colorSelection.value = colorList.value[0].GUID
-    changeColor(colorList.value[0])
+    // colorSelection.value = colorList.value[0].GUID
     is3D.value = props.is3D === 4 ? true : false
     LoadScene.change3dBox('big-3d', () => {
         screenshotList = []
@@ -113,16 +123,15 @@ const changeImage = (val) => {
 const changeColor = (item) => {
     colorSelection.value = item.GUID
     mitts.emit('changeModelColor', item)
+    store.commit('setBgColor', colorList.value[0])
     screenshotList = []
-        let arr = LoadScene.getImages()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
-        imageActive.value = screenshotList[0].src
-        directionSelection.value = screenshotList[0].id
+    let arr = LoadScene.getImages()
+    arr.forEach(element => {
+        screenshotList.push(element)
+    });
+    imageActive.value = screenshotList[0].src
+    directionSelection.value = screenshotList[0].id
     // load3DScene.setModelColor('rgb(' + item.R + ',' + item.G + ',' + item.B + ')', () => {
-
-       
     // })
 }
 const changeMode = (val) => {

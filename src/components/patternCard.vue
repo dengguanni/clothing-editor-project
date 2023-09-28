@@ -59,11 +59,8 @@ const init = () => {
   getTreeInfo()
 }
 const getGoodsId = (item) => {
-  store.commit('setGoodsId', item)
+  store.commit('setCommodityInfo', item)
   emit('sendGoodsId', item)
-}
-const getCurrentNode = () => {
-  console.log('getCurrentNode')
 }
 const searchGoods = (val) => {
   console.log(val)
@@ -84,7 +81,6 @@ const searchGoods = (val) => {
   })
 }
 const getNode = (val) => {
-  console.log('getNode', val)
   if (val.HasChilds == '1') {
     commodityApi.getLeftClassificationList({ PGUID: val.id }).then(res => {
       let arr1 = []

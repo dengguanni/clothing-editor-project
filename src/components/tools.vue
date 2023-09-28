@@ -172,6 +172,8 @@ import { useI18n } from 'vue-i18n';
 import mitts from '@/utils/mitts'
 import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
+import { useStore } from 'vuex'
+const store = useStore()
 // 默认属性
 const defaultPosition = { shadow: '', fontFamily: 'arial' };
 // 拖拽属性
@@ -181,18 +183,15 @@ const dragOption = {
 };
 const { t } = useI18n();
 const { fabric, canvasEditor } = useSelect();
-const cutPartsType = ref('')
 const state = reactive({
   isDrawingLineMode: false,
   isArrow: false,
 });
-// let drawHandler = null;
-onMounted(() => {
-  mitts.on('cutPartsType', val => {
-    cutPartsType.value = val
-  })
+const cutPartsType = computed(() => {
+  return store.state.saveData.cutPartsType
 })
-
+onMounted(() => {
+})
 const addText = (option) => {
   if (!cutPartsType.value) {
     ElMessage({

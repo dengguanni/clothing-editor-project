@@ -21,6 +21,8 @@ declare module 'vue' {
     Del: typeof import('./src/components/del.vue')['default']
     Dialog: typeof import('./src/components/dialog.vue')['default']
     DragMode: typeof import('./src/components/dragMode.vue')['default']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
+    ElPagination: typeof import('element-plus/es')['ElPagination']
     Filters: typeof import('./src/components/filters.vue')['default']
     Flip: typeof import('./src/components/flip.vue')['default']
     FontTmpl: typeof import('./src/components/fontTmpl.vue')['default']
