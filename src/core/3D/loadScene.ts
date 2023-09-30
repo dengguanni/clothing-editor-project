@@ -21,7 +21,6 @@ class LoadScene {
         }
 
         const loader = new GLTFLoader();
-        // ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb 
         // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
         loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
             object.name = name
@@ -205,7 +204,7 @@ class LoadScene {
             }
         })
         setTimeout(() => {
-            callBack()
+            callBack ? callBack() : ''
         }, 1000);
     }
     setModelCamera(direction: string) {

@@ -336,9 +336,11 @@ function _createFilter(sourceImg, type, options = null) {
     filterObj.options = options;
     sourceImg.filters.push(filterObj);
   }
+  console.log('sourceImg', sourceImg)
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+ 
   url.value = activeObject.toDataURL({
     width: activeObject.width,
     height: activeObject.height,

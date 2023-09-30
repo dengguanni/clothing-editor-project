@@ -66,7 +66,7 @@ const state = reactive({
   showDelIcon: ''
 });
 const cutPartsType = computed(() => {
-    return store.state.saveData.cutPartsType
+  return store.state.saveData.cutPartsType
 })
 let showDelIcon = ref('')
 const pageIndex = ref(0)
@@ -80,10 +80,10 @@ onMounted(() => {
 })
 const changePage = (val) => {
   if (val) {
-    pageIndex.value = pageIndex.value +1
+    pageIndex.value = pageIndex.value + 1
     getImagesCustom(imageList, pageIndex.value)
   } else {
-    pageIndex.value = pageIndex.value -1
+    pageIndex.value = pageIndex.value - 1
     getImagesCustom(imageList, pageIndex.value)
   }
 

@@ -39,9 +39,7 @@
                                 </div>
 
                             </div>
-                            <!-- <ColorPicker v-model="color4" recommend /> -->
-                            <!-- <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)">
-                            </colorSelector> -->
+
                         </template>
                     </Panel>
                 </Collapse>
@@ -52,7 +50,6 @@
   
 <script lang="ts" setup scoped>
 import { Collapse, Panel } from 'view-ui-plus';
-import colorSelector from '@/components/colorSelector.vue';
 import { reactive, ref, onMounted, provide, watch, onUnmounted } from 'vue'
 import useSelect from '@/hooks/select';
 import mitts from '@/utils/mitts.js';
@@ -160,15 +157,12 @@ const changeCommon = (key, value) => {
     getObjectAttr();
 }
 const changeSize = (item: any) => {
-    console.log('changeSize')
     sizeSelected.value = item.GUID
-    mitts.emit('changeSize', item)
     store.commit('setGoodsSizeGUID', item.GUID)
     changeColor(bgColor.value)
 }
 const changeColor = (item: any) => {
     colorSelected.value = item.GUID
-    mitts.emit('changeModelColor', item)
     store.commit('setBgColor', item)
 }
 const getBgColor = (GUID: string) => {
@@ -177,7 +171,6 @@ const getBgColor = (GUID: string) => {
         if (!bgColor.value) {
             colorSelected.value = colorList.value[0].GUID
             GoodsInfo.modelColorList = colorList.value
-            mitts.emit('changeModelColor', colorList.value[0])
             store.commit('setBgColor', colorList.value[0])
         }
 

@@ -367,7 +367,6 @@ const getSaveData = () => {
       console.log('拿回', dataJson)
     }
     store.commit('setSaveData', dataJson)
-
   })
 }
 const mapTileClick = (val) => {

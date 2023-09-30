@@ -79,6 +79,8 @@
 <script setup name="Flip">
 import useSelect from '@/hooks/select';
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
+import { useStore } from 'vuex'
+const store = useStore()
 const { mixinState, canvasEditor } = useSelect();
 
 // 非单选时，禁止镜像操作
@@ -88,15 +90,17 @@ const notSelectOneMode = () => {
 const flip = (type) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
-  canvasEditor.canvas.requestRenderAll();
-  ControlsTile.setRepeat(null, true)
+  canvasEditor.canvas.renderAll();
+  store.commit('setAllCuts')
+  // ControlsTile.setRepeat(null, true)
 };
 const angle = (value) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.rotate(activeObject.angle + value);
   // activeObject.angle = activeObject.angle+ value
   canvasEditor.canvas.renderAll();
-  ControlsTile.setRepeat(null, true)
+  store.commit('setAllCuts')
+  // ControlsTile.setRepeat(null, true)
 }
 </script>
 

@@ -37,7 +37,7 @@
             <span class="label">间距</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.charSpacing" :max="4" :step=0.1
-                @on-input="(value) => changeCommon('char_spacing', value)"></Slider>
+                @on-input="(value) => changeCommon('char_spacing', value)" @mouseup="store.commit('setAllCuts')"></Slider>
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@
             <span class="label">行高</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.lineHeigh" :max="4" :step=0.1
-                @on-input="(value) => changeCommon('lineHeight', value)"></Slider>
+                @on-input="(value) => changeCommon('lineHeight', value)" @mouseup="store.commit('setAllCuts')"></Slider>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
             <span class="label">描边</span>
             <div class="content slider-box">
               <Slider v-model="baseAttr.strokeWidth" :max="10" :step=1
-                @on-input="(value) => changeCommon('strokeWidth', value)"></Slider>
+                @on-input="(value) => changeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"></Slider>
             </div>
           </div>
         </div>
@@ -226,11 +226,12 @@
     v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
     <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
     <Col span="12">
-    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)"></Slider>
+    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts">
+    </Slider>
     </Col>
     <Col span="1">
     </Col>
-    <Col span="6"><Input v-model="baseAttr.angle"></Input></Col>
+    <Col span="6"><Input v-model="baseAttr.angle" @on-change="setAllCuts"></Input></Col>
   </Row>
 </template>
 
@@ -239,12 +240,13 @@ import fontList from '@/assets/fonts/font';
 import useSelect from '@/hooks/select';
 import FontFaceObserver from 'fontfaceobserver';
 import colorSelector from '@/components/colorSelector.vue';
-import axios from 'axios';
 import { getPolygonVertices } from '@/utils/math';
 import InputNumber from '@/components/inputNumber';
 import { Spin } from 'view-ui-plus';
 import { ElColorPicker, ElSelect } from 'element-plus'
-
+import { useStore } from 'vuex'
+import { debounce } from 'lodash-es';
+const store = useStore()
 const event = inject('event');
 const update = getCurrentInstance();
 const props = defineProps({
@@ -400,13 +402,18 @@ const getFontSizeList = () => {
 const getFreeFontList = () => {
   fontFamilyList.value = [
     ...fontFamilyList.value,
-    // ...Object.entries(res.data).map(([, value]) => value),
   ];
-  // axios.get(`${repoSrc}/font/free-font.json`).then((res) => {
 
-  // });
 };
 
+const setAllCuts = debounce(() => {
+  console.log('baseAttr.angle', baseAttr.angle)
+  if (baseAttr.angle == NaN || !baseAttr.angle) {
+    baseAttr.angle = 0
+  } else {
+    store.commit('setAllCuts')
+  }
+}, 500)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   // 不是当前obj，跳过
@@ -438,6 +445,7 @@ const getObjectAttr = (e) => {
       fontAttr.textBackgroundColor = activeObject.get('textBackgroundColor');
       fontAttr.fontWeight = activeObject.get('fontWeight');
     }
+
   }
 };
 
@@ -465,6 +473,7 @@ const changeFontFamily = (fontName) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     activeObject && activeObject.set('fontFamily', fontName);
     canvasEditor.canvas.renderAll();
+    store.commit('setAllCuts')
     return;
   }
   Spin.show();
@@ -476,6 +485,7 @@ const changeFontFamily = (fontName) => {
       const activeObject = canvasEditor.canvas.getActiveObjects()[0];
       activeObject && activeObject.set('fontFamily', fontName);
       canvasEditor.canvas.renderAll();
+      store.commit('setAllCuts')
       Spin.hide();
     })
     .catch((err) => {
@@ -498,12 +508,15 @@ const changeCommon = (key, value) => {
     canvasEditor.canvas.renderAll();
     return;
   }
+ 
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
-
-  // 更新属性
   getObjectAttr();
-
+  // if (key == 'fill') {
+  //   console.log('key', key)
+  //   activeObject && activeObject.set(key, value);
+  //   store.commit('setAllCuts')
+  // }
 };
 
 // 边框设置
@@ -842,4 +855,5 @@ onBeforeUnmount(() => {
     text-align: center;
     filter: invert(100%);
   }
-}</style>
+}
+</style>

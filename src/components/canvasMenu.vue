@@ -28,6 +28,7 @@ import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
 import { useStore } from 'vuex'
+import { debounce } from 'lodash-es';
 const store = useStore()
 const cutPartsType = computed(() => {
     return store.state.saveData.cutPartsType
@@ -45,7 +46,6 @@ const URLbase64 = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 let cutParts = ref([])
-let SizeGUID = ref('')
 // let bgColor = ref('')
 const bgColor = computed(() => {
     return store.state.saveData.commodityInfo.bgColor
@@ -53,6 +53,18 @@ const bgColor = computed(() => {
 const canvasObjects = computed(() => {
     return store.state.saveData.canvasObjects
 })
+const sizeGUID = computed(() => {
+    return store.state.saveData.commodityInfo.sizeGUID
+})
+const handelAllCuts = computed(() => {
+    return store.state.handelAllCuts
+})
+watch(handelAllCuts, (newVal, oldVal) => {
+    if (newVal) {
+        setAllCuts()
+        console.log('变了')
+    }
+}, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal) {
         bgColor.value = { ...newVal }
@@ -61,16 +73,17 @@ watch(bgColor, (newVal, oldVal) => {
         }, 100);
     }
 }, { immediate: true, deep: true });
+watch(sizeGUID, (newVal, oldVal) => {
+    if (newVal) {
+        init(newVal)
+    }
+}, { immediate: true, deep: true });
 onUnmounted(() => {
-    mitts.off('changeSize', '')
 })
 
 onMounted(() => {
-    init()
     watchCanvas()
-    mitts.on('changeModelColor', (e) => {
 
-    })
 })
 const watchCanvas = () => {
     const fn = () => {
@@ -95,8 +108,6 @@ const watchCanvas = () => {
                         multiplier: 1,
                     })
                     el.FileName = FileName
-                    el.oldLeft = clone.left
-                    el.oldTop = clone.top
                     el.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     let callback = () => {
                         if (cutPartsType.value) {
@@ -132,12 +143,14 @@ const watchCanvas = () => {
     // })
 }
 const setAllCuts = () => {
+    const objects = canvasEditor.canvas.getObjects().filter(el => el.cutPartsType == cutPartsType.value && !el.isMask && el.id !== 'workspace' && el.id !== 'grid')
+    console.log('objects', objects)
     if (cutPartsType.value) {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getActiveObjects()[0]
         let p = {
-            SizeGUID: SizeGUID.value,
+            SizeGUID: sizeGUID.value,
             Canvas_zoom: '0.07',
             Part_name: cutPartsType.value,
             Images: [],
@@ -145,69 +158,71 @@ const setAllCuts = () => {
             bgc_g: bgColor.value.G,
             bgc_b: bgColor.value.B
         }
-
-        canvasEditor.canvas.getObjects().forEach(image => {
-            if (image.id !== 'workspace' && !image.isMask && cutPartsType.value == image.cutPartsType) {
-                console.log('image', image)
-                const left = image.oldLeft ? image.oldLeft : image.left
-                const top = image.oldTop ? image.oldTop : image.top
-                const obj = {
-                    Image_fullName: image.FilePath + '/' + image.FileName,
-                    Image_width: (image.width * image.scaleX).toFixed(5) + '',
-                    Image_height: (image.height * image.scaleY).toFixed(5) + '',
-                    Image_left: (left - maskRect.left).toFixed(5) + '',
-                    Image_top: (top - maskRect.top).toFixed(5) + '',
-                    Image_angle: image.angle.toFixed(5) + ''
-                }
-                p.Images.push(obj)
-            }
-
-        })
-
-        console.log('总的剪裁参数', p)
-        picture.setCutAllParts(p).then(res => {
-            const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-            load3DScene.setModelColor(color, () => {
-            })
-            const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-            URLbase64.value = url
-            LoadScene.setTexture(cutPartsType.value, url)
-
-
-        })
-    }
-
-}
-const init = () => {
-    mitts.on('changeSize', (e) => {
-        let arr = []
-        SizeGUID.value = e.GUID
-        picture.getCutParts({ SizeGUID: e.GUID }).then(res => {
-            if (res.Tag[0]) {
-                const modelInfo = {
-                    modelName: res.Tag[0].modelName,
-                    modelUrl: res.Tag[0].modelUrl,
-                    modelUrl_Path: res.Tag[0].modelUrl_Path
-                }
-                store.commit('setModelInfo', modelInfo)
-                res.Tag[0].Table.forEach(el => {
-                    arr.push({
-                        Title: el.Title,
-                        ImageUrl: el.ImageUrl,
-                        ImageUrl_Path: el.ImageUrl_Path
+        if (objects.length > 0) {
+            objects.forEach(image => {
+                if (image.id !== 'workspace') {
+                    console.log('image', image)
+                    image.clone(cloned => {
+                        cloned.rotate(0)
+                        console.log('cloned', cloned)
+                        console.log('maskRect.top', maskRect.top, 'top', top)
+                        const obj = {
+                            Image_fullName: image.FilePath + '/' + image.FileName,
+                            Image_width: (image.width * image.scaleX).toFixed(5) + '',
+                            Image_height: (image.height * image.scaleY).toFixed(5) + '',
+                            Image_left: (cloned.left - maskRect.left).toFixed(5) + '',
+                            Image_top: (cloned.top - maskRect.top).toFixed(5) + '',
+                            Image_angle: image.angle.toFixed(5) + ''
+                        }
+                        p.Images.push(obj)
+                        setCutAllParts(p)
                     })
-                    // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
-                })
-                GoodsInfo.SizeGUID = e.GUID
-                const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
+                }
+            })
+        } else {
+            setCutAllParts(p)
+        }
+
+
+    }
+}
+
+const setCutAllParts = debounce((p) => {
+    picture.setCutAllParts(p).then(res => {
+        console.log('总的剪裁参数', p)
+        const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
+        load3DScene.setModelColor(color, null)
+        const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
+        URLbase64.value = url
+        LoadScene.setTexture(cutPartsType.value, url)
+    })
+}, 500)
+const init = (newVal) => {
+    let arr = []
+    picture.getCutParts({ SizeGUID: newVal }).then(res => {
+        if (res.Tag[0]) {
+            const modelInfo = {
+                modelName: res.Tag[0].modelName,
+                modelUrl: res.Tag[0].modelUrl,
+                modelUrl_Path: res.Tag[0].modelUrl_Path
             }
-            cutParts.value = [...arr]
-            store.commit('setCutPartsType', cutParts.value[0].Title)
-            store.commit('setCutParts', arr)
-            mitts.emit('cutParts', cutParts.value)
-            changeSelection(arr[0])
-        })
+            store.commit('setModelInfo', modelInfo)
+            res.Tag[0].Table.forEach(el => {
+                arr.push({
+                    Title: el.Title,
+                    ImageUrl: el.ImageUrl,
+                    ImageUrl_Path: el.ImageUrl_Path
+                })
+                // LoadScene.loadModel('' + res.Tag[0]['3d'], res.Tag[0].modelName)
+            })
+            GoodsInfo.SizeGUID = newVal
+            const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
+            LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
+        }
+        cutParts.value = [...arr]
+        store.commit('setCutPartsType', cutParts.value[0].Title)
+        store.commit('setCutParts', arr)
+        changeSelection(arr[0])
     })
 
 }
@@ -291,7 +306,7 @@ const changeSelection = (item) => {
     };
     const loadCanvasObject = () => {
         canvasObjects.value.forEach(el => {
-            console.log('el',el)
+            console.log('el', el)
             canvasEditor.canvas.add(el)
         })
         canvasEditor.canvas.requestRenderAll();

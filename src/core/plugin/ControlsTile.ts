@@ -181,6 +181,7 @@ class ControlsTile {
     static replaceImage = (rect: fabric.Rect, imageLeft: number, imageTop: number) => {
         console.log('替换')
         const FileName = guid() + '.png'
+        console.log('rect', rect)
         const url = rect.toDataURL({
             width: rect.width,
             height: rect.height,
@@ -189,6 +190,7 @@ class ControlsTile {
             scaleY: rect.scaleY,
             multiplier: 1,
         });
+        // const url =
         let callback1 = () => {
             const activeObject = this.canvas.getActiveObjects()[0];
             const imageURL = baseUrl +'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName

@@ -14,7 +14,7 @@
     </Button>
     <template v-if="list.length">
       <Collapse v-model="value1">
-        <Panel :name="item1.Title" v-for="(item1, index) in layerList" :key="item1.Title">
+        <Panel :name="item1.Title" v-for="(item1, index) in cutParts" :key="item1.Title">
           <div v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></div>
           <div>{{ item1.Title }}</div>
           <template #content>
@@ -31,8 +31,8 @@
                       </div>
                       <div>
                         <Lock v-show="false" :isLock="state.isLock"></Lock>
-                        <span v-html="iconType('unlock')" style="margin: 0px 10px;"></span>
-                        <span v-html="iconType('display')" style="margin: 0px 10px;"></span>
+                        <span v-html="iconType('unlock')" style="margin: 0px 10px;" @click="doLock"></span>
+                        <span v-html="iconType('display')" style="margin: 0px 10px;" @click="doHide"></span>
                       </div>
                     </div>
                   </Tooltip>
@@ -64,7 +64,9 @@ import { Collapse, Panel, Button } from 'view-ui-plus';
 import Lock from '@/components/lock.vue'
 import useSelect from '@/hooks/select';
 import { ref } from 'vue'
-import mitts from '@/utils/mitts'
+import { useStore } from 'vuex'
+import { debounce } from 'lodash-es';
+const store = useStore()
 const value1 = [1, 2]
 const { canvasEditor, fabric, mixinState } = useSelect();
 const list = ref([]);
@@ -72,18 +74,23 @@ const state = reactive({
   isLock: false,
   isHide: true
 })
-let cutPartsType = ref('')
-const layerList = ref([])
+const lockAttrs = [
+  'lockMovementX',
+  'lockMovementY',
+  'lockRotation',
+  'lockScalingX',
+  'lockScalingY',
+];
+const cutParts = computed(() => {
+  return store.state.saveData.cutParts
+})
+const cutPartsType = computed(() => {
+  return store.state.saveData.cutPartsType
+})
+// let cutPartsType = ref('')
 
 onMounted(() => {
-  mitts.on('cutParts', (val) => {
-    layerList.value = [...val]
-    cutPartsType.value = layerList.value[0].Title
-  })
-  // mitts.on('cutParts', (val) => {
-  //   layerList.value = [...val]
-  //   console.log('接受裁片', val)
-  // })
+
 })
 // 是否选中元素
 const isSelect = (item) => {
@@ -117,23 +124,36 @@ const iconType = (type) => {
   return iconType[type] || defaultIcon;
 };
 
-const doLock = () => {
-  state.isLock = !state.isLock
-}
-const doHide = () => {
-  // activeObject && activeObject.set(key, value / 100);
-  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  state.isHide = !state.isHide
-  if (!state.isHide) {
-    activeObject.set('opacity', 0)
-    state.isLock = true
-    canvasEditor.canvas.renderAll();
-  } else {
-    state.isLock = false
-    activeObject.set('opacity', 1)
-    canvasEditor.canvas.renderAll();
+const doLock = debounce(() => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  if (activeObject.isLock == undefined || activeObject.isLock) {
+    activeObject.hasControls = false;
+    activeObject.selectable = false;
+    activeObject.isLock = false
+    activeObject.hoverCursor = 'default'
+    lockAttrs.forEach((key) => {
+      activeObject[key] = true;
+    });
+    canvasEditor.canvas.discardActiveObject();
+  } else if (activeObject.isLock === false) {
+    activeObject.hasControls = true;
+    // 修改默认属性
+    lockAttrs.forEach((key) => {
+      activeObject[key] = false;
+    });
+    activeObject.selectable = true;
+    activeObject.isLock = true
+    activeObject.hoverCursor = null
   }
-}
+  canvasEditor.canvas.renderAll();
+}, 500)
+const doHide = debounce(() => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  activeObject.visible = !activeObject.visible
+  activeObject.visible ? '' : canvasEditor.canvas.discardActiveObject()
+  canvasEditor.canvas.renderAll();
+  store.commit('setAllCuts')
+}, 500)
 const textType = (type, item) => {
   if (type.includes('text')) {
     return item.name || item.text;

@@ -10,9 +10,6 @@
 
 <template>
   <div class="save-box">
-    <!-- <Button style="margin-left: 10px" type="text" @click="beforeClear">
-      {{ $t('empty') }}
-    </Button> -->
     <Button type="primary" @click="getData">
       拿取
       <Icon type="ios-arrow-down"></Icon>
@@ -71,7 +68,7 @@ const getData = () => {
   })
 }
 const saveWith = debounce(function (type) {
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask))
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask || v.id == 'grid'))
   // store.commit('setCanvasObjects', objects)
   let arr = []
   objects.forEach(element => {
@@ -83,7 +80,7 @@ const saveWith = debounce(function (type) {
     saveData: JSON.stringify(saveData.value),
     objects: arr
   }
- 
+
   historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value) }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
     console.log('保存结果', res)

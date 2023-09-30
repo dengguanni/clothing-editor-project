@@ -16,9 +16,9 @@ type IEditor = Editor;
 function downFile(fileStr: string, fileType: string) {
   const anchorEl = document.createElement('a');
   anchorEl.href = fileStr;
- 
+
   anchorEl.download = `${uuid()}.${fileType}`;
-  console.log(' anchorEl.download',  anchorEl.download)
+  console.log(' anchorEl.download', anchorEl.download)
   document.body.appendChild(anchorEl); // required for firefox
   anchorEl.click();
   anchorEl.remove();
@@ -125,7 +125,7 @@ class ServersPlugin {
       const option = this._getSaveOption();
       this.canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       const dataUrl = this.canvas.toDataURL(option);
-     
+
       // console.log('dataUrl', dataUrl)
       this.editor.hooksEntity.hookSaveAfter.callAsync(dataUrl, () => {
         downFile(dataUrl, 'png');
@@ -182,7 +182,8 @@ class ServersPlugin {
 
   clear() {
     this.canvas.getObjects().forEach((obj) => {
-      if (obj.id !== 'workspace') {
+      console.log('23456', obj)
+      if (!(obj.id == 'workspace' || obj.isMask || obj.id == 'grid')) {
         this.canvas.remove(obj);
       }
     });

@@ -53,18 +53,7 @@ const changeMode = () => {
 const preview = () => {
     emit('preview', is3D.value)
 }
-onBeforeMount(() => {
-    // mitts.on('changeModelColor', (item) => {
-    //     const color = 'rgb(' + item.R + ',' + item.G + ',' + item.B + ')'
-    //     load3DScene.setModelColor(color, () => {
-    //         screenshotList = []
-    //         let arr = LoadScene.getImages()
-    //         arr.forEach(element => {
-    //             screenshotList.push(element)
-    //         });
-    //     })
-    // })
-})
+
 onMounted(() => {
     // const modelColor = GoodsInfo.modelColorList[0]
     // load3DScene.setModelColor('rgb(' + modelColor.R + ',' + modelColor.G + ',' + modelColor.B + ')', () => {

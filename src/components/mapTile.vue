@@ -60,16 +60,25 @@ import Lock from '@/components/lock.vue'
 import { v4 as uuid } from 'uuid';
 import MouseEventEventListener from '@/utils/event/mouse.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
-import mitts from '@/utils/mitts'
 import { useStore } from 'vuex'
 const store = useStore()
+const update = getCurrentInstance();
+const { mixinState, canvasEditor } = useSelect();
 const cutPartsType = computed(() => {
     return store.state.saveData.cutPartsType
 })
+const cutParts = computed(() => {
+    return store.state.saveData.cutParts
+})
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
-const update = getCurrentInstance();
-const { mixinState, canvasEditor } = useSelect();
+const lockAttrs = [
+    'lockMovementX',
+    'lockMovementY',
+    'lockRotation',
+    'lockScalingX',
+    'lockScalingY',
+];
 const event = inject('event');
 const emit = defineEmits()
 const state = reactive({
@@ -88,7 +97,6 @@ let stateRepeat = reactive({
     direction: false,
 
 })
-let cutParts = ref([])
 let layerNum = ref(0)
 let type = ref('')
 let activeInfo = reactive({
@@ -170,9 +178,7 @@ const menuList3 = [
 onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
-    mitts.on('cutParts', (val) => {
-        cutParts.value = [...val]
-    })
+
     MouseEventEventListener.setMouseupFn = () => { }
     ControlsTile.canvas = canvasEditor.canvas
     ControlsTile.setCanvasObserve(canvasEditor.canvas)
@@ -230,7 +236,6 @@ const menuList1Click = (type) => {
             //   state.isShowCropping = true
             break;
         case 'clearness':
-
             break;
         case 'mirror':
             ControlsTile.setRepeat('mirror')
@@ -247,6 +252,7 @@ const menuList1Click = (type) => {
 
 const del = debounce(function () {
     canvasEditor.del();
+    store.commit('setAllCuts')
 }, 300);
 const btnClick = (item) => {
     emit('btnClick', item);
@@ -282,7 +288,7 @@ const setLayer = () => {
     }, 100);
 }
 // 元素缩小
-const scaleSmall = (obj) => {
+const scaleSmall = debounce((obj) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     const oldW = activeObject.scaleX * activeObject.width
     const oldH = activeObject.scaleY * activeObject.height
@@ -295,10 +301,11 @@ const scaleSmall = (obj) => {
     activeObject.left = activeObject.left + left
     activeObject.top = activeObject.top + top
     canvasEditor.canvas.renderAll()
+    store.commit('setAllCuts')
+}, 300);
 
-}
 // 元素变大
-const scaleBig = (obj) => {
+const scaleBig = debounce((obj) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     const oldW = activeObject.scaleX * activeObject.width
     const oldH = activeObject.scaleY * activeObject.height
@@ -311,6 +318,31 @@ const scaleBig = (obj) => {
     activeObject.left = activeObject.left - left
     activeObject.top = activeObject.top - top
     canvasEditor.canvas.renderAll()
+    store.commit('setAllCuts')
+
+}, 300);
+const lock = () => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+    if (activeObject.isLock == undefined || activeObject.isLock) {
+        activeObject.hasControls = false;
+        activeObject.selectable = false;
+        activeObject.isLock = false
+        activeObject.hoverCursor = 'default'
+        lockAttrs.forEach((key) => {
+            activeObject[key] = true;
+        });
+        canvasEditor.canvas.discardActiveObject();
+    } else if (activeObject.isLock === false) {
+        activeObject.hasControls = true;
+        // 修改默认属性
+        lockAttrs.forEach((key) => {
+            activeObject[key] = false;
+        });
+        activeObject.selectable = true;
+        activeObject.isLock = true
+        activeObject.hoverCursor = null
+    }
+    canvasEditor.canvas.renderAll();
 }
 const menu3Click = (type) => {
     switch (type) {
@@ -318,7 +350,8 @@ const menu3Click = (type) => {
             del()
             break
         case 'lock':
-            state.isLock = !state.isLock
+            lock()
+            // state.isLock = !state.isLock
             break
         case 'scale':
             state.isScale = !state.isScale

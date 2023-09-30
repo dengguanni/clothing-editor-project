@@ -31,18 +31,22 @@ const store = createStore({
         ID: '',
         ID_Next: '',
         ID_Previous: ''
-      }
+      },
+      handelAllCuts: 0
     }
   },
   mutations: {
     text(state) {
-      state.test = '333'+ state.test
+      state.test = '333' + state.test
     },
     setCommodityInfo(state, val) {
       state.saveData.commodityInfo.GUID = val.GUID ? val.GUID : state.saveData.commodityInfo.GUID
       state.saveData.commodityInfo.ImageUrl = val.ImageUrl ? val.ImageUrl : state.saveData.commodityInfo.ImageUrl
       state.saveData.commodityInfo.Title = val.Title ? val.Title : state.saveData.commodityInfo.Title
       state.saveData.commodityInfo.colorId = val.Title ? val.Title : state.saveData.commodityInfo.colorId
+    },
+    setAllCuts(state) {
+      state.handelAllCuts = state.handelAllCuts + 1
     },
     setGoodsId(state, GUID) {
       state.saveData.commodityInfo.GUID = GUID

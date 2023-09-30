@@ -122,7 +122,6 @@ const changeImage = (val) => {
 }
 const changeColor = (item) => {
     colorSelection.value = item.GUID
-    mitts.emit('changeModelColor', item)
     store.commit('setBgColor', colorList.value[0])
     screenshotList = []
     let arr = LoadScene.getImages()

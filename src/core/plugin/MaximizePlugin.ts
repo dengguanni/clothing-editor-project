@@ -36,7 +36,7 @@ class MaximizePlugin {
         const scale = (this.mask.height * this.mask.scaleY) / this.activeObject.height
         this.activeObject.scaleX = scale
         this.activeObject.scaleY = scale
-        this.activeObject.top = 0
+        this.activeObject.top = this.mask.top
 
     }
     //    宽度最大化
@@ -53,7 +53,7 @@ class MaximizePlugin {
         const scaleY = (this.mask.height * this.mask.scaleY) / this.activeObject.height
         this.activeObject.scaleX = scaleX
         this.activeObject.scaleY = scaleY
-        this.activeObject.top = 0
+        this.activeObject.top =  this.mask.top
         this.activeObject.left = this.mask.left
     }
 }

@@ -42,6 +42,9 @@ import { useDateFormat } from '@vueuse/core';
 import useSelect from '@/hooks/select';
 import commonIcon from '@/components/commonIcon.vue'
 import baseUrl from '@/config/constants/baseUrl';
+import { debounce } from 'lodash-es';
+import { useStore } from 'vuex'
+const store = useStore()
 const { canvasEditor, fabric } = useSelect();
 const { history, redoStack, undoStack } = reactive(canvasEditor.getHistory());
 const lockAttrs = [
@@ -51,19 +54,20 @@ const lockAttrs = [
   'lockScalingX',
   'lockScalingY',
 ];
-const state = reactive({
-  line: false
-})
+const line = ref(false)
 // 后退
 const undo = () => {
   canvasEditor.undo();
+  store.commit('setAllCuts')
 };
 // 重做
 const redo = () => {
   canvasEditor.redo();
+  store.commit('setAllCuts')
 };
 const clear = () => {
   canvasEditor.clear();
+  store.commit('setAllCuts')
 };
 // 清空
 const beforeClear = () => {
@@ -77,7 +81,6 @@ const beforeClear = () => {
 };
 const setAuxiliaryLine = () => {
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-  console.log('maskRect', maskRect)
   if (maskRect) {
     maskRect.visible = !maskRect.visible
     canvasEditor.canvas.renderAll();
@@ -85,20 +88,18 @@ const setAuxiliaryLine = () => {
 }
 
 
-const setLine = () => {
-  state.line = !state.line
-  const imageURL = 'http://192.168.1.3/ImageSource/Other/Grid.png'
-  if (!state.line) {
-    const line = canvasEditor.canvas.getObjects().find((item) =>
-      item.id === '0'
-    );
+const setLine = debounce(() => {
+  line.value = !line.value
+  const imageURL = 'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
+  if (!line.value) {
+    const line = canvasEditor.canvas.getObjects().find((item) => item.id == 'grid');
     canvasEditor.canvas.remove(line)
   } else {
     let callback = (image, isError) => {
       if (!isError) {
         // image.name = item.Title
         // image.cutPartsType = cutPartsType.value
-        image.id = '0'
+        image.id = 'grid'
         image.ImageUrl = imageURL
         image.scaleX = (703 / image.width);
         image.scaleY = (703 / image.height);
@@ -116,7 +117,7 @@ const setLine = () => {
         canvasEditor.canvas.add(image);
 
         const line = canvasEditor.canvas.getObjects().find((item) =>
-          item.id === '0'
+          item.id === 'grid'
         );
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         // canvasEditor.canvas.sendBackwards(line)
@@ -134,7 +135,7 @@ const setLine = () => {
 
   }
 
-};
+}, 300)
 
 async function imgToBase64(url) {
   return new Promise((resolve, reject) => {

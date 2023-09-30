@@ -15,7 +15,7 @@
 
 <script setup name="Lock">
 import useSelect from '@/hooks/select';
-import { onBeforeUnmount, onMounted , watch} from 'vue';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
 const props = defineProps({
   isLock: {
     type: Boolean,
@@ -41,27 +41,38 @@ watch(
   }
 );
 const lock = () => {
-  console.log('lock', )
-  // 修改自定义属性
-  mixinState.mSelectActive.hasControls = false;
-  // 修改默认属性
+  // console.log('lock', )
+  // // 修改自定义属性
+  // mixinState.mSelectActive.hasControls = false;
+  // // 修改默认属性
+  // lockAttrs.forEach((key) => {
+  //   mixinState.mSelectActive[key] = true;
+  // });
+  // mixinState.mSelectActive.selectable = false;
+  // isLock.value = true;
+  // canvasEditor.canvas.renderAll();
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  activeObject.hasControls = false;
+  activeObject.selectable = false;
+  activeObject.isLock = false
   lockAttrs.forEach((key) => {
-    mixinState.mSelectActive[key] = true;
+    activeObject[key] = true;
   });
-  mixinState.mSelectActive.selectable = false;
-  isLock.value = true;
+  canvasEditor.canvas.discardActiveObject();
   canvasEditor.canvas.renderAll();
+
 };
 const unLock = () => {
-  console.log('unLock', )
+  console.log('unLock',)
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   // 修改自定义属性
-  mixinState.mSelectActive.hasControls = true;
+  activeObject.hasControls = true;
   // 修改默认属性
   lockAttrs.forEach((key) => {
-    mixinState.mSelectActive[key] = false;
+    activeObject[key] = false;
   });
-  mixinState.mSelectActive.selectable = true;
-
+  activeObject.selectable = true;
+  activeObject.isLock = true
   isLock.value = false;
   canvasEditor.canvas.renderAll();
 };
@@ -102,4 +113,5 @@ li {
 
 a {
   color: #42b983;
-}</style>
+}
+</style>

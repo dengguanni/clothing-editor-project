@@ -41,7 +41,6 @@ const imageList = ref([])
 const queryKeyWord = ref('')
 import { useStore } from 'vuex'
 const store = useStore()
-
 const cutPartsType = computed(() => {
     return store.state.saveData.cutPartsType
 })
@@ -102,6 +101,8 @@ const addItem = (item) => {
     } else {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const imageURL = 'http://8.140.206.30:8099/' + item.ImageUrl_Path;
+        // const imageURL = baseUrl + item.ImageUrl_Path;
+
         console.log('imageURL', imageURL)
         let callback = (image, isError) => {
             if (!isError) {
@@ -125,7 +126,6 @@ const addItem = (item) => {
         };
         fabric.Image.fromURL(imageURL, callback, properties);
     }
-
 }
 // 拖拽添加
 const dragItem = (event) => {

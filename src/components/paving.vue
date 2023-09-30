@@ -13,6 +13,8 @@
 import { reactive } from 'vue'
 import useSelect from '@/hooks/select';
 import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
+import { useStore } from 'vuex'
+const store = useStore()
 const { mixinState, canvasEditor }: any = useSelect();
 onMounted(() => {
     MaximizePlugin.canvasEditor = canvasEditor
@@ -41,8 +43,8 @@ const svgList = reactive([
 ]
 )
 const changeSelection = (item) => {
-    
     MaximizePlugin.setMax(item.type)
+    store.commit('setAllCuts')
 }
 
 </script>
