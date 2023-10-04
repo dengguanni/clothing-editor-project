@@ -410,9 +410,15 @@ const setAllCuts = debounce(() => {
   console.log('baseAttr.angle', baseAttr.angle)
   if (baseAttr.angle == NaN || !baseAttr.angle) {
     baseAttr.angle = 0
-  } else {
-    store.commit('setAllCuts')
   }
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+
+  if (activeObject.isRepeat) {
+    const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentFileName == activeObject.FileName)
+    obj.rotate(baseAttr.angle)
+    canvasEditor.canvas.renderAll();
+  }
+  store.commit('setAllCuts')
 }, 500)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
@@ -508,7 +514,7 @@ const changeCommon = (key, value) => {
     canvasEditor.canvas.renderAll();
     return;
   }
- 
+
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
   getObjectAttr();

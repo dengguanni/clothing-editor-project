@@ -1,3 +1,4 @@
+import { ControlsTile } from '@/core/plugin/ControlsTile.ts';
 import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
 import guid from '@/utils/guiId.ts'
@@ -30,103 +31,71 @@ class ControlsTile {
         scaleY: 0
     }
     static groupRepeat: any
-    static setCanvasObserve(canvas) {
-        // this.canvas = canvas
-        // this.activeInfo = {
-        //     angle: 0,
-        //     width: 0,
-        //     height: 0,
-        //     scaleX: 0,
-        //     scaleY: 0
-        // }
+    static setCanvasObserve() {
         this.canvas.on('object:modified', function () {
-            let type = ''
             const activeObject = ControlsTile.canvas.getActiveObjects()[0];
-            if (ControlsTile.isRepeat && activeObject && activeObject.id === ControlsTile.activeObject.id) {
-                for (let key in ControlsTile.stateRepeat) {
-                    if (ControlsTile.stateRepeat[key]) {
-                        type = key
-                    }
-                }
-                ControlsTile.canvas.getObjects().forEach(el => {
-                    if (el.isRepeat) {
-                        ControlsTile.canvas.remove(el)
-
-                    }
-                })
-                if (ControlsTile.isRepeat) {
-                    if (ControlsTile.repeatType == 'basic') {
-                        ControlsTile.newHandelRepeat()
-                    } else if (ControlsTile.repeatType == 'mirror') {
-                        ControlsTile.newRepeatMirror()
-                    } else if (ControlsTile.repeatType == 'transverse') {
-                        ControlsTile.newRepeatX()
-                    } else if (ControlsTile.repeatType == 'direction') {
-                        ControlsTile.newRepeatY()
-                    }
-                    ControlsTile.canvas.requestRenderAll();
-                }
-            }
-
+            ControlsTile.setRepeat(activeObject.repeatType, true)
         })
     }
     static setRepeat(repeatType: string, val: boolean = false) {
         const activeObject = this.canvas.getActiveObjects()[0];
-        const type = repeatType ? repeatType : this.repeatType
-        this.repeatType = type
-        this.activeObject = activeObject
-        activeObject?.clone((cloned: any) => {
-            if (cloned.left === undefined || cloned.top === undefined) return;
-            for (let key in this.stateRepeat) {
-                if (type == key) {
-                    this.stateRepeat[key] = val ? val : !this.stateRepeat[key]
+        if (!val) {
+            if (repeatType) {
+                if (activeObject.repeatType == repeatType) {
+                    activeObject.isRepeat = activeObject.isRepeat == undefined ? true : !activeObject.isRepeat
                 } else {
-                    this.stateRepeat[key] = false
+                    activeObject.isRepeat = true
                 }
+            } else {
+                activeObject.isRepeat = false
             }
-            this.isRepeat = this.stateRepeat[type]
-            this.canvas.getObjects().forEach(el => {
-                if (el.isRepeat) {
-                    this.canvas.remove(el)
-                }
-            })
-            if (this.isRepeat) {
-                if (type == 'basic') {
-                    this.newHandelRepeat()
-                } else if (type == 'mirror') {
-                    ControlsTile.newRepeatMirror()
-                } else if (type == 'transverse') {
-                    ControlsTile.newRepeatX()
-                } else if (type == 'direction') {
-                    ControlsTile.newRepeatY()
-                }
-                this.canvas.requestRenderAll();
+        }
+        activeObject.repeatType = repeatType
+        ControlsTile.canvas.getObjects().forEach((el: any) => {
+            if (el.tileParentFileName == activeObject.FileName) {
+                ControlsTile.canvas.remove(el)
             }
-        });
+        })
+
+        if (activeObject.isRepeat && activeObject.repeatType) {
+            if (activeObject.repeatType == 'basic') {
+                this.handelBasicRepeat()
+            } else if (activeObject.repeatType == 'mirror') {
+                ControlsTile.handelRepeatMirror()
+            } else if (activeObject.repeatType == 'transverse') {
+                ControlsTile.handelRepeatX()
+            } else if (activeObject.repeatType == 'direction') {
+                ControlsTile.handelRepeatY()
+            }
+            this.canvas.requestRenderAll();
+        }
     }
     static getMaxCount = (cloned: any) => {
-        const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
+        const mask = this.canvas.getObjects().find((item: any) => item.isMask);
         let maxXcount, maxYcount
-        const left = cloned.left < 0 ? cloned.left * -1 : cloned.left
-        const top = cloned.top < 0 ? cloned.top * -1 : cloned.top
-        if (left < workspace.width - cloned.width * cloned.scaleX - left) {
-            const n = Math.ceil((workspace.width - cloned.width * cloned.scaleX - left) / (cloned.width * cloned.scaleX))
-            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
-        } else {
-            const n = Math.ceil(left / (cloned.width * cloned.scaleX))
-            maxXcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
+        const nX = Math.round((mask.width * mask.scaleX) / (cloned.width * cloned.scaleX))
+        const nY = Math.round((mask.height * mask.scaleY) / (cloned.height * cloned.scaleY))
+        const fnX = (n, numb) => {
+            if (n < (2 * numb + 1)) {
+                maxXcount = (2 * numb) + 1
+            } else {
+                fnX(n, numb + 1)
+            }
         }
-        if (top < workspace.height - (cloned.height * cloned.scaleY) - top) {
-            const n = Math.ceil((workspace.height - cloned.height - top * cloned.scaleY) / (cloned.height * cloned.scaleY))
-            maxYcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
-        } else {
-            const n = Math.ceil(top / (cloned.height * cloned.scaleY))
-            maxYcount = (2 * n + 3) % 2 == 0 ? 2 * n + 5 : 2 * n + 3
+        const fnY = (n, numb) => {
+            if (n < (2 * numb + 1)) {
+                maxYcount = (2 * numb) + 1
+            } else {
+                fnY(n, numb + 1)
+            }
         }
-
+        fnX(nX, 1)
+        fnY(nY, 1)
+        console.log('axXcount, maxYcount' ,maxXcount, maxYcount)
         return { maxXcount, maxYcount }
     }
-    static newHandelRepeat() {
+    // 基础平铺
+    static handelBasicRepeat() {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
@@ -178,8 +147,8 @@ class ControlsTile {
             this.replaceImage(p.rect, p.imageLeft, p.imageTop)
         })
     }
+    // 更新图片
     static replaceImage = (rect: fabric.Rect, imageLeft: number, imageTop: number) => {
-        console.log('替换')
         const FileName = guid() + '.png'
         console.log('rect', rect)
         const url = rect.toDataURL({
@@ -190,10 +159,9 @@ class ControlsTile {
             scaleY: rect.scaleY,
             multiplier: 1,
         });
-        // const url =
         let callback1 = () => {
             const activeObject = this.canvas.getActiveObjects()[0];
-            const imageURL = baseUrl +'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
+            const imageURL = baseUrl + 'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     image.cutPartsType = activeObject.cutPartsType
@@ -202,7 +170,9 @@ class ControlsTile {
                         selectable: false,
                         evented: false,
                         isRepeat: true,
+
                     })
+                    image.tileParentFileName = activeObject.FileName
                     image.cutPartsType = activeObject.cutPartsType
                     image.sendBackwards()
                     image.id = uuid()
@@ -223,13 +193,12 @@ class ControlsTile {
         }
         setUserUploadFile(url, FileName, 'images_temp//', callback1)
     }
-    static newRepeatX = () => {
+    static handelRepeatX = () => {
         const self = this
         let arr1 = []
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
         const createPattern1 = () => {
-            let isOffsetX = false
             activeObject.clone(cloned => {
                 let { maxXcount, maxYcount } = self.getMaxCount(cloned)
                 cloned.rotate(0)
@@ -376,7 +345,7 @@ class ControlsTile {
         createPattern()
         this.canvas.requestRenderAll();
     }
-    static newRepeatY = () => {
+    static handelRepeatY = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
@@ -566,14 +535,9 @@ class ControlsTile {
             arr1.push(rect)
             fn1()
         })
-
-
-
-
-
     }
     // 镜像
-    static newRepeatMirror = () => {
+    static handelRepeatMirror = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)

@@ -68,7 +68,6 @@ watch(bgColor, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 onMounted(() => {
     colorList.value = [...GoodsInfo.modelColorList]
-    // colorSelection.value = colorList.value[0].GUID
     is3D.value = props.is3D === 4 ? true : false
     LoadScene.change3dBox('big-3d', () => {
         screenshotList = []
@@ -78,22 +77,11 @@ onMounted(() => {
         });
         imageActive.value = screenshotList[0].src
         directionSelection.value = screenshotList[0].id
-        //     LoadScene.loadModel('', 'duanxiu')
     })
-    // load3DScene.init(scene, camera, renderer, 'big-3d', () => {
-    //     screenshotList = []
-    //     let arr = LoadScene.getImages()
-    //     arr.forEach(element => {
-    //         screenshotList.push(element)
-    //     });
-    //     imageActive.value = screenshotList[0].src
-    //     directionSelection.value = screenshotList[0].id
-    //     LoadScene.loadModel('', 'duanxiu')
-    // })
+
 })
 
 onUnmounted(() => {
-    // load3DScene.destroyScene()
     LoadScene.change3dBox('small-3d')
 })
 const changeDirection = (item) => {
@@ -130,8 +118,6 @@ const changeColor = (item) => {
     });
     imageActive.value = screenshotList[0].src
     directionSelection.value = screenshotList[0].id
-    // load3DScene.setModelColor('rgb(' + item.R + ',' + item.G + ',' + item.B + ')', () => {
-    // })
 }
 const changeMode = (val) => {
     is3D.value = val

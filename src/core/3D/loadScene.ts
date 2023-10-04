@@ -10,6 +10,7 @@ class LoadScene {
     static camera: any
     static scene: any
     static renderer: any
+    static control: any
     static screenshotList: Array<any> = []
     static loadModel(url: string, name: string, modelColor: any = null) {
         if (LoadScene.scene) {
@@ -43,27 +44,14 @@ class LoadScene {
         return this.screenshotList
     }
     static setTexture = (name, url, callback) => {
-        // console.log('LoadScene.scene', LoadScene.scene)
-        // const drawingCanvas = document.getElementById('canvas');
-        // const drawingContext = drawingCanvas.getContext('2d');
-        // drawingContext.fillStyle = '#FFFFFF';
-        // drawingContext.fillRect(10, 10, 10, 10);
-
-        // image.addEventListener('load', function (event) { texture.needsUpdate = true; });
         if (url) {
             LoadScene.scene.traverse((child: any) => {
                 if (child.isMesh && child.name == name) {
                     const mapTexture = new THREE.TextureLoader().load(url)
-                    // const mapTexture = new THREE.TextureLoader().load(url)
-                    // const mapTexture = new THREE.CanvasTexture(drawingCanvas)
                     mapTexture.encoding = THREE.sRGBEncoding
-                    // mapTexture.offset.y = -80
-                    console.log('mapTexture', mapTexture)
                     mapTexture.repeat.set(1, 1)
                     child.material = new THREE.MeshLambertMaterial({
                         map: mapTexture,
-                        transparent: true, // 允许材质可透明
-                        // color
                     })
                 }
             })
@@ -108,7 +96,6 @@ class LoadScene {
             preserveDrawingBuffer: true,
             alpha: true
         });
-        // LoadScene.renderer.setClearAlpha(0)
         // 设置渲染尺寸
         const height = id == 'big-3d' ? 600 : 280
         const width = id == 'big-3d' ? 600 : 280
@@ -119,14 +106,12 @@ class LoadScene {
         document.getElementById(id)?.appendChild(LoadScene.renderer.domElement);
 
         // 创建轨道控制器
-        const control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
-        control.target.set(0, 0, 0);
+        LoadScene.control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
+        LoadScene.control.target.set(0, 0, 0);
         // 设置阻尼
-        // control.enableDamping = true;
-        // LoadScene.loadModel()
         // 创建渲染函数
         const render = () => {
-            control.update();
+            LoadScene.control.update();
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
             // 通过动画帧来执行函数
             requestAnimationFrame(render);
@@ -157,30 +142,25 @@ class LoadScene {
             }
             LoadScene.screenshotList.push(obj)
         }
-        setImage()
-        LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
-                c.rotation.y = c.rotation.y - Math.PI / 3
-                setImage()
-            }
-        })
-        LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
-                c.rotation.y = c.rotation.y - 2 * Math.PI / 3
-                setImage()
-            }
-        })
+
         LoadScene.scene.traverse((c: any) => {
             if (c.name == 'duanxiu') {
                 c.rotation.y = 0
+                setImage()
+                c.rotation.y = Math.PI / 2
+                setImage()
+                c.rotation.y = Math.PI
+                setImage()
+                c.rotation.y = 0
             }
+
         })
+
         return LoadScene.screenshotList
     }
 
     destroyScene() {
         LoadScene.scene = null
-        console.log('销毁')
     }
     getScreenshot() {
         let screenshotList = []
@@ -210,13 +190,17 @@ class LoadScene {
     setModelCamera(direction: string) {
         if (LoadScene.scene) {
             LoadScene.scene.traverse((c: any) => {
-                const setModelRotation = (targetRotation) => {
-                    let rotation = { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z };
-                    let testTween = new TWEEN.Tween(rotation);
-                    testTween.to({ x: c.rotation.x, y: targetRotation, z: c.rotation.z }, 1000);
+                const setModelRotation = (targetPosition: any) => {
+                    console.log('LoadScene.camera', LoadScene.camera.position)
+                    console.log('target', LoadScene.control.target)
+                    let position = { x: LoadScene.camera.position.x, y: LoadScene.camera.position.y, z: LoadScene.camera.position.z };
+                    let testTween = new TWEEN.Tween(position);
+                    testTween.to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 1000);
                     testTween.onStart(function () {
                     }).onUpdate(function (object) {
-                        c.rotation.y = object.y
+                        LoadScene.camera.position.x = object.x
+                        LoadScene.camera.position.z = object.z
+                        LoadScene.camera.position.y = object.y
                     }).onComplete(function () {
                     });
                     testTween.easing(TWEEN.Easing.Quadratic.Out);
@@ -224,18 +208,16 @@ class LoadScene {
                 }
                 if (c.name == 'duanxiu') {
                     if (direction.includes('左')) {
-                        setModelRotation(Math.PI / 2)
+                        setModelRotation({ x: 2.7697086512561713, y: -0.7981105367000209, z: 0.8317052112167073 })
                     } else if (direction.includes('右')) {
-                        setModelRotation(-(Math.PI / 2))
+                        setModelRotation({ x: -2.8087046119192127, y: -0.7981105367000209, z: 0.8317052112167073 })
                     } else if (direction.includes('前')) {
-                        setModelRotation((Math.PI))
+                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: -3 })
                     } else if (direction.includes('后')) {
-                        setModelRotation(-Math.PI)
+                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: 2.980386083644747 })
                     } else {
-                        setModelRotation((Math.PI))
+                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: -3 })
                     }
-
-
                 }
             })
         }

@@ -202,6 +202,7 @@ const addText = (option) => {
     return
   }
   const active = canvasEditor.canvas.getActiveObjects()[0]
+  const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
   const FileName = guid() + '.png'
   const text = new fabric.IText(t('everything_is_fine'), {
     ...defaultPosition,
@@ -211,14 +212,13 @@ const addText = (option) => {
     cutPartsType: cutPartsType.value,
     type: 'text',
     FileName: FileName,
-    FilePath: 'images_temp/' + FileName.substring(0, 1)
+    FilePath: 'images_temp/' + FileName.substring(0, 1),
   });
+  const top = mask.top + (mask.height * mask.scaleY)/2 - (text.height / 2)
+  const left = mask.left + (mask.width * mask.scaleX)/2 - (text.width / 2)
+  text.top = top
+  text.left = left
   canvasEditor.canvas.add(text);
-
-  if (!option) {
-    text.center();
-  }
-
   canvasEditor.canvas.setActiveObject(text);
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   const url = activeObject.toDataURL({
@@ -229,10 +229,8 @@ const addText = (option) => {
     scaleY: activeObject.scaleY,
     multiplier: 1,
   })
-  let callback = () => {
-    console.log('字体')
-  }
-  setUserUploadFile(url, FileName, 'images_temp/', callback)
+  canvasEditor.canvas.bringToFront(mask)
+  setUserUploadFile(url, FileName, 'images_temp/', null)
 };
 
 

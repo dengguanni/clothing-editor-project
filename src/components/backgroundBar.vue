@@ -100,9 +100,7 @@ const addItem = (item) => {
         })
     } else {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        const imageURL = 'http://8.140.206.30:8099/' + item.ImageUrl_Path;
-        // const imageURL = baseUrl + item.ImageUrl_Path;
-
+        const imageURL = baseUrl + item.ImageUrl_Path;
         console.log('imageURL', imageURL)
         let callback = (image, isError) => {
             if (!isError) {
@@ -132,7 +130,6 @@ const dragItem = (event) => {
     if (!props.isBg) {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const URL = event.toElement.currentSrc;
-        console.log('URL', URL)
         const imageURL = URL
         const ImageUrl_Path = URL.replace('http://8.140.206.30:8099/', '')
         const obj = imageList.value.filter(el => el.ImageUrl_Path == ImageUrl_Path)[0]
@@ -176,10 +173,7 @@ const dragItem = (event) => {
         } else {
             fabric.Image.fromURL(imageURL, callback, properties);
         }
-
-
     }
-
 }
 </script>
 <style lang="less" scoped>

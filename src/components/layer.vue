@@ -171,12 +171,12 @@ const textType = (type, item) => {
 };
 // 选中元素
 const select = (id, obj) => {
-  // console.log('CutParts', obj)
-  // CutParts.cutPartsType = obj.Title
+  store.commit('setCutPartsType', obj.Title)
   const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
-  canvasEditor.canvas.discardActiveObject();
   canvasEditor.canvas.setActiveObject(info);
   canvasEditor.canvas.requestRenderAll();
+  console.log('伽桑')
+
 };
 
 // 按钮类型

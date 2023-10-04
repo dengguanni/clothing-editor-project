@@ -1,4 +1,6 @@
 
+// 最大化
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 class MaximizePlugin {
     static canvasEditor: any
     static activeObject: any
@@ -6,7 +8,7 @@ class MaximizePlugin {
     static setMax(type: string, mask: any) {
         this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
         this.mask = this.canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        console.log('mask', mask)
+        console.log('this.mask', this.mask)
         this.activeObject.angle = 0
         if (type == 'bigFull') {
             this.designMaximization()
@@ -17,8 +19,7 @@ class MaximizePlugin {
         } else {
             this.widthMaximization()
         }
-        this.canvasEditor.position('Vcenter')
-        this.canvasEditor.position('Hcenter')
+        ControlsTile.setRepeat(this.activeObject.repeatType, true)
         this.canvasEditor.canvas.requestRenderAll();
 
     }
@@ -37,15 +38,17 @@ class MaximizePlugin {
         this.activeObject.scaleX = scale
         this.activeObject.scaleY = scale
         this.activeObject.top = this.mask.top
-
+        const left = this.mask.left + (this.mask.width * this.mask.scaleX) / 2 - (this.activeObject.width *scale / 2)
+        this.activeObject.left = left
     }
     //    宽度最大化
     static widthMaximization() {
-        const scale =(this.mask.width * this.mask.scaleX) / this.activeObject.width
+        const scale = (this.mask.width * this.mask.scaleX) / this.activeObject.width
         this.activeObject.scaleX = scale
         this.activeObject.scaleY = scale
         this.activeObject.left = this.mask.left
-
+        const top = this.mask.top + (this.mask.height * this.mask.scaleY) / 2 - (this.activeObject.height *scale / 2)
+        this.activeObject.top = top
     }
     //    铺满设计区
     static spreadDesignAea() {
@@ -53,7 +56,7 @@ class MaximizePlugin {
         const scaleY = (this.mask.height * this.mask.scaleY) / this.activeObject.height
         this.activeObject.scaleX = scaleX
         this.activeObject.scaleY = scaleY
-        this.activeObject.top =  this.mask.top
+        this.activeObject.top = this.mask.top
         this.activeObject.left = this.mask.left
     }
 }

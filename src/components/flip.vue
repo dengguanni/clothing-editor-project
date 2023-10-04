@@ -92,15 +92,14 @@ const flip = (type) => {
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
   canvasEditor.canvas.renderAll();
   store.commit('setAllCuts')
-  // ControlsTile.setRepeat(null, true)
+  ControlsTile.setRepeat(activeObject.repeatType, true)
 };
 const angle = (value) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.rotate(activeObject.angle + value);
-  // activeObject.angle = activeObject.angle+ value
+  ControlsTile.setRepeat(activeObject.repeatType, true)
   canvasEditor.canvas.renderAll();
   store.commit('setAllCuts')
-  // ControlsTile.setRepeat(null, true)
 }
 </script>
 

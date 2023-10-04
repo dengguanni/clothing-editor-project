@@ -9,7 +9,7 @@
             <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value)>
                 <img :src="value.src" />
             </div>
-            <!-- <img :src="imagebase64" style=" border-color: black;" /> -->
+            <!-- <img :src="imageBase64" style=" border-color: black;" /> -->
         </div>
     </div>
 </template>
@@ -20,6 +20,8 @@ import { v4 as uuid } from 'uuid';
 import { uiType, paramsFilters, combinationFilters } from '@/config/constants/filter';
 import { reactive } from 'vue'
 import picture from '@/api/picture'
+import guid from '@/utils/guiId.ts'
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 let croppedImage = ref()
@@ -27,7 +29,7 @@ const state = reactive({
     type: '',
     hasCropping: false
 });
-const imagebase64 = ref('')
+const imageBase64 = ref('')
 const imageList = reactive([
     {
         id: uuid(),
@@ -78,7 +80,6 @@ onMounted(() => {
                 })
             }
             state.hasCropping = false
-
         }
 
     })
@@ -102,43 +103,53 @@ const handelCutParts = (image) => {
             Mask_height: mask.height * mask.scaleY,
             Mask_left: mask.left,
             Mask_top: mask.top,
-            Mask_angle: mask.angle
+            Mask_angle: mask.angle,
+            Image_flipX: image.flipX,
+            Image_flipY: image.flipY,
+            Image_visible: image.visible
         }
-        console.log('剪裁参数', p)
         picture.setCutParts(p).then(res => {
-            let imgInstance
-            const imgEl = document.createElement('img');
-            imgEl.src = 'data:image/jpeg;base64,' + res.Tag[0].base64;
-            imagebase64.value = imgEl.src
-            document.body.appendChild(imgEl);
-            imgInstance = new fabric.Image(imgEl, {
-                id: uuid(),
-                name: image.name,
-                width: image.width,
-                height: image.height,
-                // width: 703,
-                // height: 703,
-                angle: image.angle,
-                top: image.top,
-                left: image.left,
-                angle: image.angle
-            })
-            // console.log('剪裁', res)
+            console.log('剪裁参数', p, 'res', res)
 
-            imgInstance.cutPartsType = image.cutPartsType
-            imgInstance.FilePath = image.FilePath
-            imgInstance.parentUrl = image.ImageUrl
-            imgInstance.ImageUrl = image.ImageUrl
-            imgInstance.skewX = image.skewX
-            imgInstance.skewY = image.skewY
-            console.log('maskRect', maskRect)
+            const FileName = guid() + '.png'
+            const callback = () => {
 
-            imgEl.onload = () => {
-                canvasEditor.canvas.add(imgInstance);
-                canvasEditor.canvas.bringToFront(maskRect)
-                canvasEditor.canvas.renderAll();
-                imgEl.remove();
+                let imgInstance
+                const imgEl = document.createElement('img');
+                imgEl.src = 'data:image/jpeg;base64,' + res.Tag[0].base64;
+                imageBase64.value = imgEl.src
+                document.body.appendChild(imgEl);
+                imgInstance = new fabric.Image(imgEl, {
+                    id: uuid(),
+                    name: image.name,
+                    width: image.width,
+                    height: image.height,
+                    angle: image.angle,
+                    top: image.top,
+                    left: image.left,
+                    angle: image.angle,
+                })
+                imgInstance.cutPartsType = image.cutPartsType
+                imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                imgInstance.FileName = FileName
+                imgInstance.parentUrl = image.ImageUrl
+                imgInstance.ImageUrl = image.ImageUrl
+                imgInstance.skewX = image.skewX
+                imgInstance.skewY = image.skewY
+
+                imgEl.onload = () => {
+                    const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
+                    canvasEditor.canvas.remove(oldObj)
+                    canvasEditor.canvas.add(imgInstance);
+                    canvasEditor.canvas.bringToFront(maskRect)
+                    canvasEditor.canvas.renderAll();
+                    imgEl.remove();
+
+                }
+
             }
+            setUserUploadFile('data:image/jpeg;base64,' + res.Tag[0].base64, FileName, 'images_temp//', callback)
+
         })
 
     }
@@ -319,10 +330,8 @@ const clipImage = () => {
                 offsetY: 0,
                 height: 100,
                 width: 100
-
             });
             canvasEditor.canvas.add(clipBox);
-
             activeObject.set({
                 selectable: false,
                 hoverCursor: 'default',
@@ -344,47 +353,6 @@ const clipImage = () => {
             });
             activeObject.visible = false;
             canvasEditor.canvas.renderAll();
-            // mixinState.clipBox.on({
-            //     'moving': () => {
-            //         if (!mixinState.isClipping) {
-            //             clipBox.clipClone.left = clipBox.left - mixinState.clipLeft
-            //             clipBox.clipClone.top = clipBox.top - mixinState.clipTop
-            //             canvasEditor.canvas.renderAll()
-            //             returnd
-            //         }
-            //         let left = clipBox.left - clipBox.clipClone.left;
-            //         let top = clipBox.top - clipBox.clipClone.top;
-            //         mixinState.clipLeft = left
-            //         mixinState.clipTop = top
-            //         clipBox.fill.offsetX = -left / clipBox.clipClone.scaleX
-            //         clipBox.fill.offsetY = -top / clipBox.clipClone.scaleY
-            //         canvasEditor.canvas.renderAll();
-            //     },
-            //     'scaling': () => {
-            //         if (!mixinState.isClipping) {
-            //             clipBox.clipClone.left = clipBox.left - mixinState.clipLeft
-            //             clipBox.clipClone.top = clipBox.top - mixinState.clipTop
-            //             clipBox.clipClone.scaleX = clipBox.scaleX
-            //             clipBox.clipClone.scaleY = clipBox.scaleY
-            //             canvasEditor.canvas.renderAll()
-            //             return
-            //         }
-            //         // let _width = clipBox.width / clipBox.
-            //         let _width = clipBox.width * clipBox.scaleX / clipBox.clipClone.scaleX
-            //         let _height = clipBox.height * clipBox.scaleY / clipBox.clipClone.scaleY
-            //         let left = clipBox.left - clipBox.clipClone.left;
-            //         let top = clipBox.top - clipBox.clipClone.top;
-            //         mixinState.clipLeft = clipBox.left
-            //         mixinState.clipTop = clipBox.top
-            //         clipBox.fill.offsetX = -left / clipBox.clipClone.scaleX
-            //         clipBox.fill.offsetY = -top / clipBox.clipClone.scaleX
-            //         clipBox.scaleX = clipBox.clipClone.scaleX
-            //         clipBox.scaleY = clipBox.clipClone.scaleY
-            //         clipBox.width = _width
-            //         clipBox.height = _height
-            //         canvasEditor.canvas.renderAll();
-            //     }
-            // })
             setTimeout(() => {
                 canvasEditor.canvas.setActiveObject(mixinState.clipBox);
                 canvasEditor.canvas.renderAll();

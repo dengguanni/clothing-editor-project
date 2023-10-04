@@ -82,6 +82,8 @@ import mitts from '@/utils/mitts'
 import { v4 as uuid } from 'uuid';
 import baseUrl from '@/config/constants/baseUrl'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
+
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
@@ -249,6 +251,7 @@ const replaceImage = (url, type) => {
       activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
       activeObject.set('oldFilePath', oldFilePath)
       activeObject.applyFilters()
+      ControlsTile.setRepeat(activeObject.repeatType, true)
       canvasEditor.canvas.renderAll();
     });
   }
@@ -336,7 +339,6 @@ function _createFilter(sourceImg, type, options = null) {
     filterObj.options = options;
     sourceImg.filters.push(filterObj);
   }
-  console.log('sourceImg', sourceImg)
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]

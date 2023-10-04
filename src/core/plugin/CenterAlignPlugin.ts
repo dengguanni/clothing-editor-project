@@ -1,8 +1,4 @@
 /*
- * @Author: 邓官妮
- * @Date: 2023-06-15 22:49:42
- * @LastEditors: 邓官妮
- * @LastEditTime: 2023-06-27 23:10:47
  * @Description: 居中对齐插件
  */
 

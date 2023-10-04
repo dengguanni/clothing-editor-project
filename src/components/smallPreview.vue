@@ -7,7 +7,6 @@
                     <button :class="!is3D ? 'btn-active' : 'btn'" @click="changeMode()">2D</button>
                 </div>
             </div>
-            <!-- <div class="content"> -->
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
                 <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;"
                     v-loading="loadScreenshotList">
@@ -15,7 +14,6 @@
                 </CarouselItem>
             </Carousel>
             <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="load3d"></div>
-            <!-- </div> -->
             <button class="preview" @click="preview">预览</button>
         </div>
     </div>

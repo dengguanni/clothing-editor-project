@@ -369,15 +369,19 @@ const menu3Click = (type) => {
             break
         case 'layer-up':
             canvasEditor.up();
+            store.commit('setAllCuts')
             break
         case 'layer-down':
             canvasEditor.down();
+            store.commit('setAllCuts')
             break
         case 'layer-top':
             canvasEditor.upTop();
+            store.commit('setAllCuts')
             break
         case 'layer-bottom':
             canvasEditor.downTop();
+            store.commit('setAllCuts')
             break
         case 'createCopy':
             clone();
