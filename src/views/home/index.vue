@@ -412,6 +412,7 @@ const closeDailog = () => {
 const sendGoodsId = (val) => {
   showDailog.value = false
   goodsInfo.value = { ...val }
+  store.commit('setGoodsId', val.GUID)
   getLeftClassificationList.getGoodsSizeDetails({ GUID: goodsInfo.value.GUID }).then(res => {
     let arr = []
     res.Tag[0].Table.forEach(el => {

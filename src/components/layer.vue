@@ -21,7 +21,7 @@
             <div class="layer-box">
               <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
                 @click="select(item.id, item1)">
-                <div v-if="item.cutPartsType == item1.Title && !item.isMask">
+                <div v-if="item.cutPartsType == item1.Title && item.isMask ==undefined">
                   <Tooltip :content="item.name || item.text || item.type" placement="left">
                     <div class="ellipsis">
                       <div style="display:flex;">
@@ -151,6 +151,7 @@ const doHide = debounce(() => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject.visible = !activeObject.visible
   activeObject.visible ? '' : canvasEditor.canvas.discardActiveObject()
+  activeObject.customVisible = activeObject.visible
   canvasEditor.canvas.renderAll();
   store.commit('setAllCuts')
 }, 500)
@@ -171,11 +172,15 @@ const textType = (type, item) => {
 };
 // 选中元素
 const select = (id, obj) => {
-  store.commit('setCutPartsType', obj.Title)
-  const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
-  canvasEditor.canvas.setActiveObject(info);
-  canvasEditor.canvas.requestRenderAll();
-  console.log('伽桑')
+  console.log('id,', id, )
+  console.log(' obj', obj)
+  if (obj) {
+    store.commit('setCutPartsType', obj.Title)
+    const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
+    canvasEditor.canvas.setActiveObject(info);
+    canvasEditor.canvas.requestRenderAll();
+  }
+
 
 };
 
@@ -210,7 +215,7 @@ const getList = () => {
     ...canvasEditor.canvas.getObjects().filter((item) => {
       // return item;
       // 过滤掉辅助线
-      return !(item instanceof fabric.GuideLine || item.id === 'workspace');
+      return !(item instanceof fabric.GuideLine || item.id === 'workspace' || item.isMask !== undefined);
     }),
   ]
     .reverse()
@@ -225,7 +230,6 @@ const getList = () => {
         isMask
       };
     });
-  // console.log('list', list.value)
 };
 
 onMounted(() => {

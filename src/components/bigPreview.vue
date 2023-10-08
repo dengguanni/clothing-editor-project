@@ -53,6 +53,7 @@ const props = defineProps({
 let screenshotList = reactive([])
 let scene, renderer, camera
 const is3D = ref(false)
+
 const colorList = ref([
 
 ])

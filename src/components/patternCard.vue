@@ -1,3 +1,4 @@
+<!-- 商品选择 -->
 <template>
   <div class="patter-card" @click.native.stop>
     <div class="left">
@@ -60,6 +61,8 @@ const init = () => {
 }
 const getGoodsId = (item) => {
   store.commit('setCommodityInfo', item)
+  console.log(item)
+  store.commit('setGoodsId', item.GUID)
   emit('sendGoodsId', item)
 }
 const searchGoods = (val) => {
@@ -134,15 +137,8 @@ const selectNOde = (val) => {
       currentParentNodeId.value = val.id
     }
   })
-  // getBgColor()
+}
 
-}
-// 获取颜色
-const getBgColor = (GUID) => {
-  commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
-    console.log('颜色', res)
-  })
-}
 const getTreeInfo = () => {
   commodityApi.getLeftClassificationList({ PGUID: '' }).then(res => {
     console.log('res', res)

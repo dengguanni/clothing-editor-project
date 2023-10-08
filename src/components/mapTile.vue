@@ -300,6 +300,7 @@ const scaleSmall = debounce((obj) => {
     const top = (oldH - newH) / 2
     activeObject.left = activeObject.left + left
     activeObject.top = activeObject.top + top
+    ControlsTile.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
 }, 300);
@@ -317,6 +318,7 @@ const scaleBig = debounce((obj) => {
     const top = (newH - oldH) / 2
     activeObject.left = activeObject.left - left
     activeObject.top = activeObject.top - top
+    ControlsTile.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
 

@@ -83,7 +83,6 @@ import { v4 as uuid } from 'uuid';
 import baseUrl from '@/config/constants/baseUrl'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
-
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
@@ -279,6 +278,7 @@ const restoreImage = () => {
       activeObject.set('FilePath', activeObject.oldFilePath);
       activeObject.set('oldFilePath', null)
       activeObject.applyFilters()
+      ControlsTile.setRepeat(activeObject.repeatType, true)
       canvasEditor.canvas.renderAll();
     });
   }
@@ -353,6 +353,7 @@ function _createFilter(sourceImg, type, options = null) {
   });
   canvasEditor.canvas.requestRenderAll();
   replaceImage(url.value, type)
+ 
   return filterObj;
 }
 /**

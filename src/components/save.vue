@@ -14,7 +14,7 @@
       拿取
       <Icon type="ios-arrow-down"></Icon>
     </Button>
-    <Button type="primary" @click="saveWith">
+    <Button type="primary" @click="setSaveData">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
     </Button>
@@ -28,6 +28,7 @@ import historyAip from '@/api/history.ts'
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex'
+import { allCustomAttribute} from '@/config/customAttributeFabricObj.ts'
 const store = useStore()
 const saveData = computed(() => {
   return store.state.saveData
@@ -63,28 +64,30 @@ const getData = () => {
   }
   historyAip.getHistory(p).then(res => {
     const data = res.Tag[0].Table[0].JsonValue
-    console.log('data', data)
     console.log('拿回', JSON.parse(data))
   })
 }
-const saveWith = debounce(function (type) {
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask || v.id == 'grid'))
-  // store.commit('setCanvasObjects', objects)
-  let arr = []
-  objects.forEach(element => {
-    const obj = JSON.stringify(element.toJSON(['name']))
-    arr.push(obj)
-    console.log(JSON.parse(obj))
+const setSaveData = debounce(function (type) {
+  const list = ['name', 'isRepeat']
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+  const objectsCopy = JSON.parse(JSON.stringify(objects))
+  objectsCopy.forEach((element,index )=> {
+    list.forEach(el => {
+      allCustomAttribute.forEach(key => {
+        element[key] = objects[index][key]
+      })
+      element['src'] = ''
+    });
   });
-  const JsonValue = {
-    saveData: JSON.stringify(saveData.value),
-    objects: arr
-  }
-
+  store.commit('setCanvasObjects', objectsCopy)
+  console.log('JSON.stringify(newObj)', JSON.stringify(objectsCopy))
+  // console.log('JSON.stringify(saveData.value)', JSON.stringify(saveData.value))
+  // console.log('objects', objects)
+  // console.log('JSON.stringify(objects)', JSON.stringify(objects))
+  // console.log('allCustomAttribute', allCustomAttribute)
   historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value) }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
     console.log('保存结果', res)
-
   })
 }, 300);
 

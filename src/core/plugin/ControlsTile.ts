@@ -91,7 +91,7 @@ class ControlsTile {
         }
         fnX(nX, 1)
         fnY(nY, 1)
-        console.log('axXcount, maxYcount' ,maxXcount, maxYcount)
+        console.log('axXcount, maxYcount', maxXcount, maxYcount)
         return { maxXcount, maxYcount }
     }
     // 基础平铺
@@ -112,15 +112,15 @@ class ControlsTile {
                 height: cloned.height,
                 scaleX: cloned.scaleX,
                 scaleY: cloned.scaleY,
-            });
-            var patternSourceCanvas = new fabric.StaticCanvas();
+            })
+            const patternSourceCanvas = new fabric.StaticCanvas();
             patternSourceCanvas.add(cloned);
             patternSourceCanvas.setDimensions({
                 width: cloned.getScaledWidth(),
                 height: cloned.getScaledHeight(),
             });
             patternSourceCanvas.renderAll();
-            var pattern = new fabric.Pattern({
+            const pattern = new fabric.Pattern({
                 source: patternSourceCanvas.getElement(),
                 repeat: 'repeat',
                 hasControls: false,
@@ -193,92 +193,12 @@ class ControlsTile {
         }
         setUserUploadFile(url, FileName, 'images_temp//', callback1)
     }
+    // 横向平铺
     static handelRepeatX = () => {
         const self = this
         let arr1 = []
         const activeObject = this.canvas.getActiveObjects()[0];
         this.observeObj(activeObject)
-        const createPattern1 = () => {
-            activeObject.clone(cloned => {
-                let { maxXcount, maxYcount } = self.getMaxCount(cloned)
-                cloned.rotate(0)
-                const left = cloned.left - (cloned.width * cloned.scaleX)
-                const top = cloned.top - (cloned.height * cloned.scaleY)
-                cloned.set({
-                    id: uuid(),
-                    top: 0,
-                    left: 0,
-                    width: cloned.width,
-                    height: cloned.height,
-                    scaleX: cloned.scaleX,
-                    scaleY: cloned.scaleY,
-                });
-                var patternSourceCanvas = new fabric.StaticCanvas();
-                patternSourceCanvas.add(cloned);
-                patternSourceCanvas.setDimensions({
-                    width: cloned.getScaledWidth(),
-                    height: cloned.getScaledHeight(),
-                });
-                patternSourceCanvas.renderAll();
-                var pattern = new fabric.Pattern({
-                    source: patternSourceCanvas.getElement(),
-                    repeat: 'repeat',
-                    hasControls: false,
-                    ...this.lockObj,
-                });
-                const rect = new fabric.Rect(
-                    {
-                        width: cloned.width * cloned.scaleX * maxXcount,
-                        height: cloned.height * cloned.scaleY,
-                        left: 0,
-                        top: cloned.height * cloned.scaleY,
-                        fill: pattern,
-                        isRepeat: true,
-                        hasControls: false,
-                        ...this.lockObj,
-                        selectable: false,
-                        evented: false,
-                    },
-                )
-                rect.clone(cloned => {
-                    cloned.set(
-                        {
-                            width: cloned.width * cloned.scaleX * maxXcount,
-                            height: cloned.height * cloned.scaleY,
-                            left: (cloned.width * cloned.scaleX) / 2,
-                            top: 0,
-                            fill: pattern,
-                        }
-                    )
-                    arr1.push(rect, cloned)
-                })
-                rect.clone(cloned => {
-                    cloned.set(
-                        {
-                            width: cloned.width * cloned.scaleX * maxXcount,
-                            height: cloned.height * cloned.scaleY,
-                            left: (cloned.width * cloned.scaleX) / 2,
-                            top: cloned.height * cloned.scaleY * 2,
-                            fill: pattern,
-                        }
-                    )
-                    arr1.push(rect)
-                    const group = new fabric.Group(...arr1, {
-                        top: 0,
-                        left: 0,
-                        width: activeObject.width * activeObject.scaleX * 3,
-                        height: activeObject.height * activeObject.scaleY * 3,
-                        isRepeat: true,
-                    })
-                    group.cutPartsType = activeObject.cutPartsType
-                    group.rotate(activeObject.angle)
-                    group.sendBackwards()
-                    self.canvas.add(group);
-                    this.canvas.requestRenderAll();
-                })
-
-            })
-        }
         const createPattern = () => {
             let isOffsetX = false
             activeObject.clone(cloned => {
@@ -295,7 +215,7 @@ class ControlsTile {
                     scaleX: cloned.scaleX,
                     scaleY: cloned.scaleY,
                 });
-                for (let num = 1; num < (maxYcount + 1) / 2; num++) {
+                for (let num = 1; num < maxYcount; num++) {
                     console.log('maxYcount', maxYcount)
                     var patternSourceCanvas = new fabric.StaticCanvas();
                     const heightNum = num == 1 ? 0 : (num * 2) - 3
@@ -329,22 +249,56 @@ class ControlsTile {
 
                         },
                     )
-                    const p = {
-                        rect: rect,
-                        imageLeft: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
-                        imageTop: rectTop,
+                    arr1.push(rect)
+                    if (num == maxYcount - 1) {
+                        const group = new fabric.Group(arr1, {
+                            width: cloned.width * cloned.scaleX * maxXcount,
+                            height: cloned.height * cloned.scaleY * (2 * num - 1)
+                        })
+                        var patternSourceCanvas = new fabric.StaticCanvas();
+
+                        patternSourceCanvas.add(cloned);
+                        patternSourceCanvas.setDimensions({
+                            width: cloned.getScaledWidth(),
+                            height: cloned.getScaledHeight(),
+                        });
+                        patternSourceCanvas.renderAll();
+                        var pattern = new fabric.Pattern({
+                            source: patternSourceCanvas.getElement(),
+                            repeat: 'repeat',
+                            hasControls: false,
+                            ...this.lockObj,
+                        });
+                        const rect = new fabric.Rect(
+                            {
+                                width: group.width,
+                                height: group.height,
+                                left: 0,
+                                top: 0,
+                                fill: pattern,
+                                isRepeat: true,
+                                hasControls: false,
+                                ...this.lockObj,
+                                selectable: false,
+                                evented: false,
+
+                            },
+                        )
+                        const p = {
+                            rect: rect,
+                            imageLeft: left - (((maxXcount - 1) / 2) - 1) * cloned.width * cloned.scaleX,
+                            imageTop: rectTop,
+                        }
+                        this.replaceImage(p.rect, p.imageLeft, p.imageTop)
                     }
-                    this.replaceImage(p.rect, p.imageLeft, p.imageTop)
-                    // rect.cutPartsType = activeObject.cutPartsType
-                    // rect.rotate(activeObject.angle)
-                    // rect.sendBackwards()
-                    // self.canvas.add(rect);
+
                 }
             })
         }
         createPattern()
         this.canvas.requestRenderAll();
     }
+    // 纵向平铺
     static handelRepeatY = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
@@ -365,14 +319,14 @@ class ControlsTile {
                 height: activeObject.height * activeObject.scaleY * maxYcount,
                 isRepeat: true,
             })
-            var patternSourceCanvas = new fabric.StaticCanvas();
+            const patternSourceCanvas = new fabric.StaticCanvas();
             patternSourceCanvas.add(group);
             patternSourceCanvas.setDimensions({
                 width: group.getScaledWidth(),
                 height: group.getScaledHeight(),
             });
             patternSourceCanvas.renderAll();
-            var pattern = new fabric.Pattern({
+            const pattern = new fabric.Pattern({
                 source: patternSourceCanvas.getElement(),
                 repeat: 'repeat',
                 hasControls: false,
@@ -414,14 +368,14 @@ class ControlsTile {
                     scaleX: cloned.scaleX,
                     scaleY: cloned.scaleY,
                 });
-                var patternSourceCanvas = new fabric.StaticCanvas();
+                const patternSourceCanvas = new fabric.StaticCanvas();
                 patternSourceCanvas.add(cloned);
                 patternSourceCanvas.setDimensions({
                     width: cloned.getScaledWidth(),
                     height: cloned.getScaledHeight(),
                 });
                 patternSourceCanvas.renderAll();
-                var pattern = new fabric.Pattern({
+                const pattern = new fabric.Pattern({
                     source: patternSourceCanvas.getElement(),
                     repeat: 'repeat-y',
                     hasControls: false,
@@ -460,14 +414,14 @@ class ControlsTile {
                     scaleX: cloned.scaleX,
                     scaleY: cloned.scaleY,
                 });
-                var patternSourceCanvas = new fabric.StaticCanvas();
+                const patternSourceCanvas = new fabric.StaticCanvas();
                 patternSourceCanvas.add(cloned);
                 patternSourceCanvas.setDimensions({
                     width: cloned.getScaledWidth(),
                     height: cloned.getScaledHeight(),
                 });
                 patternSourceCanvas.renderAll();
-                var pattern = new fabric.Pattern({
+                const pattern = new fabric.Pattern({
                     source: patternSourceCanvas.getElement(),
                     repeat: 'repeat-y',
                     hasControls: false,
@@ -505,14 +459,14 @@ class ControlsTile {
                 scaleX: cloned.scaleX,
                 scaleY: cloned.scaleY,
             });
-            var patternSourceCanvas = new fabric.StaticCanvas();
+            const patternSourceCanvas = new fabric.StaticCanvas();
             patternSourceCanvas.add(cloned);
             patternSourceCanvas.setDimensions({
                 width: cloned.getScaledWidth(),
                 height: cloned.getScaledHeight(),
             });
             patternSourceCanvas.renderAll();
-            var pattern = new fabric.Pattern({
+            const pattern = new fabric.Pattern({
                 source: patternSourceCanvas.getElement(),
                 repeat: 'repeat-y',
                 hasControls: false,
@@ -536,7 +490,7 @@ class ControlsTile {
             fn1()
         })
     }
-    // 镜像
+    // 镜像平铺
     static handelRepeatMirror = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
@@ -550,7 +504,6 @@ class ControlsTile {
             cloned.rotate(0)
             left = cloned.left
             top = cloned.top
-            console.log('left', left)
             cloned.set({
                 id: uuid(),
                 top: 0,
@@ -628,14 +581,14 @@ class ControlsTile {
                             width: activeObject.width * 3 * activeObject.scaleX,
                             height: activeObject.height * 3 * activeObject.scaleY,
                         })
-                        var patternSourceCanvas = new fabric.StaticCanvas();
+                        const patternSourceCanvas = new fabric.StaticCanvas();
                         patternSourceCanvas.add(group2);
                         patternSourceCanvas.setDimensions({
                             width: group2.getScaledWidth(),
                             height: group2.getScaledHeight(),
                         });
                         patternSourceCanvas.renderAll();
-                        var pattern = new fabric.Pattern({
+                        const pattern = new fabric.Pattern({
                             source: patternSourceCanvas.getElement(),
                             repeat: 'repeat',
                             hasControls: false,
@@ -675,11 +628,7 @@ class ControlsTile {
                             imageTop: rectTop
                         }
                         this.replaceImage(p.rect, p.imageLeft, p.imageTop)
-                        // rect.cutPartsType = activeObject.cutPartsType
-                        // rect.rotate(activeObject.angle)
-                        // rect.sendBackwards()
-                        // self.canvas.add(rect);
-                        // this.canvas.requestRenderAll();
+
                     })
                 })
             })

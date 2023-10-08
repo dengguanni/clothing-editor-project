@@ -10,7 +10,8 @@ const store = createStore({
           bgColor: {},
           sizeList: [],
           ImageUrl: '',
-          Title: ''
+          Title: '',
+          colorList: []
         },
         // 模型信息
         modelInfo: {
@@ -25,7 +26,6 @@ const store = createStore({
         // 裁片
         cutParts: []
       },
-      test: '11',
       // 撤回-回退
       saveSteps: {
         ID: '',
@@ -36,9 +36,6 @@ const store = createStore({
     }
   },
   mutations: {
-    text(state) {
-      state.test = '333' + state.test
-    },
     setCommodityInfo(state, val) {
       state.saveData.commodityInfo.GUID = val.GUID ? val.GUID : state.saveData.commodityInfo.GUID
       state.saveData.commodityInfo.ImageUrl = val.ImageUrl ? val.ImageUrl : state.saveData.commodityInfo.ImageUrl
@@ -50,6 +47,9 @@ const store = createStore({
     },
     setGoodsId(state, GUID) {
       state.saveData.commodityInfo.GUID = GUID
+    },
+    setBgColorList(state, val) {
+      state.saveData.commodityInfo.setBgColorList = val
     },
     setSizeList(state, val) {
       state.saveData.commodityInfo.sizeList = val

@@ -178,6 +178,8 @@ class LoadScene {
                 c.traverse((v: any) => {
                     if (v.type == 'Mesh') {
                         v.material.color = color
+
+                        console.log('Mesh',v)
                     }
                 })
 

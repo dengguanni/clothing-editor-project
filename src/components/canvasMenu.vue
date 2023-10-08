@@ -60,11 +60,14 @@ const sizeGUID = computed(() => {
 const handelAllCuts = computed(() => {
     return store.state.handelAllCuts
 })
-
+const goodsId = computed(() => {
+    console.log('goodsId')
+    return store.state.saveData.commodityInfo.GUID
+})
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
-        setAllCuts()
-        console.log('变了')
+        setAllCuts(false)
+        console.log('handelAllCuts')
     }
 }, { immediate: true, deep: true });
 watch(cutPartsType, (newVal, oldVal) => {
@@ -76,17 +79,16 @@ watch(cutPartsType, (newVal, oldVal) => {
 watch(cutParts, (newVal, oldVal) => {
     if (newVal.length > 0) {
         console.log('cutParts变了', newVal)
+        loadCuts()
         changeSelection()
     }
-
-
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
-    if (newVal) {
-        bgColor.value = { ...newVal }
-        setTimeout(() => {
-            setAllCuts()
-        }, 100);
+    if (newVal.GUID) {
+        // setTimeout(() => {
+        console.log('bgColorbgColorbgColor', newVal)
+        setAllCuts(true)
+        // }, 1000);
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
@@ -98,7 +100,7 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
-    watchCanvas()
+    // watchCanvas()
 })
 const watchCanvas = () => {
     const fn = () => {
@@ -126,7 +128,7 @@ const watchCanvas = () => {
                     el.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     let callback = () => {
                         if (cutPartsType.value) {
-                            setAllCuts()
+                            setAllCuts(false)
                         }
                     }
                     setUserUploadFile(url, FileName, 'images_temp/', callback)
@@ -134,7 +136,7 @@ const watchCanvas = () => {
             }
         })
         if (cutPartsType.value && !hasText) {
-            setAllCuts()
+            setAllCuts(false)
         }
     }
     setTimeout(() => {
@@ -153,24 +155,31 @@ const watchCanvas = () => {
     }, 1500);
 
 }
-const setAllCuts = () => {
-    const objects = canvasEditor.canvas.getObjects().filter(el => el.cutPartsType == cutPartsType.value && !el.isMask && el.id !== 'workspace' && el.id !== 'grid')
+const setAllCuts = debounce((isColorChange) => {
+    console.log('isColorChange', isColorChange)
+    const objects = canvasEditor.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
     if (cutPartsType.value) {
-        const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        let p = {
-            SizeGUID: sizeGUID.value,
-            Canvas_zoom: '0.07',
-            Part_name: cutPartsType.value,
-            Images: [],
-            bgc_r: bgColor.value.R,
-            bgc_g: bgColor.value.G,
-            bgc_b: bgColor.value.B
-        }
-        const fn = (objects, index) => {
+        let maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        // let p = {
+        //     SizeGUID: sizeGUID.value,
+        //     Canvas_zoom: '0.07',
+        //     Part_name: cutPartsType.value,
+        //     Images: [],
+        //     bgc_r: bgColor.value.R,
+        //     bgc_g: bgColor.value.G,
+        //     bgc_b: bgColor.value.B
+        // }
+        let ImagesList = {}
+        cutParts.value.forEach(el => {
+            ImagesList[el.Title] = {}
+            ImagesList[el.Title].Images = []
+        })
+
+        const fn = (objects, index, p) => {
             if (objects.length > 0) {
                 objects[index].clone(cloned => {
                     cloned.rotate(0)
+                    maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
                     const obj = {
                         Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
                         Image_width: (objects[index].width * objects[index].scaleX).toFixed(5) + '',
@@ -180,32 +189,63 @@ const setAllCuts = () => {
                         Image_angle: objects[index].angle.toFixed(5) + '',
                         Image_flipX: objects[index].flipX,
                         Image_flipY: objects[index].flipY,
-                        Image_visible: objects[index].visible
+                        Image_visible: objects[index].cutPartsType == p.Part_name
+                        // Image_visible: objects[index].customVisible 
                     }
-                    p.Images.push(obj)
+                    if (objects[index].customVisible === false) obj.Image_visible = false
+                    console.log('ImagesList', ImagesList)
+                    ImagesList[p.Part_name].Images.push(obj)
                     if (objects[index + 1]) {
-                        fn(objects, index + 1)
+                        fn(objects, index + 1, p)
                     } else {
-                        setCutAllParts(p)
+                        p.Images = ImagesList[p.Part_name].Images
+                        setCutAllParts(p, p.Part_name.Title)
                     }
                 })
             } else {
-                setCutAllParts(p)
+                p.Images = ImagesList[p.Part_name.Title].Images
+                setCutAllParts(p, p.Part_name.Title)
             }
         }
-        fn(objects, 0)
+        if (!isColorChange) {
+            let p = {
+                SizeGUID: sizeGUID.value,
+                Canvas_zoom: '0.07',
+                Part_name: cutPartsType.value,
+                Images: [],
+                bgc_r: bgColor.value.R,
+                bgc_g: bgColor.value.G,
+                bgc_b: bgColor.value.B
+            }
+            fn(objects, 0, p)
+        } else {
+            cutParts.value.forEach(element => {
+                let p = {
+                    SizeGUID: sizeGUID.value,
+                    Canvas_zoom: '0.07',
+                    Part_name: element.Title,
+                    Images: [],
+                    bgc_r: bgColor.value.R,
+                    bgc_g: bgColor.value.G,
+                    bgc_b: bgColor.value.B
+                }
+                fn(objects, 0, p)
+            })
+        }
     }
-}
-const setCutAllParts = debounce((p) => {
+
+}, 500)
+const setCutAllParts = (p, Title) => {
     picture.setCutAllParts(p).then(res => {
         console.log('总的剪裁参数', p)
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-        load3DScene.setModelColor(color, null)
+        // load3DScene.setModelColor(color, null)
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
-        LoadScene.setTexture(cutPartsType.value, url)
+        LoadScene.setTexture(p.Part_name, url)
     })
-}, 500)
+}
+
 const init = (newVal) => {
     let arr = []
     picture.getCutParts({ SizeGUID: newVal }).then(res => {
@@ -229,16 +269,55 @@ const init = (newVal) => {
         }
         store.commit('setCutParts', arr)
         store.commit('setCutPartsType', cutParts.value[0].Title)
+        loadCanvasObject()
+        setAllCuts(true)
+        watchCanvas()
     })
 
 }
-const upDateTexture = () => {
-    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-    if (cutPartsType.value) {
-        LoadScene.setTexture(cutPartsType.value, '', () => {
-        })
-    }
+const loadCuts = () => {
+    const m = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+    if (m) return
+    cutParts.value.forEach((el, index) => {
+        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+        var img = new Image();
+        const ImageUrl_Path = el.ImageUrl_Path
+        img.src = baseUrl + ImageUrl_Path
+
+        img.onload = function () {
+            var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
+            var maskRect = new fabric.Rect(
+                {
+                    scaleX: 0.07,
+                    scaleY: 0.07,
+                    width: img.width,
+                    height: img.height,
+                    fill: pattern,
+                    opacity: 0.3,
+                    hasControls: false,
+                    selectable: false,
+                    evented: false,
+                    left: workspace.width / 2 - (img.width * 0.07) / 2,
+                    top: workspace.height / 2 - (img.height * 0.07) / 2,
+                });
+            maskRect.name = el.Title
+            maskRect.cutPartsType = el.Title
+            maskRect.objectCaching = false
+            maskRect.isMask = el.Title == cutPartsType.value
+            maskRect.visible = el.Title == cutPartsType.value
+            if (el.Title == cutPartsType.value) {
+                maskRect.clone((cloned) => {
+                    const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
+                    canvasEditor.canvas.clipPath = cloned;
+                    canvasEditor.canvas.renderAll()
+                    canvasEditor.canvas.requestRenderAll();
+                });
+            }
+            canvasEditor.canvas.add(maskRect);
+            canvasEditor.canvas.requestRenderAll();
+        };
+        // if ( cutParts.value[index + 1]) setAllCuts(true)
+    })
 }
 const changeSelection = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
@@ -247,64 +326,83 @@ const changeSelection = () => {
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = cutPartsType.value
     cutPartsType.value = cutPartsType.value
-    canvasEditor.canvas.getObjects().map(el => {
+    let maskRect
+    canvasEditor.canvas.getObjects().forEach(el => {
         {
-            if (el.isCutPart) {
-                canvasEditor.canvas.remove(el)
-            }
+
             if (el.cutPartsType == cutPartsType.value) {
                 el.visible = true
             } else if (el.id !== 'workspace') {
                 el.visible = false
             }
+            if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
+                el.visible = true
+                el.isMask = true
+                maskRect = el
+                console.log('maskRect', maskRect)
+                maskRect.clone((cloned) => {
+                    const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
+                    canvasEditor.canvas.clipPath = cloned;
+                    canvasEditor.canvas.renderAll()
+                    canvasEditor.canvas.requestRenderAll();
+                });
+                // canvasEditor.canvas.requestRenderAll();
+                // canvasEditor.canvas.remove(el)
+            }
         }
     })
-    var img = new Image();
-    const ImageUrl_Path = cutParts.value.find(el => el.Title == cutPartsType.value).ImageUrl_Path
-    img.src = baseUrl + ImageUrl_Path
-    workspace.clone((cloned) => {
-        canvasEditor.canvas.clipPath = cloned;
-        canvasEditor.canvas.requestRenderAll();
-    });
-    img.onload = function () {
-        var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
-        var maskRect = new fabric.Rect(
-            {
-                scaleX: 0.07,
-                scaleY: 0.07,
-                width: img.width,
-                height: img.height,
-                fill: pattern,
-                opacity: 0.3,
-                hasControls: false,
-                selectable: false,
-                evented: false,
-                left: workspace.width / 2 - (img.width * 0.07) / 2,
-                top: workspace.height / 2 - (img.height * 0.07) / 2,
-            });
-        maskRect.name = cutPartsType.value
-        maskRect.cutPartsType = cutPartsType.value
-        maskRect.isCutPart = true
-        maskRect.objectCaching = false
-        maskRect.isMask = true
-        canvasEditor.canvas.add(maskRect);
-        canvasEditor.canvas.requestRenderAll();
-        maskRect.clone((cloned) => {
-            const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
-            canvasEditor.canvas.clipPath = cloned;
-            canvasEditor.canvas.renderAll()
-            canvasEditor.canvas.requestRenderAll();
-        });
-        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-        LoadScene.setTexture(cutPartsType.value, '', null)
-    };
-    const loadCanvasObject = () => {
-        canvasObjects.value.forEach(el => {
-            canvasEditor.canvas.add(el)
-        })
-        canvasEditor.canvas.requestRenderAll();
-    }
+    // setAllCuts(true)
 }
+const loadCanvasObject = () => {
+    console.log('加载对象')
+    const fn = (obj, index) => {
+        if (obj.type == 'image') {
+            const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
+            let callback = (image, isError) => {
+                if (!isError) {
+                    for (var key in obj) {
+                        image[key] = obj[key]
+                    }
+                    console.log('obj.cutPartsType == cutPartsType.value', obj.cutPartsType == cutPartsType.value)
+                    if (obj.cutPartsType == cutPartsType.value) {
+                        image.visible = true
+                    } else {
+                        image.visible = false
+                    }
+                    if (image.customVisible === false) image.visible = false
+                    image.sendBackwards()
+                    canvasEditor.canvas.add(image)
+                    if (canvasObjects.value[index + 1]) fn(canvasObjects.value[index + 1], index + 1)
+                }
+            };
+            const properties = {
+                left: 100,
+                top: 100
+            };
+            if (obj.FileName.substring(0, 1)) {
+                fabric.Image.fromURL(imageURL, callback, properties);
+
+            }
+        } else if (obj.type == 'text') {
+            addText(obj)
+            if (canvasObjects.value[index + 1]) fn(canvasObjects.value[index + 1], index + 1)
+        }
+    }
+    fn(canvasObjects.value[0], 0)
+}
+const addText = (option) => {
+    const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
+    const text = new fabric.IText(option.text, {
+        type: 'text',
+    });
+
+    for (var key in option) {
+        text[key] = option[key]
+    }
+    text.sendBackwards()
+    canvasEditor.canvas.add(text)
+    canvasEditor.canvas.requestRenderAll();
+};
 </script>
 <style lang="less">
 .canvas-menu-1 {

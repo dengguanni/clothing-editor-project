@@ -132,6 +132,7 @@ watch(sizeGUID, (newVal, oldVal) => {
     if (newVal) changeSize({ GUID: newVal })
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
+    console.log('bgColor',  newVal)
     if (newVal) colorSelected.value = newVal.GUID
 }, { immediate: true, deep: true });
 watch(
@@ -163,6 +164,7 @@ const changeSize = (item: any) => {
 }
 const changeColor = (item: any) => {
     colorSelected.value = item.GUID
+    console.log('changeColor', item)
     store.commit('setBgColor', item)
 }
 const getBgColor = (GUID: string) => {
@@ -172,6 +174,7 @@ const getBgColor = (GUID: string) => {
             colorSelected.value = colorList.value[0].GUID
             GoodsInfo.modelColorList = colorList.value
             store.commit('setBgColor', colorList.value[0])
+            store.commit('setBgColorList', colorList)
         }
 
     })

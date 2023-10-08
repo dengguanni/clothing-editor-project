@@ -107,18 +107,17 @@ const replaceImage = (str, fileHeaderPath) => {
       left: 0,
       top: 0
     };
-    let callback2 = (item => {
-      // const scaleX = width / item.width
-      // const scaleY = height / item.height
-      activeObject.setSrc(item.ImageUrl, () => {
-        activeObject.set('name', item.Title);
+    let callback2 = (() => {
+      const ImageUrl = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/'+ FileName
+      activeObject.setSrc(ImageUrl, () => {
+        activeObject.set('name', activeObject.Title);
         activeObject.set('id', uuid());
         activeObject.set('width', width);
         activeObject.set('height', height);
         activeObject.set('scaleX', activeObject.scaleX);
         activeObject.set('scaleY', activeObject.scaleY);
         activeObject.set('FileName', FileName);
-        activeObject.set('FilePath', item.FilePath);
+        activeObject.set('FilePath', 'UserUploadFile/images_custom/' + FileName.substring(0, 1) );
         activeObject.set('cutPartsType', activeObject.cutPartsType);
         canvasEditor.canvas.renderAll();
       });
