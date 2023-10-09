@@ -188,7 +188,7 @@ const state = reactive({
   isArrow: false,
 });
 const cutPartsType = computed(() => {
-  return store.state.saveData.cutPartsType
+  return store.state.cutPartsType
 })
 onMounted(() => {
 })

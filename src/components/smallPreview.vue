@@ -28,7 +28,7 @@ import mitts from '@/utils/mitts.js';
 import { useStore } from 'vuex'
 const store = useStore()
 const cutPartsType = computed(() => {
-    return store.state.saveData.cutPartsType
+    return store.state.cutPartsType
 })
 const load3DScene = new LoadScene()
 let screenshotList = reactive([])

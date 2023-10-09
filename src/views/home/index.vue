@@ -1,11 +1,11 @@
 <template>
-  <Dialog @closeDailog="closeDailog" v-if="showDailog">
+  <Dialog @closeDailog="closeDailog" v-if="showDailog" :dialogType="dialogType">
     <patternCard v-if="dialogType == 1" @sendGoodsId="sendGoodsId"></patternCard>
     <productDetails v-if="dialogType == 2 || dialogType == 3" :selectedProduct="selectedProduct"
       :goodsId="goodsInfo.GUID"></productDetails>
     <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
   </Dialog>
-  <div class="home">
+  <div class="home" v-loading="pageLoading">
     <!-- <Layout> -->
     <!-- 头部区域 -->
     <Header v-if="state.isShowHeader">
@@ -298,12 +298,12 @@ const goodsGUID = computed(() => {
   console.log('变了')
   return store.state.saveData.commodityInfo.GUID
 })
-// watch(
-//   () => goodsGUID,
-//   (val) => {
-//     console.log('id变了')
-//   }
-// );
+const pageLoading = computed(() => {
+  return store.state.pageLoading
+})
+// watch(pageLoading, (newVal, oldVal) => {
+  
+// }, { immediate: true, deep: true });
 onMounted(() => {
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
@@ -356,6 +356,7 @@ onMounted(() => {
 //   }
 // },
 const getSaveData = () => {
+  store.commit('setIsSetSteps', true)
   const p = {
     ID: ''
   }

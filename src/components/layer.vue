@@ -85,7 +85,7 @@ const cutParts = computed(() => {
   return store.state.saveData.cutParts
 })
 const cutPartsType = computed(() => {
-  return store.state.saveData.cutPartsType
+  return store.state.cutPartsType
 })
 // let cutPartsType = ref('')
 

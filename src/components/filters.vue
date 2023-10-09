@@ -144,6 +144,11 @@ const setSharpening = (val) => {
       0, -1, 0]
   }));
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+  console.log('activeObject.width', activeObject.width)
+  const scaleX = activeObject.scaleX
+  const scaleY = activeObject.scaleY
+  activeObject.scaleX = 1
+  activeObject.scaleY = 1
   const url = activeObject.toDataURL({
     width: activeObject.width,
     height: activeObject.height,
@@ -152,6 +157,8 @@ const setSharpening = (val) => {
     scaleY: activeObject.scaleY,
     multiplier: 1,
   });
+  activeObject.scaleX = scaleX
+  activeObject.scaleY = scaleY
   if (val) {
     replaceImage(url, 'Sharpen')
   } else {
@@ -164,7 +171,6 @@ const setSharpening = (val) => {
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  console.log(type, value, activeObject)
   state.noParamsFilters[type] = value;
   if (value) {
     const itemFilter = _getFilter(activeObject, type);
@@ -229,17 +235,22 @@ const handleSelectOne = () => {
 // 上传并替换滤镜图片
 const replaceImage = (url, type) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  const FileName = guid() + '.png'
   const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
   const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
+  const FileName = guid() + '.png'
+  const width = activeObject.width
+  const height = activeObject.height
+  console.log('width', width, activeObject.scaleX)
   let filtersList = activeObject.filtersList ? activeObject.filtersList : []
   type == 'Sharpen' ? '' : filtersList.push(type)
   let callback = () => {
     activeObject.setSrc(url, () => {
+      console.log('width', width)
+      console.log('activeObject.wi', activeObject.width, activeObject.scaleX)
       activeObject.set('name', activeObject.Title);
       activeObject.set('id', uuid());
-      activeObject.set('width', activeObject.width);
-      activeObject.set('height', activeObject.height);
+      activeObject.set('width', width);
+      activeObject.set('height', height);
       activeObject.set('scaleX', activeObject.scaleX);
       activeObject.set('filtersList', filtersList);
       activeObject.set('scaleY', activeObject.scaleY);
@@ -252,6 +263,7 @@ const replaceImage = (url, type) => {
       activeObject.applyFilters()
       ControlsTile.setRepeat(activeObject.repeatType, true)
       canvasEditor.canvas.renderAll();
+      console.log('activeObject.wi', activeObject.width)
     });
   }
   setUserUploadFile(url, FileName, 'images_temp//', callback)
@@ -339,10 +351,16 @@ function _createFilter(sourceImg, type, options = null) {
     filterObj.options = options;
     sourceImg.filters.push(filterObj);
   }
+  // 加滤镜
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
- 
+  console.log('activeObject.width  url', activeObject.width, activeObject.scaleX)
+  // 变base64
+  const scaleX = activeObject.scaleX
+  const scaleY = activeObject.scaleY
+  activeObject.scaleX = 1
+  activeObject.scaleY = 1
   url.value = activeObject.toDataURL({
     width: activeObject.width,
     height: activeObject.height,
@@ -351,9 +369,10 @@ function _createFilter(sourceImg, type, options = null) {
     scaleY: activeObject.scaleY,
     multiplier: 1,
   });
+  activeObject.scaleX = scaleX
+  activeObject.scaleY = scaleY
   canvasEditor.canvas.requestRenderAll();
   replaceImage(url.value, type)
- 
   return filterObj;
 }
 /**

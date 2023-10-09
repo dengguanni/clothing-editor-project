@@ -3,15 +3,16 @@
   <div class="reserve-line"></div>
   <div style="display: inline-block">
     <!-- 后退 -->
-    <Tooltip :content="$t('history.revocation') + `(${undoStack.length})`">
-      <Button @click="undo" type="text" size="small" :disabled="undoStack.length === 0" class="item">
+    <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
+      <Button @click="undo" type="text" size="small" :disabled="saveSteps.ID_Previous <1" class="item">
         <commonIcon angleKey="withdraw"></commonIcon>
       </Button>
     </Tooltip>
     <!-- 重做 -->
-    <Tooltip :content="$t('history.redo') + `(${redoStack.length})`">
-      <Button @click="redo" type="text" size="small" :disabled="redoStack.length === 0" class="item">
+    <Tooltip :content="$t('history.redo') + `(${saveSteps.ID_Next == -1 ? 0 : saveSteps.ID_Next})`">
+      <Button @click="redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
         <commonIcon angleKey="redo"></commonIcon>
+        <!-- <commonIcon angleKey="prohibitRedo" v-show="saveSteps.ID_Next < 1"></commonIcon> -->
       </Button>
     </Tooltip>
     <Tooltip :content="'清空'">
@@ -44,6 +45,7 @@ import commonIcon from '@/components/commonIcon.vue'
 import baseUrl from '@/config/constants/baseUrl';
 import { debounce } from 'lodash-es';
 import { useStore } from 'vuex'
+import historyAip from '@/api/history.ts'
 const store = useStore()
 const { canvasEditor, fabric } = useSelect();
 const { history, redoStack, undoStack } = reactive(canvasEditor.getHistory());
@@ -54,17 +56,47 @@ const lockAttrs = [
   'lockScalingX',
   'lockScalingY',
 ];
+const cutPartsType = computed(() => {
+  return store.state.cutPartsType
+})
+const saveSteps = computed(() => {
+  return store.state.saveSteps
+})
 const line = ref(false)
 // 后退
 const undo = () => {
-  canvasEditor.undo();
-  store.commit('setAllCuts')
+  loadCanvasObject(true)
+
+  // store.commit('setAllCuts')
 };
+
 // 重做
 const redo = () => {
-  canvasEditor.redo();
-  store.commit('setAllCuts')
+  loadCanvasObject(false)
 };
+const loadCanvasObject = (isNext) => {
+  store.commit('setIsSetSteps', true)
+  console.log('saveSteps.value.ID', saveSteps.value.ID)
+  const p = {
+    ID: isNext ? saveSteps.value.ID - 1 : Number(saveSteps.value.ID) + 1,
+  }
+  historyAip.getHistory(p).then(res => {
+    const steps = {
+      ID: res.Tag[0].Table[0].ID,
+      ID_Next: res.Tag[0].Table[0].ID_Next,
+      ID_Previous: res.Tag[0].Table[0].ID_Previous,
+    }
+    store.commit('setSaveSteps', steps)
+    console.log('steps', steps)
+    const data = res.Tag[0].Table[0].JsonValue
+    const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+    objects.forEach(element => {
+      canvasEditor.canvas.remove(element)
+    });
+    store.commit('setSaveData', JSON.parse(data))
+  })
+
+}
 const clear = () => {
   canvasEditor.clear();
   store.commit('setAllCuts')

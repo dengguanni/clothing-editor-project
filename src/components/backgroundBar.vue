@@ -28,6 +28,7 @@ import getPicture from '@/api/picture.ts'
 import mitts from '@/utils/mitts'
 import LoadScene from '@/core/3D/loadScene.ts'
 import baseUrl from '@/config/constants/baseUrl'
+import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -42,7 +43,7 @@ const queryKeyWord = ref('')
 import { useStore } from 'vuex'
 const store = useStore()
 const cutPartsType = computed(() => {
-    return store.state.saveData.cutPartsType
+    return store.state.cutPartsType
 })
 onMounted(() => {
     init()
@@ -100,8 +101,9 @@ const addItem = (item) => {
         })
     } else {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+        const currentBackground = canvasEditor.canvas.getObjects().find((item) => item.isBackground && item.cutPartsType == cutPartsType.value)
         const imageURL = baseUrl + item.ImageUrl_Path;
-        console.log('imageURL', imageURL)
         let callback = (image, isError) => {
             if (!isError) {
                 image.name = item.Title
@@ -113,11 +115,21 @@ const addItem = (item) => {
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.bringToFront(maskRect)
-                canvasEditor.canvas.discardActiveObject();
-                canvasEditor.canvas.setActiveObject(info);
-                canvasEditor.canvas.requestRenderAll();
+
+                if (props.isBg) {
+                    if (currentBackground) canvasEditor.canvas.remove(currentBackground)
+                    image.isBackground = true
+                    canvasEditor.canvas.sendToBack(info)
+                    canvasEditor.canvas.sendToBack(workspace)
+                    canvasEditor.canvas.setActiveObject(info);
+                    canvasEditor.canvas.requestRenderAll();
+                    MaximizePlugin.setMax('width')
+                    MaximizePlugin.setMax('height')
+                }
+
             }
         };
+
         const properties = {
             left: 100,
             top: 100

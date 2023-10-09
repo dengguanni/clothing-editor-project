@@ -45,8 +45,11 @@ const active = ref('')
 const cutParts = computed(() => {
     return store.state.saveData.cutParts
 })
+const isSetSteps = computed(() => {
+    return store.state.isSetSteps
+})
 const cutPartsType = computed(() => {
-    return store.state.saveData.cutPartsType
+    return store.state.cutPartsType
 })
 const bgColor = computed(() => {
     return store.state.saveData.commodityInfo.bgColor
@@ -61,7 +64,6 @@ const handelAllCuts = computed(() => {
     return store.state.handelAllCuts
 })
 const goodsId = computed(() => {
-    console.log('goodsId')
     return store.state.saveData.commodityInfo.GUID
 })
 watch(handelAllCuts, (newVal, oldVal) => {
@@ -85,10 +87,7 @@ watch(cutParts, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
-        // setTimeout(() => {
-        console.log('bgColorbgColorbgColor', newVal)
         setAllCuts(true)
-        // }, 1000);
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
@@ -96,14 +95,8 @@ watch(sizeGUID, (newVal, oldVal) => {
         init(newVal)
     }
 }, { immediate: true, deep: true });
-onUnmounted(() => {
-})
-
-onMounted(() => {
-    // watchCanvas()
-})
 const watchCanvas = () => {
-    const fn = () => {
+    const fn = (isSetSteps) => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
@@ -128,7 +121,7 @@ const watchCanvas = () => {
                     el.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     let callback = () => {
                         if (cutPartsType.value) {
-                            setAllCuts(false)
+                            setAllCuts(false, isSetSteps)
                         }
                     }
                     setUserUploadFile(url, FileName, 'images_temp/', callback)
@@ -136,46 +129,34 @@ const watchCanvas = () => {
             }
         })
         if (cutPartsType.value && !hasText) {
-            setAllCuts(false)
+            setAllCuts(false, isSetSteps)
+
         }
     }
-    setTimeout(() => {
-        canvasEditor.canvas.on('object:added', () => {
-            console.log('added')
-            fn()
-        })
-        canvasEditor.canvas.on('object:modified', () => {
-            console.log('modified')
-            fn()
-        })
-        canvasEditor.canvas.on('object:removed', () => {
-            console.log('removed')
-            fn()
-        })
-    }, 1500);
+    canvasEditor.canvas.on('object:added', () => {
+        console.log('added', isSetSteps.value ? '否' : '是')
+        fn(isSetSteps.value)
+    })
+    canvasEditor.canvas.on('object:modified', () => {
+        console.log('modified', isSetSteps.value ? '否' : '是')
+        fn(isSetSteps.value)
+    })
+    canvasEditor.canvas.on('object:removed', () => {
+        console.log('removed', isSetSteps.value ? '否' : '是')
+        fn(isSetSteps.value)
+    })
 
 }
-const setAllCuts = debounce((isColorChange) => {
-    console.log('isColorChange', isColorChange)
+const setAllCuts = debounce((isColorChange, isSetSteps) => {
     const objects = canvasEditor.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
     if (cutPartsType.value) {
         let maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        // let p = {
-        //     SizeGUID: sizeGUID.value,
-        //     Canvas_zoom: '0.07',
-        //     Part_name: cutPartsType.value,
-        //     Images: [],
-        //     bgc_r: bgColor.value.R,
-        //     bgc_g: bgColor.value.G,
-        //     bgc_b: bgColor.value.B
-        // }
         let ImagesList = {}
         cutParts.value.forEach(el => {
             ImagesList[el.Title] = {}
             ImagesList[el.Title].Images = []
         })
-
-        const fn = (objects, index, p) => {
+        const fn = (objects, index, p, indexP = null) => {
             if (objects.length > 0) {
                 objects[index].clone(cloned => {
                     cloned.rotate(0)
@@ -193,20 +174,23 @@ const setAllCuts = debounce((isColorChange) => {
                         // Image_visible: objects[index].customVisible 
                     }
                     if (objects[index].customVisible === false) obj.Image_visible = false
-                    console.log('ImagesList', ImagesList)
                     ImagesList[p.Part_name].Images.push(obj)
                     if (objects[index + 1]) {
                         fn(objects, index + 1, p)
                     } else {
                         p.Images = ImagesList[p.Part_name].Images
-                        setCutAllParts(p, p.Part_name.Title)
+                        if (indexP && !cutParts.value[indexP + 1]) store.commit('setIsSetSteps', false)
+                        setCutAllParts(p, p.Part_name.Title, isSetSteps)
                     }
                 })
             } else {
-                p.Images = ImagesList[p.Part_name.Title].Images
-                setCutAllParts(p, p.Part_name.Title)
+                p.Images = []
+                setCutAllParts(p, p.Part_name.Title, isSetSteps)
+                if (indexP && !cutParts.value[indexP + 1]) store.commit('setIsSetSteps', false)
             }
         }
+
+        console.log('isColorChange', isColorChange, bgColor.value)
         if (!isColorChange) {
             let p = {
                 SizeGUID: sizeGUID.value,
@@ -219,7 +203,8 @@ const setAllCuts = debounce((isColorChange) => {
             }
             fn(objects, 0, p)
         } else {
-            cutParts.value.forEach(element => {
+            store.commit('setIsSetSteps', true)
+            cutParts.value.forEach((element, indexP) => {
                 let p = {
                     SizeGUID: sizeGUID.value,
                     Canvas_zoom: '0.07',
@@ -229,20 +214,20 @@ const setAllCuts = debounce((isColorChange) => {
                     bgc_g: bgColor.value.G,
                     bgc_b: bgColor.value.B
                 }
-                fn(objects, 0, p)
+                fn(objects, 0, p, indexP)
             })
         }
     }
-
-}, 500)
-const setCutAllParts = (p, Title) => {
+}, 100)
+const setCutAllParts = (p, Title, isSetSteps) => {
     picture.setCutAllParts(p).then(res => {
         console.log('总的剪裁参数', p)
+        isSetSteps ? '' : store.commit('setSave')
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-        // load3DScene.setModelColor(color, null)
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
         LoadScene.setTexture(p.Part_name, url)
+
     })
 }
 
@@ -275,15 +260,20 @@ const init = (newVal) => {
     })
 
 }
-const loadCuts = () => {
-    const m = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-    if (m) return
-    cutParts.value.forEach((el, index) => {
+// 加载裁片
+const loadCuts = debounce(() => {
+    store.commit('setIsSetSteps', true)
+    const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
+    objects.forEach(el => {
+        canvasEditor.canvas.remove(el)
+    })
+    canvasEditor.canvas.requestRenderAll();
+
+    const fn = (index) => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         var img = new Image();
-        const ImageUrl_Path = el.ImageUrl_Path
+        const ImageUrl_Path = cutParts.value[index].ImageUrl_Path
         img.src = baseUrl + ImageUrl_Path
-
         img.onload = function () {
             var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
             var maskRect = new fabric.Rect(
@@ -300,12 +290,12 @@ const loadCuts = () => {
                     left: workspace.width / 2 - (img.width * 0.07) / 2,
                     top: workspace.height / 2 - (img.height * 0.07) / 2,
                 });
-            maskRect.name = el.Title
-            maskRect.cutPartsType = el.Title
+            maskRect.name = cutParts.value[index].Title
+            maskRect.cutPartsType = cutParts.value[index].Title
             maskRect.objectCaching = false
-            maskRect.isMask = el.Title == cutPartsType.value
-            maskRect.visible = el.Title == cutPartsType.value
-            if (el.Title == cutPartsType.value) {
+            maskRect.isMask = cutParts.value[index].Title == cutPartsType.value
+            maskRect.visible = cutParts.value[index].Title == cutPartsType.value
+            if (cutParts.value[index].Title == cutPartsType.value) {
                 maskRect.clone((cloned) => {
                     const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                     canvasEditor.canvas.clipPath = cloned;
@@ -315,10 +305,16 @@ const loadCuts = () => {
             }
             canvasEditor.canvas.add(maskRect);
             canvasEditor.canvas.requestRenderAll();
+            if (cutParts.value[index + 1] == undefined) {
+                store.commit('setIsSetSteps', false)
+            } else {
+                fn(index + 1)
+            }
         };
-        // if ( cutParts.value[index + 1]) setAllCuts(true)
-    })
-}
+    }
+    fn(0)
+}, 1000)
+// 切换裁片
 const changeSelection = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
     activeObject ? activeObject.cutPartsType == cutPartsType.value ? '' : canvasEditor.canvas.discardActiveObject() : ''
@@ -329,7 +325,6 @@ const changeSelection = () => {
     let maskRect
     canvasEditor.canvas.getObjects().forEach(el => {
         {
-
             if (el.cutPartsType == cutPartsType.value) {
                 el.visible = true
             } else if (el.id !== 'workspace') {
@@ -339,7 +334,6 @@ const changeSelection = () => {
                 el.visible = true
                 el.isMask = true
                 maskRect = el
-                console.log('maskRect', maskRect)
                 maskRect.clone((cloned) => {
                     const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                     canvasEditor.canvas.clipPath = cloned;
@@ -353,8 +347,10 @@ const changeSelection = () => {
     })
     // setAllCuts(true)
 }
+// 刷新加载对象
 const loadCanvasObject = () => {
-    console.log('加载对象')
+    console.log('刷新加载对象')
+    store.commit('setIsSetSteps', true)
     const fn = (obj, index) => {
         if (obj.type == 'image') {
             const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
@@ -363,7 +359,6 @@ const loadCanvasObject = () => {
                     for (var key in obj) {
                         image[key] = obj[key]
                     }
-                    console.log('obj.cutPartsType == cutPartsType.value', obj.cutPartsType == cutPartsType.value)
                     if (obj.cutPartsType == cutPartsType.value) {
                         image.visible = true
                     } else {
@@ -371,37 +366,48 @@ const loadCanvasObject = () => {
                     }
                     if (image.customVisible === false) image.visible = false
                     image.sendBackwards()
+
                     canvasEditor.canvas.add(image)
-                    if (canvasObjects.value[index + 1]) fn(canvasObjects.value[index + 1], index + 1)
+                    if (canvasObjects.value[index + 1]) {
+                        fn(canvasObjects.value[index + 1], index + 1)
+                    } else {
+                        store.commit('setIsSetSteps', false)
+                    }
+
                 }
             };
             const properties = {
                 left: 100,
                 top: 100
             };
-            if (obj.FileName.substring(0, 1)) {
-                fabric.Image.fromURL(imageURL, callback, properties);
-
-            }
-        } else if (obj.type == 'text') {
+            fabric.Image.fromURL(imageURL, callback, properties);
+        } else if (obj.type === 'text') {
             addText(obj)
-            if (canvasObjects.value[index + 1]) fn(canvasObjects.value[index + 1], index + 1)
+            if (canvasObjects.value[index + 1]) {
+                fn(canvasObjects.value[index + 1], index + 1)
+            } else {
+                store.commit('setIsSetSteps', false)
+            }
         }
+
     }
-    fn(canvasObjects.value[0], 0)
+    if (canvasObjects.value[0]) fn(canvasObjects.value[0], 0)
+    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+    const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
+    canvasEditor.canvas.bringToFront(mask)
+    canvasEditor.canvas.sendToBack(backgroundImage)
+    canvasEditor.canvas.requestRenderAll();
 }
 const addText = (option) => {
     const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
     const text = new fabric.IText(option.text, {
         type: 'text',
     });
-
     for (var key in option) {
         text[key] = option[key]
     }
     text.sendBackwards()
     canvasEditor.canvas.add(text)
-    canvasEditor.canvas.requestRenderAll();
 };
 </script>
 <style lang="less">

@@ -2,8 +2,9 @@
     <div class="commom-dalig" @click.native.stop="closeDailog">
         <div class="card">
             <div class="header">
-                <div class="text-1">效果图
-                    <!-- <span class="text-2">(编号12039)</span>" -->
+                <div class="text-1">
+                    {{ setTitle() }}
+                    <span class="text-2" v-if="!(dialogType == 4 || dialogType == 5)">(编号12039)</span>
                 </div>
                 <Icon type="ios-close" size="24" @click="closeDailog" style="cursor: pointer;" />
             </div>
@@ -15,9 +16,33 @@
   
 <script setup >
 import { defineEmits } from 'vue'
+const props = defineProps({
+    dialogType: {
+        type: Number,
+        default: 4
+    }
+})
+watch(props.dialogType, (newVal, oldVal) => {
+    if (newVal) {
+        setTitle()
+    }
+}, { immediate: true, deep: true });
+let title = ref('效果图')
 const emit = defineEmits();
 const closeDailog = () => {
     emit('closeDailog')
+}
+
+const setTitle = () => {
+    if (props.dialogType == 4 || props.dialogType == 5) {
+        title.value = '效果图'
+    } else if (props.dialogType == 2 || props.dialogType == 3) {
+        title.value = '青少年轻薄运动长袖防晒衣'
+    } else {
+        title.value = '青少年轻薄运动长袖防晒衣'
+    }
+    return title.value
+
 }
 </script>
 <style lang="less">
@@ -33,7 +58,7 @@ const closeDailog = () => {
 
     .card {
         background: #ffff;
-        padding: 0px 0px  20px 0px;
+        padding: 0px 0px 20px 0px;
         border-radius: 10px 10px 10px 10px;
 
         .text-1 {

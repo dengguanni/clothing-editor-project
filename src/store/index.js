@@ -22,17 +22,21 @@ const store = createStore({
         // 画布内容
         canvasObjects: [],
         // 裁片类型
-        cutPartsType: '',
+        
         // 裁片
         cutParts: []
       },
+      cutPartsType: '',
       // 撤回-回退
       saveSteps: {
         ID: '',
-        ID_Next: '',
-        ID_Previous: ''
+        ID_Next: 0,
+        ID_Previous: 0
       },
-      handelAllCuts: 0
+      handelSave: 0,
+      handelAllCuts: 0,
+      pageLoading: false,
+      isSetSteps: false
     }
   },
   mutations: {
@@ -44,6 +48,16 @@ const store = createStore({
     },
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
+    },
+    setIsSetSteps(state,val) {
+      console.log('setIsSetSteps', val)
+      state.isSetSteps = val
+    },
+    setSave(state) {
+      state.handelSave = state.handelSave + 1
+    },
+    setPageLoading(state, val) {
+      state.pageLoading = val
     },
     setGoodsId(state, GUID) {
       state.saveData.commodityInfo.GUID = GUID
@@ -64,7 +78,7 @@ const store = createStore({
       state.saveData.modelInfo = obj
     },
     setCutPartsType(state, val) {
-      state.saveData.cutPartsType = val
+      state.cutPartsType = val
     },
     setCanvasObjects(state, val) {
       state.saveData.canvasObjects = val

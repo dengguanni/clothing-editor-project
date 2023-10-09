@@ -1,15 +1,8 @@
-<!--
- * @Author: 邓官妮
- * @Date: 2022-09-03 19:16:55
- * @LastEditors: 邓官妮
- * @LastEditTime: 2023-07-16 12:51:11
- * @Description: 插入SVG元素
--->
 
 <template>
   <div style="display: inline-block" class="import-file">
     <div class="btn-box">
-      <input id="myInput" class="input-file" type="file" placeholder="上传图片">
+      <input id="myInput" class="input-file" type="file" placeholder="上传图片" multiple>
       <Button class="btn-1">
         <Icon type="md-add" size="15" color="#4E5969 " />上传图片
       </Button>
@@ -25,13 +18,10 @@
       <div v-for="item in imageList" :key="item.GUID" style="position: relative;">
         <img class="item" :id="item.GUID" :src="item.ImageUrl" @click="addItem(item)" @mouseenter="showIcon(item)"
           @mouseleave="closeIcon(item)" />
-        <!-- <Icon type="ios-close" size="30" @click="delImage(item)" style="cursor: pointer;" class="icon"/> -->
         <Icon type="md-trash" class="icon" size="27" v-show="showDelIcon == item.GUID" @mouseenter="showIcon(item)"
           @click="delImage(item)" />
       </div>
-
     </div>
-    <!-- <el-pagination small layout="prev, pager, next" :total="50"  /> -->
     <div class="page-box">
       <ElButton type="primary" text :icon="Delete" @click="changePage(false)" :disabled="pageIndex < 1"> <el-icon>
           <ArrowLeft />
@@ -66,7 +56,7 @@ const state = reactive({
   showDelIcon: ''
 });
 const cutPartsType = computed(() => {
-  return store.state.saveData.cutPartsType
+  return store.state.cutPartsType
 })
 let showDelIcon = ref('')
 const pageIndex = ref(0)
@@ -108,7 +98,7 @@ const replaceImage = (str, fileHeaderPath) => {
       top: 0
     };
     let callback2 = (() => {
-      const ImageUrl = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/'+ FileName
+      const ImageUrl = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/' + FileName
       activeObject.setSrc(ImageUrl, () => {
         activeObject.set('name', activeObject.Title);
         activeObject.set('id', uuid());
@@ -117,7 +107,7 @@ const replaceImage = (str, fileHeaderPath) => {
         activeObject.set('scaleX', activeObject.scaleX);
         activeObject.set('scaleY', activeObject.scaleY);
         activeObject.set('FileName', FileName);
-        activeObject.set('FilePath', 'UserUploadFile/images_custom/' + FileName.substring(0, 1) );
+        activeObject.set('FilePath', 'UserUploadFile/images_custom/' + FileName.substring(0, 1));
         activeObject.set('cutPartsType', activeObject.cutPartsType);
         canvasEditor.canvas.renderAll();
       });
@@ -139,7 +129,6 @@ const replaceImage = (str, fileHeaderPath) => {
 const delImage = (item) => {
   picture.delImagesCustom({ GUID: item.GUID }).then(res => {
     if (res.OK == 'True') {
-      // imageList.value = [...]
       imageList.value = [...imageList.value.filter(el => el.GUID !== item.GUID)]
       ElMessage({
         showClose: true,
@@ -152,6 +141,7 @@ const delImage = (item) => {
 
 // 获取选取图片
 const getFile = (file) => {
+  console.log('file', file.target.files)
   if (!file) {
     return;
   }
@@ -160,36 +150,36 @@ const getFile = (file) => {
   } = file.target;
   if (files.length <= 0) return;
   const fileReader = new FileReader();
-  fileReader.readAsDataURL(files[0]);
-  fileReader.onload = (event) => {
-    try {
-      const {
-        result
-      } = event.target;
-      const FileName = guid() + '.png'
-      setUserUploadFile(result, FileName, 'images_custom\\', () => {
-        picture.setImagesCustom({ FileName }).then(e => {
-          if (e.OK == 'True') {
-            getImagesCustom(imageList, pageIndex.value)
-          }
+  const fn = (index) => {
+    fileReader.readAsDataURL(files[index]);
+    fileReader.onload = (event) => {
+      try {
+        const {
+          result
+        } = event.target;
+        const FileName = guid() + '.png'
+        setUserUploadFile(result, FileName, 'images_custom\\', () => {
+          picture.setImagesCustom({ FileName }).then(e => {
+            if (e.OK == 'True') {
+              if (files[index + 1]) {
+                fn(index + 1)
+              } else {
+                getImagesCustom(imageList, pageIndex.value)
+                ElMessage({
+                  showClose: true,
+                  message: '上传成功',
+                  type: 'success',
+                })
+              }
+            }
+          })
         })
-        ElMessage({
-          showClose: true,
-          message: '上传成功',
-          type: 'success',
-        })
-      })
-      // imageList.push({
-      //   id: id,
-      //   src: result,
-      //   name: '图片' + uuid(),
-      // })
-      // console.log('result', result)
-
-    } catch (e) {
-      console.log(e);
-    }
-  };
+      } catch (e) {
+        console.log(e);
+      }
+    };
+  }
+  fn(0)
 }
 
 const HANDLEMAP = {

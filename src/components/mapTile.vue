@@ -1,5 +1,5 @@
 <template>
-    <div v-if="mixinState.mSelectMode === 'one'">
+    <div v-show="mixinState.mSelectMode === 'one'">
         <div class="box-01">
             <div class="bg-sq-02" v-for="item in menuList1" :key="item.type" @click="menuList1Click(item.type)">
                 {{ item.label }}
@@ -11,39 +11,30 @@
                 {{ item.label }}
             </div>
         </div>
-        <div class="bg-sq-03" style="position: relative;">
-            <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item">
-                <div style="cursor: pointer;" @mousedown="menu3Click(item.type)" :id="item.type">
-                    <span v-html="item.svg" style="margin: 0px"></span>
-                </div>
-                <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
-                    <div class="item" id="scale-big" @click.stop="setCopyTo({ Title: 'all' })">所有片</div>
-                    <div class="item" id="scale-big" @click.stop="setCopyTo(item1)" v-for="item1 in cutParts"
-                        :key="item.Title">{{ item1.Title }}</div>
-                </div>
-                <!-- <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
-                    <ElDropdownMenu>
-                        <ElDropdownItem>Action 1</ElDropdownItem>
-                        <ElDropdownItem>Action 2</ElDropdownItem>
-                        <ElDropdownItem>Action 3</ElDropdownItem>
-                    </ElDropdownMenu> -->
-                <!-- <ElDropdown ref="dropdown1" trigger="contextmenu">
-                        <template #dropdown>
-
-                        </template>
-                    </ElDropdown> -->
-                <!-- </div> -->
-                <div v-show="item.type == 'scale' && state.isScale" class="scale-menu">
-                    <div class="item" id="scale-big" @click.stop="menu3Click('scale-big')">放大</div>
-                    <div class="item" id="scale-small" @click.stop="menu3Click('scale-small')">缩小</div>
-                </div>
-                <div v-show="item.type == 'layer' && state.isLayer" class="scale-menu" @click.stop id="layer">
-                    <div id="layer-up" class="item" @click.stop="menu3Click('layer-up')">上移</div>
-                    <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')">置顶</div>
-                    <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')">置底</div>
-                    <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
-                </div>
-            </Tooltip>
+        <div class="menu-box">
+            <div style="display: flex;justify-content: space-evenly; width: 100%; ">
+                <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item" style="width: 25px;">
+                    <el-button text='plain' type='' @mousedown="menu3Click(item.type)" :id="item.type"
+                        style="border-radius: 50%; width: 25px;">
+                        <span v-html="item.svg" style="margin: 0px;"></span>
+                    </el-button>
+                    <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
+                        <div class="item" id="scale-big" @click.stop="setCopyTo({ Title: 'all' })">所有片</div>
+                        <div class="item" id="scale-big" @click.stop="setCopyTo(item1)" v-for="item1 in cutParts"
+                            :key="item.Title">{{ item1.Title }}</div>
+                    </div>
+                    <div v-show="item.type == 'scale' && state.isScale" class="scale-menu">
+                        <div class="item" id="scale-big" @click.stop="menu3Click('scale-big')">放大</div>
+                        <div class="item" id="scale-small" @click.stop="menu3Click('scale-small')">缩小</div>
+                    </div>
+                    <div v-show="item.type == 'layer' && state.isLayer" class="scale-menu" @click.stop id="layer">
+                        <div id="layer-up" class="item" @click.stop="menu3Click('layer-up')">上移</div>
+                        <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')">置顶</div>
+                        <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')">置底</div>
+                        <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
+                    </div>
+                </Tooltip>
+            </div>
         </div>
         <Lock v-show="false" :isLock="state.isLock"></Lock>
     </div>
@@ -65,11 +56,15 @@ const store = useStore()
 const update = getCurrentInstance();
 const { mixinState, canvasEditor } = useSelect();
 const cutPartsType = computed(() => {
-    return store.state.saveData.cutPartsType
+    return store.state.cutPartsType
 })
 const cutParts = computed(() => {
     return store.state.saveData.cutParts
 })
+let mSelectMode = computed(() => {
+    mixinState.mSelectMode
+});
+
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
 const lockAttrs = [
@@ -106,6 +101,7 @@ let activeInfo = reactive({
     scaleX: 0,
     scaleY: 0
 })
+let activeObject = ref()
 const menuList1 = [
     {
         type: 'basic',
@@ -175,10 +171,17 @@ const menuList3 = [
 
     }
 ];
+watch(mSelectMode, (newVal, oldVal) => {
+    if (newVal) {
+        if (mixinState.mSelectMode === 'one') {
+            activeObject.value = canvasEditor.canvas.getActiveObjects()[0]
+        }
+    }
+}, { immediate: true, deep: true });
 onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
-
+    console.log('mixinState.mSelectMode')
     MouseEventEventListener.setMouseupFn = () => { }
     ControlsTile.canvas = canvasEditor.canvas
     ControlsTile.setCanvasObserve(canvasEditor.canvas)
@@ -187,11 +190,49 @@ onMounted(() => {
 })
 const init = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-    console.log('activeObject', activeObject)
     if (activeObject) {
         type.value = activeObject.type;
         update?.proxy?.$forceUpdate();
     }
+}
+const setDisabled = (type) => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+    let disabled = false
+    switch (type) {
+        case 'delete':
+            break
+        case 'lock':
+            break
+        case 'scale':
+            break
+        case 'scale-big':
+            break
+        case 'scale-small':
+            break
+        case 'layer':
+            console.log('(layer.value', activeObject)
+            if (activeObject && activeObject.isBackground !== undefined) {
+                disabled = true
+            } else {
+                disabled = false
+            }
+            break
+        case 'layer-up':
+            break
+        case 'layer-down':
+            break
+        case 'layer-top':
+            break
+        case 'layer-bottom':
+            break
+        case 'createCopy':
+            break
+        case 'copyTo':
+            break
+        default:
+            return disabled
+    }
+    return disabled
 }
 const setCopyTo = (item) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
@@ -228,8 +269,10 @@ const setCopyTo = (item) => {
 
 }
 const menuList1Click = (type) => {
+
     switch (type) {
         case 'basic':
+            console.log('mixinState.mSelectMode', mixinState)
             ControlsTile.setRepeat('basic')
             break;
         case 'cropping':
@@ -303,6 +346,7 @@ const scaleSmall = debounce((obj) => {
     ControlsTile.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
+
 }, 300);
 
 // 元素变大
@@ -321,7 +365,6 @@ const scaleBig = debounce((obj) => {
     ControlsTile.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
-
 }, 300);
 const lock = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
@@ -422,7 +465,17 @@ const menu3Click = (type) => {
     }
 }
 
+.menu-box {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F0F2F5;
+    border-radius: 20px;
+}
+
 .scale-menu {
+
     position: absolute;
     bottom: 38px;
     box-sizing: border-box;
@@ -440,6 +493,7 @@ const menu3Click = (type) => {
     }
 
     .item {
+        cursor: pointer;
         width: 100%;
         height: 40px;
         display: flex;

@@ -28,7 +28,7 @@ import historyAip from '@/api/history.ts'
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex'
-import { allCustomAttribute} from '@/config/customAttributeFabricObj.ts'
+import { allCustomAttribute } from '@/config/customAttributeFabricObj.ts'
 const store = useStore()
 const saveData = computed(() => {
   return store.state.saveData
@@ -36,7 +36,14 @@ const saveData = computed(() => {
 const saveSteps = computed(() => {
   return store.state.saveSteps
 })
-
+const handelSave = computed(() => {
+  return store.state.handelSave
+})
+watch(handelSave, (newVal, oldVal) => {
+  if (newVal) {
+    setSaveData()
+  }
+}, { immediate: true, deep: true });
 const aa = ref('')
 const { t } = useI18n();
 const { canvasEditor } = useSelect();
@@ -68,28 +75,22 @@ const getData = () => {
   })
 }
 const setSaveData = debounce(function (type) {
-  const list = ['name', 'isRepeat']
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+  console.log('保存对象',objects)
   const objectsCopy = JSON.parse(JSON.stringify(objects))
-  objectsCopy.forEach((element,index )=> {
-    list.forEach(el => {
-      allCustomAttribute.forEach(key => {
-        element[key] = objects[index][key]
-      })
-      element['src'] = ''
-    });
+  objectsCopy.forEach((element, index) => {
+    allCustomAttribute.forEach(key => {
+      element[key] = objects[index][key]
+    })
+    element['src'] = ''
   });
   store.commit('setCanvasObjects', objectsCopy)
-  console.log('JSON.stringify(newObj)', JSON.stringify(objectsCopy))
-  // console.log('JSON.stringify(saveData.value)', JSON.stringify(saveData.value))
-  // console.log('objects', objects)
-  // console.log('JSON.stringify(objects)', JSON.stringify(objects))
-  // console.log('allCustomAttribute', allCustomAttribute)
+  // console.log('JSON.stringify(newObj)', JSON.stringify(objectsCopy))
   historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value) }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
     console.log('保存结果', res)
   })
-}, 300);
+}, 700);
 
 /**
  * @desc clear canvas 清空画布

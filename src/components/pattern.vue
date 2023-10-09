@@ -164,7 +164,6 @@ const changeSize = (item: any) => {
 }
 const changeColor = (item: any) => {
     colorSelected.value = item.GUID
-    console.log('changeColor', item)
     store.commit('setBgColor', item)
 }
 const getBgColor = (GUID: string) => {

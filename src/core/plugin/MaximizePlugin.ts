@@ -1,3 +1,4 @@
+import { Canvas } from 'fabric/fabric-impl';
 
 // 最大化
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
@@ -8,8 +9,8 @@ class MaximizePlugin {
     static setMax(type: string, mask: any) {
         this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
         this.mask = this.canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        console.log('this.mask', this.mask)
-        this.activeObject.angle = 0
+        console.log('tthis.activeObjec', this.activeObject)
+        this.activeObject.rotate(0);
         if (type == 'bigFull') {
             this.designMaximization()
         } else if (type == 'full') {

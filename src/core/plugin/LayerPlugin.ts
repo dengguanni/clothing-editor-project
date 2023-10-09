@@ -5,7 +5,7 @@
  * @LastEditTime: 2023-06-27 23:07:57
  * @Description: 图层调整插件
  */
-
+ 
 import { fabric } from 'fabric';
 import Editor from '../core';
 type IEditor = Editor;
@@ -25,8 +25,11 @@ class LayerPlugin {
   }
 
   _workspaceSendToBack() {
+    const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground);
     const workspace = this._getWorkspace();
+    backgroundImage && backgroundImage.sendToBack();
     workspace && workspace.sendToBack();
+
   }
   _lineSendToBack() {
     const line = this.canvas.getObjects().find((item) => item.id === '0');
