@@ -125,8 +125,10 @@ const iconType = (type) => {
 };
 
 const doLock = debounce(() => {
+
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   if (activeObject.isLock == undefined || activeObject.isLock) {
+    store.commit('setAllIsLock')
     activeObject.hasControls = false;
     activeObject.selectable = false;
     activeObject.isLock = false
@@ -134,7 +136,6 @@ const doLock = debounce(() => {
     lockAttrs.forEach((key) => {
       activeObject[key] = true;
     });
-    canvasEditor.canvas.discardActiveObject();
   } else if (activeObject.isLock === false) {
     activeObject.hasControls = true;
     // 修改默认属性

@@ -114,19 +114,19 @@ const addItem = (item) => {
                 image.FilePath = item.FilePath
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-                canvasEditor.canvas.bringToFront(maskRect)
-
+                
                 if (props.isBg) {
                     if (currentBackground) canvasEditor.canvas.remove(currentBackground)
                     image.isBackground = true
                     canvasEditor.canvas.sendToBack(info)
                     canvasEditor.canvas.sendToBack(workspace)
                     canvasEditor.canvas.setActiveObject(info);
-                    canvasEditor.canvas.requestRenderAll();
                     MaximizePlugin.setMax('width')
                     MaximizePlugin.setMax('height')
                 }
-
+                console.log('maskRect', maskRect)
+                canvasEditor.canvas.bringToFront(maskRect)
+                canvasEditor.canvas.requestRenderAll();
             }
         };
 

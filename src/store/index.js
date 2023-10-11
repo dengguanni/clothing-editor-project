@@ -22,7 +22,7 @@ const store = createStore({
         // 画布内容
         canvasObjects: [],
         // 裁片类型
-        
+
         // 裁片
         cutParts: []
       },
@@ -35,8 +35,11 @@ const store = createStore({
       },
       handelSave: 0,
       handelAllCuts: 0,
+      handleLock: 0,
       pageLoading: false,
-      isSetSteps: false
+      isSetSteps: false,
+      selected: '',
+
     }
   },
   mutations: {
@@ -49,12 +52,17 @@ const store = createStore({
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
     },
-    setIsSetSteps(state,val) {
-      console.log('setIsSetSteps', val)
+    setAllIsLock(state) {
+      state.handleLock = state.handleLock + 1
+    },
+    setIsSetSteps(state, val) {
       state.isSetSteps = val
     },
     setSave(state) {
       state.handelSave = state.handelSave + 1
+    },
+    setSelected(state, val) {
+      state.selected = val
     },
     setPageLoading(state, val) {
       state.pageLoading = val

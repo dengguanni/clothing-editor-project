@@ -63,7 +63,6 @@ class CopyPlugin {
     const cutPartsType = activeObject.cutPartsType
     const FileName = activeObject.FileName
     const FilePath = activeObject.FilePath
-    console.log('fuzhiactiveObject', activeObject)
     activeObject?.clone((cloned: fabric.Object) => {
       if (cloned.left === undefined || cloned.top === undefined) return;
       
@@ -77,8 +76,8 @@ class CopyPlugin {
         FileName: FileName,
         FilePath: FilePath
       });
+      
       canvas.discardActiveObject();
-      console.log('复制', cloned)
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();

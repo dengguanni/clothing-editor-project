@@ -15,6 +15,7 @@ export const allCustomAttribute = [
     'customVisible', //自定义显隐
     'id',
     'isBackground', //是否背景图
+    'isLock'
 ]
 export const basicCustomAttribute = [
     'tileParentFileName',  //平铺父级文件名

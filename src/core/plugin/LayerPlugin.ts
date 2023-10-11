@@ -5,7 +5,7 @@
  * @LastEditTime: 2023-06-27 23:07:57
  * @Description: 图层调整插件
  */
- 
+
 import { fabric } from 'fabric';
 import Editor from '../core';
 type IEditor = Editor;
@@ -32,13 +32,16 @@ class LayerPlugin {
 
   }
   _lineSendToBack() {
-    const line = this.canvas.getObjects().find((item) => item.id === '0');
-    line && line.sendToBack();
+    // const line = this.canvas.getObjects().find((item) => item.id === '0');
+    // line && line.sendToBack();
   }
   _maskBringToFront() {
+    const line = this.canvas.getObjects().find((item) =>
+      item.id === 'grid'
+    );
     const mask = this.canvas.getObjects().find((item) => item.isMask);
     mask && mask.bringToFront();
-
+    line && line.bringToFront();
   }
 
   up() {

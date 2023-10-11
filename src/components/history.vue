@@ -123,6 +123,7 @@ const setAuxiliaryLine = () => {
 const setLine = debounce(() => {
   line.value = !line.value
   const imageURL = 'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
+  // const imageURL = baseUrl+'/ImageSource/Other/Grid.png?t=1'
   if (!line.value) {
     const line = canvasEditor.canvas.getObjects().find((item) => item.id == 'grid');
     canvasEditor.canvas.remove(line)
@@ -133,12 +134,14 @@ const setLine = debounce(() => {
         // image.cutPartsType = cutPartsType.value
         image.id = 'grid'
         image.ImageUrl = imageURL
+        image.opacity = 0.5
         image.scaleX = (703 / image.width);
         image.scaleY = (703 / image.height);
         image.hasControls = false
         image.set('selectable', false);
         image.set('hasControls', false);
         image.set('isDragging', false);
+        image.set('evented', false);
         image.hoverCursor = 'default';
         lockAttrs.forEach((key) => {
           image[key] = true;
@@ -153,7 +156,7 @@ const setLine = debounce(() => {
         );
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         // canvasEditor.canvas.sendBackwards(line)
-        line.sendToBack()
+        line.bringToFront()
         workspace.sendToBack()
         // canvasEditor.canvas.moveTo(line, 3)
         canvasEditor.canvas.requestRenderAll();

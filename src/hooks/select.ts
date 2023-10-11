@@ -12,6 +12,7 @@ import { SelectEvent, SelectMode, SelectOneType } from '@/utils/event/types';
 interface Selector {
   mSelectMode: SelectMode;
   mSelectOneType: SelectOneType;
+  mSelectOneIsBackground: boolean | undefined;
   mSelectId: string[] | '';
   mSelectIds: string[];
   mSelectActive: unknown[];
@@ -38,6 +39,7 @@ export default function useSelect() {
     clipActiveObj: {},
     clipLeft: 0,
     clipRight: 0,
+    mSelectOneIsBackground: undefined,
     setIsClipping: setIsClipping
   });
 
@@ -50,6 +52,7 @@ export default function useSelect() {
     state.mSelectMode = SelectMode.ONE;
     state.mSelectId = e[0].id;
     state.mSelectOneType = e[0].type;
+    state.mSelectOneIsBackground = e[0].isBackground;
     state.mSelectIds = e.map((item) => item.id);
   };
 

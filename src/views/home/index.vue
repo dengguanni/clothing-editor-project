@@ -260,6 +260,7 @@ import Editor, {
   HistoryPlugin,
   FlipPlugin,
   RulerPlugin,
+  TestPlugin
   // MaterialPlugin,
 } from '@/core';
 let selectedProduct = ref(0)
@@ -301,10 +302,10 @@ const goodsGUID = computed(() => {
 const pageLoading = computed(() => {
   return store.state.pageLoading
 })
-// watch(pageLoading, (newVal, oldVal) => {
-  
-// }, { immediate: true, deep: true });
+
 onMounted(() => {
+  
+  store.commit('setPageLoading', true)
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
     fireRightClick: true, // 启用右键，button的数字为3
@@ -333,6 +334,8 @@ onMounted(() => {
   canvasEditor.use(HistoryPlugin);
   canvasEditor.use(FlipPlugin);
   canvasEditor.use(RulerPlugin);
+  canvasEditor.use(TestPlugin);
+  
   // canvasEditor.use(MaterialPlugin);
 
   event.init(canvas);

@@ -21,6 +21,8 @@ import RulerPlugin from './plugin/RulerPlugin';
 // import MaterialPlugin from './plugin/MaterialPlugin';
 import ControlsTile from './plugin/ControlsTile'
 
+import TestPlugin from './plugin/TestPlugin';
+
 export {
   DringPlugin,
   AlignGuidLinePlugin,
@@ -41,6 +43,7 @@ export {
   FlipPlugin,
   RulerPlugin,
   // MaterialPlugin,
-  ControlsTile
+  ControlsTile,
+  TestPlugin
 };
 export default Editor;

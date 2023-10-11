@@ -182,6 +182,10 @@ class ControlsTile {
                     image.top = imageTop
                     image.rotate(activeObject.angle)
                     this.canvas.add(image);
+                    const mask = this.canvas.getObjects().find((item) => item.isMask)
+                    const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
+                    this.canvas.bringToFront(mask)
+                    this.canvas.sendToBack(backgroundImage)
                     this.canvas.requestRenderAll();
                 }
             };

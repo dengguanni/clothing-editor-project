@@ -87,12 +87,17 @@ watch(cutParts, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
-        setAllCuts(true)
+        setTimeout(() => {
+            console.log('bgColor')
+            setAllCuts(true)
+        }, 100);
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
     if (newVal) {
+        // setTimeout(() => {
         init(newVal)
+        // }, 100);
     }
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
@@ -134,18 +139,20 @@ const watchCanvas = () => {
         }
     }
     canvasEditor.canvas.on('object:added', () => {
-        console.log('added', isSetSteps.value ? '否' : '是')
+        console.log('added',)
         fn(isSetSteps.value)
     })
     canvasEditor.canvas.on('object:modified', () => {
-        console.log('modified', isSetSteps.value ? '否' : '是')
+        console.log('modified')
         fn(isSetSteps.value)
     })
     canvasEditor.canvas.on('object:removed', () => {
-        console.log('removed', isSetSteps.value ? '否' : '是')
+        console.log('removed')
         fn(isSetSteps.value)
     })
-
+    canvasEditor.canvas.on('selection:updated', (val) => {
+        store.commit('setSelected', val.selected[0])
+    })
 }
 const setAllCuts = debounce((isColorChange, isSetSteps) => {
     const objects = canvasEditor.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
@@ -307,6 +314,7 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
                 store.commit('setIsSetSteps', false)
+                store.commit('setPageLoading', false)
             } else {
                 fn(index + 1)
             }
@@ -323,13 +331,16 @@ const changeSelection = () => {
     active.value = cutPartsType.value
     cutPartsType.value = cutPartsType.value
     let maskRect
+    const oldMask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+    oldMask ? oldMask.isMask = false : ''
     canvasEditor.canvas.getObjects().forEach(el => {
         {
-            if (el.cutPartsType == cutPartsType.value) {
+            if (el.cutPartsType == cutPartsType.value || el.id == 'grid') {
                 el.visible = true
             } else if (el.id !== 'workspace') {
                 el.visible = false
             }
+
             if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
                 el.visible = true
                 el.isMask = true
@@ -389,7 +400,6 @@ const loadCanvasObject = () => {
                 store.commit('setIsSetSteps', false)
             }
         }
-
     }
     if (canvasObjects.value[0]) fn(canvasObjects.value[0], 0)
     const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
@@ -397,6 +407,7 @@ const loadCanvasObject = () => {
     canvasEditor.canvas.bringToFront(mask)
     canvasEditor.canvas.sendToBack(backgroundImage)
     canvasEditor.canvas.requestRenderAll();
+
 }
 const addText = (option) => {
     const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
