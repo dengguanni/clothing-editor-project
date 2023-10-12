@@ -114,18 +114,18 @@ const addItem = (item) => {
                 image.FilePath = item.FilePath
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-                
+                canvasEditor.canvas.setActiveObject(image);
+               
                 if (props.isBg) {
                     if (currentBackground) canvasEditor.canvas.remove(currentBackground)
                     image.isBackground = true
                     canvasEditor.canvas.sendToBack(info)
                     canvasEditor.canvas.sendToBack(workspace)
-                    canvasEditor.canvas.setActiveObject(info);
                     MaximizePlugin.setMax('width')
                     MaximizePlugin.setMax('height')
                 }
-                console.log('maskRect', maskRect)
                 canvasEditor.canvas.bringToFront(maskRect)
+                store.commit('setSelected', image)
                 canvasEditor.canvas.requestRenderAll();
             }
         };
@@ -166,12 +166,12 @@ const dragItem = (event) => {
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
+                store.commit('setSelected', image)
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
                 upDateTexture()
             }
         };
-
         const properties = {
             left: 0,
             top: 0
@@ -194,7 +194,6 @@ const dragItem = (event) => {
     width: 100%;
     padding: 10px 20px 0px 20px;
     overflow: hidden;
-
     .page {
         width: 100%;
         display: flex;

@@ -58,18 +58,17 @@ const cbMap = {
     canvasEditor.saveImg();
   },
 };
-
+let a = ref(0)
 const getData = () => {
-  canvasEditor.test()
- 
-  // saveSteps.value.ID
-  // const p = {
-  //   ID: ''
-  // }
-  // historyAip.getHistory(p).then(res => {
-  //   const data = res.Tag[0].Table[0].JsonValue
-  //   console.log('拿回', JSON.parse(data))
-  // })
+  canvasEditor.test(1111)
+  saveSteps.value.ID
+  const p = {
+    ID: ''
+  }
+  historyAip.getHistory(p).then(res => {
+    const data = res.Tag[0].Table[0].JsonValue
+    console.log('拿回', JSON.parse(data))
+  })
 }
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)

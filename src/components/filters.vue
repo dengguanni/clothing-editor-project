@@ -22,7 +22,6 @@
           {{ $t('filters.' + key) }}
         </Checkbox>
       </div>
-      <img :src="url">
     </div>
     <!-- <Collapse>
 
@@ -119,12 +118,12 @@ watch(
   () => props.singleFilters,
   (val) => {
     setSharpening(val)
-
   }
 );
 // 锐化、清晰
 const setSharpening = (val) => {
   const obj = canvasEditor.canvas.getActiveObjects()[0];
+  obj.Sharpen = obj.Sharpen ? false : true
   function applyFilter(index, filter) {
     obj.filters[index] = filter;
     var timeStart = +new Date();
@@ -133,18 +132,15 @@ const setSharpening = (val) => {
     var dimString = obj.width + ' x ' +
       obj.height;
     var $ = function (id) { return document.getElementById(id) };
-    // $('bench').innerHTML = dimString + 'px ' +
-    //   parseFloat(timeEnd - timeStart) + 'ms';
     canvasEditor.canvas.renderAll();
   }
   const f = fabric.Image.filters
-  applyFilter(12, val && new f.Convolute({
+  applyFilter(12, obj.Sharpen && new f.Convolute({
     matrix: [0, -1, 0,
       -1, 5, -1,
       0, -1, 0]
   }));
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  console.log('activeObject.width', activeObject.width)
   const scaleX = activeObject.scaleX
   const scaleY = activeObject.scaleY
   activeObject.scaleX = 1
@@ -165,11 +161,12 @@ const setSharpening = (val) => {
     restoreImage()
   }
 
-
 }
 
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
+  console.log('changeFilters',)
+
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   state.noParamsFilters[type] = value;
   if (value) {
@@ -180,6 +177,8 @@ const changeFilters = (type, value) => {
   } else {
     _removeFilter(activeObject, type);
   }
+
+
 };
 // 有参数与组合滤镜修改
 const changeFiltersByParams = (type) => {

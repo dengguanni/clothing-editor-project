@@ -227,6 +227,7 @@ import bigPreview from '@/components/bigPreview.vue'
 
 // 功能组件
 import { CanvasEventEmitter } from '@/utils/event/notifier';
+import { createRouter, createWebHashHistory ,useRouter,useRoute } from 'vue-router';
 import canvasMenu from '@/components/canvasMenu.vue'
 // import { downFile } from '@/utils/utils';
 import { fabric } from 'fabric';
@@ -273,7 +274,8 @@ let goodsInfo = ref({
   Title: ''
 })
 const store = useStore()
-
+const router = useRoute()
+console.log('router',router)
 // 创建编辑器
 const canvasEditor = new Editor();
 
@@ -368,7 +370,6 @@ const getSaveData = () => {
     const dataJson = JSON.parse(data)
     if (dataJson.commodityInfo.GUID) {
       sendGoodsId(dataJson.commodityInfo)
-      console.log('拿回', dataJson)
     }
     store.commit('setSaveData', dataJson)
   })

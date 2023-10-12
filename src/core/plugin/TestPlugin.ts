@@ -14,15 +14,15 @@ class TestPlugin {
         this.canvas = canvas;
         this.editor = editor;
     }
-    test() {
-        console.log('test')
+    test(aa: any) {
+        console.log('test',aa)
     }
-    contextMenu() {
-        const activeObject = this.canvas.getActiveObject();
-        if (activeObject) {
-            this.test()
-        }
-      }
+    // contextMenu() {
+    //     const activeObject = this.canvas.getActiveObject();
+    //     if (activeObject) {
+    //         this.test()
+    //     }
+    //   }
 }
 
 export default TestPlugin;

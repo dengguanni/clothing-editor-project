@@ -128,7 +128,7 @@ const doLock = debounce(() => {
 
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   if (activeObject.isLock == undefined || activeObject.isLock) {
-    store.commit('setAllIsLock')
+   
     activeObject.hasControls = false;
     activeObject.selectable = false;
     activeObject.isLock = false
@@ -147,6 +147,7 @@ const doLock = debounce(() => {
     activeObject.hoverCursor = null
   }
   canvasEditor.canvas.renderAll();
+  store.commit('setAllIsLock')
 }, 500)
 const doHide = debounce(() => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];

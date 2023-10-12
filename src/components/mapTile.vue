@@ -3,7 +3,7 @@
         <div class="box-01" v-if="mixinState.mSelectOneType !== 'text'">
             <!-- <greyButton></greyButton> -->
             <greyButton v-for="item in menuList1" :key="item.type" @buttonClick="menuList1Click(item.type)"
-                :disabled="item.disabled" :content="item.label">
+                :disabled="item.disabled" :content="item.label" :isSelected="item.isSelected">
             </greyButton>
         </div>
         <div class="box-01" v-if="mixinState.mSelectOneType !== 'text'">
@@ -70,8 +70,11 @@ const cutParts = computed(() => {
 let mSelectMode = computed(() => {
     mixinState.mSelectMode
 });
-let selected = computed(() => {
+const selected = computed(() => {
     return store.state.selected
+});
+const handleLock = computed(() => {
+    return store.state.handleLock
 });
 // import clone from '@/components/clone.vue'
 // import { Slider } from 'element-plus'
@@ -114,27 +117,32 @@ let menuList1 = reactive([
     {
         type: 'basic',
         label: '基础平铺',
-        disabled: false
+        disabled: false,
+        isSelected: false
     },
     {
         type: 'mirror',
         label: '镜像平铺',
-        disabled: false
+        disabled: false,
+        isSelected: false
     },
     {
         type: 'transverse',
         label: '横向平铺',
-        disabled: false
+        disabled: false,
+        isSelected: false
     },
     {
         type: 'direction',
         label: '纵向平铺',
-        disabled: false
+        disabled: false,
+        isSelected: true
     },
     {
         type: 'matting',
         label: '抠图',
-        disabled: false
+        disabled: false,
+        isSelected: false
     }
 ])
 let filterList = reactive([
@@ -194,18 +202,26 @@ const menuList3 = reactive([
     }
 ])
 
+watch(handleLock, (newVal, oldVal) => {
+    if (newVal) {
+        const activeObject = canvasEditor.canvas.getActiveObject()
+        buttonLimitions(menuList3, activeObject)
+        buttonLimitions(filterList, activeObject)
+        buttonLimitions(menuList1, activeObject)
+    }
+}, { immediate: true, deep: true });
 watch(selected, (newVal, oldVal) => {
     if (newVal) {
         console.log('newVal', newVal)
         buttonLimitions(menuList3, newVal)
         buttonLimitions(filterList, newVal)
         buttonLimitions(menuList1, newVal)
+        setButtonActive(menuList1, null)
     }
 }, { immediate: true, deep: true });
 onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
-    console.log('mixinState.mSelectMode')
     MouseEventEventListener.setMouseupFn = () => { }
     ControlsTile.canvas = canvasEditor.canvas
     ControlsTile.setCanvasObserve(canvasEditor.canvas)
@@ -214,35 +230,55 @@ onMounted(() => {
 
 })
 const init = () => {
-    console.log(1234567)
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     if (activeObject) {
         type.value = activeObject.type;
         update?.proxy?.$forceUpdate();
     }
 }
-const setDisabled = (arr, obj) => {
-    console.log('obj', obj)
-    if (obj.isBackground !== undefined) {
-        arr.forEach(el => {
-            if (el.type == 'layer') {
-                console.log('layer')
-                el.disabled = true
+const setButtonActive = (arr, type) => {
+    const obj = canvasEditor.canvas.getActiveObjects()[0]
+    if (type) {
+        if (obj.repeatType) {
+            if (obj.repeatType == type) {
+                arr.forEach(element => {
+                    element.isSelected = false
+                });
             } else {
-                el.disabled = false
+                arr.forEach(el => {
+                    if (el.type == type) {
+                        el.isSelected = true
+                    } else {
+                        el.isSelected = false
+                    }
+                })
             }
-        })
+
+        } else {
+            arr.forEach(el => {
+                if (el.type == type) {
+                    console.log('el.isSelected = true')
+                    el.isSelected = true
+                } else {
+                    el.isSelected = false
+                }
+            })
+        }
     } else {
-        arr.forEach(el => el.disabled = false)
-    }
-    if (!obj.hasControls) {
-        arr.forEach(el => {
-            if (el.type !== 'lock') {
-                el.disabled = true
-            } else {
-                el.disabled = false
-            }
-        })
+        if (obj.repeatType) {
+            arr.forEach(el => {
+                if (el.type == obj.repeatType) {
+                    el.isSelected = true
+                } else {
+                    el.isSelected = false
+                }
+            })
+        } else {
+            arr.forEach(element => {
+                element.isSelected = false
+            });
+        }
+
     }
 
 }
@@ -281,10 +317,9 @@ const setCopyTo = (item) => {
 
 }
 const menuList1Click = (type) => {
-
+    setButtonActive(menuList1, type)
     switch (type) {
         case 'basic':
-            console.log('mixinState.mSelectMode', mixinState)
             ControlsTile.setRepeat('basic')
             break;
         case 'cropping':
@@ -310,6 +345,11 @@ const del = debounce(function () {
     store.commit('setAllCuts')
 }, 300);
 const btnClick = (item) => {
+    const activeObject = canvasEditor.canvas.getActiveObject()
+    if (activeObject.Sharpen && item == 'filter') {
+        Message.error('添加清晰后不支持滤镜');
+        return
+    }
     emit('btnClick', item);
 };
 const setIsScale = () => {
@@ -383,15 +423,12 @@ const lock = () => {
     if (activeObject.isLock == undefined || activeObject.isLock) {
         activeObject.hasControls = false;
         activeObject.selectable = false;
-        activeObject.isLock = false
+        activeObject.isLock = true
         activeObject.hoverCursor = 'default'
         lockAttrs.forEach((key) => {
             activeObject[key] = true;
         });
         store.commit('setAllIsLock')
-        buttonLimitions(menuList3, activeObject)
-        buttonLimitions(filterList, activeObject)
-        buttonLimitions(menuList1, activeObject)
     } else if (activeObject.isLock === false) {
         activeObject.hasControls = true;
         // 修改默认属性
@@ -399,12 +436,9 @@ const lock = () => {
             activeObject[key] = false;
         });
         activeObject.selectable = true;
-        activeObject.isLock = true
+        activeObject.isLock = false
         activeObject.hoverCursor = null
         store.commit('setAllIsLock')
-        buttonLimitions(menuList3, activeObject)
-        buttonLimitions(filterList, activeObject)
-        buttonLimitions(menuList1, activeObject)
     }
     canvasEditor.canvas.renderAll();
 }

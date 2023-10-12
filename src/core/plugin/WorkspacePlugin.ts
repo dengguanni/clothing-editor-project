@@ -85,35 +85,12 @@ class WorkspacePlugin {
     // console.log('width, height', width, height)
     const width = 703
     const height = 703
-    // var clipPath = new fabric.Circle({
-    //   radius: 10,
-    //   left: 40,
-    //   top: 40
-    // })
     const workspace = new fabric.Rect({
       fill: 'rgba(255,255,255,1)',
       width,
       height,
       id: 'workspace',
     });
-
-    let a = 703
-    let b = 400
-    // const aa = new fabric.Rect({
-    //   fill: 'rgba(255,255,25,1)',
-    //   width: a,
-    //   height: b,
-    //   top: 200,
-    //   id: 'workspace',
-    // });
-    // aa.set('selectable', false);
-    // aa.set('hasControls', false);
-    // aa.hoverCursor = 'default';
-    // this.newWorkspace = aa
-
-    // workspace.clipPath = clipPath
-    // this.canvas.add(aa);
-
     workspace.set('selectable', false);
     workspace.set('hasControls', false);
     workspace.hoverCursor = 'default';
@@ -143,7 +120,7 @@ class WorkspacePlugin {
     const resizeObserver = new ResizeObserver(
       throttle(() => {
         this.auto();
-      }, 50)
+      }, 500)
     );
     resizeObserver.observe(this.workspaceEl);
   }
@@ -174,14 +151,16 @@ class WorkspacePlugin {
     this.setCenterFromObject(this.workspace);
 
     // 超出画布不展示
-    this.workspace.clone((cloned: fabric.Rect) => {
+
+    const maskRect = this.canvas.getObjects().find((item: any) => item.isMask)
+    maskRect ? maskRect.clone((cloned: any) => {
+      this.canvas.clipPath = cloned;
+      this.canvas.renderAll()
+      this.canvas.requestRenderAll();
+    }) : this.workspace.clone((cloned: fabric.Rect) => {
       this.canvas.clipPath = cloned;
       this.canvas.requestRenderAll();
     });
-    // this.newWorkspace.clone((cloned: fabric.Rect) => {
-    //   this.canvas.clipPath = cloned;
-    //   this.canvas.requestRenderAll();
-    // });
     if (cb) cb(this.workspace.left, this.workspace.top);
   }
 

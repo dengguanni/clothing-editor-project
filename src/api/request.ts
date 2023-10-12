@@ -2,6 +2,7 @@ import axios from 'axios' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
 import { decrypt, encrypt } from '@/utils/decrypt.js'
+
 let baseURL = 'http://8.140.206.30:8011';
 // console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 

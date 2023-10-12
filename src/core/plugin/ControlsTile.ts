@@ -1,3 +1,4 @@
+import { event } from '@/utils/event/notifier';
 import { ControlsTile } from '@/core/plugin/ControlsTile.ts';
 import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
@@ -52,7 +53,7 @@ class ControlsTile {
         }
         activeObject.repeatType = repeatType
         ControlsTile.canvas.getObjects().forEach((el: any) => {
-            if (el.tileParentFileName == activeObject.FileName) {
+            if (el.tileParentId == activeObject.id) {
                 ControlsTile.canvas.remove(el)
             }
         })
@@ -68,6 +69,8 @@ class ControlsTile {
                 ControlsTile.handelRepeatY()
             }
             this.canvas.requestRenderAll();
+        } else {
+            activeObject.repeatType = null
         }
     }
     static getMaxCount = (cloned: any) => {
@@ -98,7 +101,7 @@ class ControlsTile {
     static handelBasicRepeat() {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        this.observeObj(activeObject)
+        
         activeObject.clone(cloned => {
             const { maxXcount, maxYcount } = self.getMaxCount(cloned)
             cloned.rotate(0)
@@ -160,6 +163,7 @@ class ControlsTile {
             multiplier: 1,
         });
         let callback1 = () => {
+            let z: number
             const activeObject = this.canvas.getActiveObjects()[0];
             const imageURL = baseUrl + 'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
             let callback = (image: any, isError: boolean) => {
@@ -167,25 +171,30 @@ class ControlsTile {
                     image.cutPartsType = activeObject.cutPartsType
                     image.set({
                         ...this.lockObj,
-                        selectable: false,
-                        evented: false,
+                        // selectable: false,
+                        // evented: false,
                         isRepeat: true,
-
                     })
                     image.tileParentFileName = activeObject.FileName
+                    image.tileParentId = activeObject.id
                     image.cutPartsType = activeObject.cutPartsType
-                    image.sendBackwards()
                     image.id = uuid()
                     image.FileName = FileName
                     image.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     image.left = imageLeft
                     image.top = imageTop
+                    image.hoverCursor = null
                     image.rotate(activeObject.angle)
                     this.canvas.add(image);
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
                     this.canvas.bringToFront(mask)
                     this.canvas.sendToBack(backgroundImage)
+                    const objects = this.canvas.getObjects()
+                    objects.forEach((element, index) => {
+                        if (element.id == activeObject.id) z = index
+                    });
+                    image.moveTo(z);
                     this.canvas.requestRenderAll();
                 }
             };
@@ -202,7 +211,7 @@ class ControlsTile {
         const self = this
         let arr1 = []
         const activeObject = this.canvas.getActiveObjects()[0];
-        this.observeObj(activeObject)
+        
         const createPattern = () => {
             let isOffsetX = false
             activeObject.clone(cloned => {
@@ -306,7 +315,7 @@ class ControlsTile {
     static handelRepeatY = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        this.observeObj(activeObject)
+        
         const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
         let left
         let top
@@ -498,7 +507,7 @@ class ControlsTile {
     static handelRepeatMirror = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        this.observeObj(activeObject)
+        
         const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
         let newObjArr1 = []
         let newObjArr2 = []
@@ -690,7 +699,6 @@ class ControlsTile {
                     ...this.lockObj,
                 });
                 this.canvas.add(cloned2);
-                // this.canvas.requestRenderAll();
             })
         }
         for (let i = 1; i < bottomCount + 1; i++) {
@@ -708,23 +716,6 @@ class ControlsTile {
                 this.canvas.add(cloned3);
             })
         }
-    }
-    static observeObj(obj: any) {
-        const Canvas = this.canvas
-        obj.on('rotating', function () {
-            console.log('rotating');
-        });
-        // rotated
-        //对象被移除监听事件
-        obj.on('removed', function () {
-            Canvas.getObjects().forEach(el => {
-                if (el.isRepeat) {
-                    Canvas.remove(el)
-                    ControlsTile.isRepeat = false
-                }
-            })
-        });
-
     }
 }
 export default ControlsTile

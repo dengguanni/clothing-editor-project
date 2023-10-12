@@ -139,19 +139,32 @@ const watchCanvas = () => {
         }
     }
     canvasEditor.canvas.on('object:added', () => {
-        console.log('added',)
+        console.log('added')
         fn(isSetSteps.value)
     })
     canvasEditor.canvas.on('object:modified', () => {
         console.log('modified')
         fn(isSetSteps.value)
     })
-    canvasEditor.canvas.on('object:removed', () => {
-        console.log('removed')
-        fn(isSetSteps.value)
-    })
-    canvasEditor.canvas.on('selection:updated', (val) => {
+    canvasEditor.canvas.on('selection:created', (val) => {
+        console.log('selection:created', val.selected[0])
         store.commit('setSelected', val.selected[0])
+    })
+    canvasEditor.canvas.on('before:transform', (val) => {
+        if (val.transform.target.tileParentId) {
+            const obj = canvasEditor.canvas.getObjects().find(el => el.id == val.transform.target.tileParentId)
+            canvasEditor.canvas.discardActiveObject();
+            canvasEditor.canvas.setActiveObject(obj);
+        }
+        store.commit('setSelected', val.transform.target)
+    })
+    canvasEditor.canvas.on('object:removed', (val) => {
+        canvasEditor.canvas.getObjects().forEach((el) => {
+            if (val.target.isRepeat && el.tileParentId == val.target.id) {
+                canvasEditor.canvas.remove(el)
+            }
+        })
+        fn(isSetSteps.value)
     })
 }
 const setAllCuts = debounce((isColorChange, isSetSteps) => {

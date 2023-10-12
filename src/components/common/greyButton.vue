@@ -1,5 +1,6 @@
 <template>
-    <button class="btn-box" :style="'width:' + props.width + 'px'" type="submit" v-show="!disabled" @click="buttonClick">
+    <button :class="isSelected ? 'btn-box-radio' : 'btn-box'" :style="'width:' + props.width + 'px'" type="submit"
+        v-show="!disabled" @click="buttonClick">
         {{ content }}
         <v-slot></v-slot>
         <span v-html="svg" v-if="svg"></span>
@@ -7,13 +8,13 @@
     <button class="btn-box-disabled" disabled :style="'width:' + props.width + 'px;cursor:' + 'not-allowed;'" type="submit"
         v-show="disabled">
         <v-slot></v-slot>
-        {{ content + 1 }}
+        {{ content }}
         <span v-html="svg" v-if="svg" :style="'cursor:' + 'not-allowed;'"></span>
     </button>
 </template>
   
 <script setup>
- const emit = defineEmits()
+const emit = defineEmits()
 const props = defineProps({
     bgColor: {
         type: String,
@@ -38,9 +39,13 @@ const props = defineProps({
     svg: {
         type: String,
         default: ''
+    },
+    isSelected: {
+        type: Boolean,
+        default: false
     }
 })
-const buttonClick = ()=>{
+const buttonClick = () => {
     emit('buttonClick')
 }
 </script>
@@ -78,6 +83,18 @@ const buttonClick = ()=>{
     }
 }
 
+.btn-box-radio {
+    font-size: 14px;
+    color: #ffff;
+    height: 40px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    background-color: #3064F2;
+    width: 136px;
+    margin-bottom: 12px;
+}
+
 .btn-box-disabled {
     font-size: 14px;
     color: #4E5969;
@@ -89,36 +106,37 @@ const buttonClick = ()=>{
     width: 136px;
     margin-bottom: 12px;
 }
+
 .a,
 .b,
 .c {
-  fill: #4e5969;
+    fill: #4e5969;
 }
 
 .a,
 .b,
 .c,
 .d {
-  stroke: #4e5969;
+    stroke: #4e5969;
 }
 
 .a {
-  opacity: 0;
+    opacity: 0;
 }
 
 .b {
-  stroke-linecap: round;
+    stroke-linecap: round;
 }
 
 .b,
 .c,
 .d {
-  stroke-linejoin: round;
-  stroke-width: 2px;
+    stroke-linejoin: round;
+    stroke-width: 2px;
 }
 
 .d {
-  fill: none;
+    fill: none;
 }
 </style>
   

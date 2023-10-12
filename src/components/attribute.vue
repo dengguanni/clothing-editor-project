@@ -414,7 +414,7 @@ const setAllCuts = debounce(() => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
 
   if (activeObject.isRepeat) {
-    const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentFileName == activeObject.FileName)
+    const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentId == activeObject.id)
     obj.rotate(baseAttr.angle)
     canvasEditor.canvas.renderAll();
   }
