@@ -82,11 +82,16 @@ import { v4 as uuid } from 'uuid';
 import baseUrl from '@/config/constants/baseUrl'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
+import { Message } from 'view-ui-plus';
+import { useStore } from 'vuex'
+const store = useStore()
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 const event = inject('event');
 const update = getCurrentInstance();
-
+const selected = computed(() => {
+  return store.state.selected
+})
 let url = ref('')
 // 无参数滤镜
 const noParamsFilters = {
@@ -120,53 +125,82 @@ watch(
     setSharpening(val)
   }
 );
+watch(selected, (newVal, oldVal) => {
+  if (newVal) {
+    console.log('selected', newVal)
+    setCheckBoxList(state.noParamsFilters, newVal)
+  }
+}, { immediate: true, deep: true });
+const setCheckBoxList = (arr, obj) => {
+  if (obj.filtersList) {
+    obj.filtersList.forEach(v => {
+      for (let key in arr) {
+        if (key == v) {
+          arr[key] = true
+        } else {
+          arr[key] = false
+        }
+      }
+    })
+  } else {
+    for (let key in arr) arr[key] = false
+  }
+
+  console.log('state.noParamsFilters', state.noParamsFilters)
+
+}
 // 锐化、清晰
 const setSharpening = (val) => {
   const obj = canvasEditor.canvas.getActiveObjects()[0];
-  obj.Sharpen = obj.Sharpen ? false : true
-  function applyFilter(index, filter) {
-    obj.filters[index] = filter;
-    var timeStart = +new Date();
-    obj.applyFilters();
-    var timeEnd = +new Date();
-    var dimString = obj.width + ' x ' +
-      obj.height;
-    var $ = function (id) { return document.getElementById(id) };
-    canvasEditor.canvas.renderAll();
-  }
-  const f = fabric.Image.filters
-  applyFilter(12, obj.Sharpen && new f.Convolute({
-    matrix: [0, -1, 0,
-      -1, 5, -1,
-      0, -1, 0]
-  }));
-  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  const scaleX = activeObject.scaleX
-  const scaleY = activeObject.scaleY
-  activeObject.scaleX = 1
-  activeObject.scaleY = 1
-  const url = activeObject.toDataURL({
-    width: activeObject.width,
-    height: activeObject.height,
-    angle: activeObject.angle,
-    scaleX: activeObject.scaleX,
-    scaleY: activeObject.scaleY,
-    multiplier: 1,
-  });
-  activeObject.scaleX = scaleX
-  activeObject.scaleY = scaleY
-  if (val) {
-    replaceImage(url, 'Sharpen')
+  const goON = obj.filtersList ? (obj.filtersList.length == 0 ? true : false) : true
+  if (goON) {
+    obj.Sharpen = obj.Sharpen ? false : true
+    function applyFilter(index, filter) {
+      obj.filters[index] = filter;
+      var timeStart = +new Date();
+      obj.applyFilters();
+      var timeEnd = +new Date();
+      var dimString = obj.width + ' x ' +
+        obj.height;
+      var $ = function (id) { return document.getElementById(id) };
+      canvasEditor.canvas.renderAll();
+    }
+    const f = fabric.Image.filters
+    applyFilter(12, obj.Sharpen && new f.Convolute({
+      matrix: [0, -1, 0,
+        -1, 5, -1,
+        0, -1, 0]
+    }));
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0]
+    const scaleX = activeObject.scaleX
+    const scaleY = activeObject.scaleY
+    activeObject.scaleX = 1
+    activeObject.scaleY = 1
+    const url = activeObject.toDataURL({
+      width: activeObject.width,
+      height: activeObject.height,
+      angle: activeObject.angle,
+      scaleX: activeObject.scaleX,
+      scaleY: activeObject.scaleY,
+      multiplier: 1,
+    });
+    activeObject.scaleX = scaleX
+    activeObject.scaleY = scaleY
+    if (val) {
+      replaceImage(url, 'Sharpen')
+    } else {
+      restoreImage()
+    }
   } else {
-    restoreImage()
+    Message.error('添加滤镜后不支持清晰化')
   }
+
 
 }
 
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
   console.log('changeFilters',)
-
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   state.noParamsFilters[type] = value;
   if (value) {
@@ -177,8 +211,6 @@ const changeFilters = (type, value) => {
   } else {
     _removeFilter(activeObject, type);
   }
-
-
 };
 // 有参数与组合滤镜修改
 const changeFiltersByParams = (type) => {
@@ -293,6 +325,7 @@ const restoreImage = () => {
       canvasEditor.canvas.renderAll();
     });
   }
+
 }
 onMounted(() => {
   event.on('selectOne', handleSelectOne);

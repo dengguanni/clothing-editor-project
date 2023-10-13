@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 
 const aesKey = 'O2BEeIv399qHQNhD6aGW8R8DEj4bqHXm';
 
-export function encrypt(data) {
+function encrypt(data) {
   return encryptAES(data, aesKey);
 }
 
@@ -21,7 +21,7 @@ export function decrypt(data) {
   return decryptAES(data, aesKey);
 }
 
-export function decryptAES(data, key) {
+function decryptAES(data, key) {
   const keyBytes = CryptoJS.enc.Utf8.parse(key);
   const decrypted = CryptoJS.AES.decrypt(data, keyBytes, {
     iv: keyBytes,
@@ -29,4 +29,8 @@ export function decryptAES(data, key) {
     padding: CryptoJS.pad.Pkcs7,
   });
   return CryptoJS.enc.Utf8.stringify(decrypted);
+}
+export default {
+  decrypt,
+  encrypt
 }

@@ -22,6 +22,7 @@ import { reactive } from 'vue'
 import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
+import baseUrl from '@/config/constants/baseUrl'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 let croppedImage = ref()
@@ -110,10 +111,8 @@ const handelCutParts = (image) => {
         }
         picture.setCutParts(p).then(res => {
             console.log('剪裁参数', p, 'res', res)
-
             const FileName = guid() + '.png'
             const callback = () => {
-
                 let imgInstance
                 const imgEl = document.createElement('img');
                 imgEl.src = 'data:image/jpeg;base64,' + res.Tag[0].base64;
@@ -132,6 +131,8 @@ const handelCutParts = (image) => {
                 imgInstance.cutPartsType = image.cutPartsType
                 imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
                 imgInstance.FileName = FileName
+                imgInstance.parentCroppingFilePath = image.FilePath
+                imgInstance.parentCroppingFileName = image.FileName
                 imgInstance.parentUrl = image.ImageUrl
                 imgInstance.ImageUrl = image.ImageUrl
                 imgInstance.skewX = image.skewX
@@ -175,7 +176,9 @@ const restore = () => {
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
-        const imageURL = activeObjects.parentUrl;
+        console.log('activeObjects', activeObjects)
+        "http://8.140.206.30:8099/UserUploadFile/images_library/6c4e5caa-4bd2-11ee-b1c4-00163e10d08e.png"
+        const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
             if (!isError) {
                 canvasEditor.canvas.remove(activeObjects)
@@ -186,7 +189,8 @@ const restore = () => {
                 image.top = activeObjects.top
                 image.left = activeObjects.left
                 image.angle = activeObjects.angle
-                image.FilePath = activeObjects.FilePath
+                image.FilePath = activeObjects.parentCroppingFilePath
+                image.FileName = activeObjects.parentCroppingFileName
                 image.ImageUrl = activeObjects.ImageUrl
                 image.cutPartsType = activeObjects.cutPartsType
                 image.visible = true
@@ -197,6 +201,7 @@ const restore = () => {
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
+                console.log('image', image)
             }
         };
         const properties = {
@@ -242,7 +247,6 @@ const addItem = (item) => {
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
-
             }
         };
         const properties = {

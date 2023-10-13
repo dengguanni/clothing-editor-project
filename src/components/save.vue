@@ -22,7 +22,7 @@ import historyAip from '@/api/history.ts'
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex'
-import { decrypt, encrypt } from '@/utils/crypto.js'
+import crypto from '@/utils/crypto'
 import { allCustomAttribute } from '@/config/customAttributeFabricObj.ts'
 const store = useStore()
 const saveData = computed(() => {
@@ -33,6 +33,9 @@ const saveSteps = computed(() => {
 })
 const handelSave = computed(() => {
   return store.state.handelSave
+})
+const USERINFO = computed(() => {
+  return store.state.USERINFO
 })
 watch(handelSave, (newVal, oldVal) => {
   if (newVal) {
@@ -60,15 +63,16 @@ const cbMap = {
 };
 let a = ref(0)
 const getData = () => {
-  canvasEditor.test(1111)
-  saveSteps.value.ID
-  const p = {
-    ID: ''
-  }
-  historyAip.getHistory(p).then(res => {
-    const data = res.Tag[0].Table[0].JsonValue
-    console.log('拿回', JSON.parse(data))
-  })
+console.log('getObjects',canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
+  // canvasEditor.test(1111)
+  // saveSteps.value.ID
+  // const p = {
+  //   ID: ''
+  // }
+  // historyAip.getHistory(p).then(res => {
+  //   const data = res.Tag[0].Table[0].JsonValue
+  //   console.log('拿回', JSON.parse(data))
+  // })
 }
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)

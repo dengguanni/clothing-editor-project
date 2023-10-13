@@ -265,19 +265,9 @@ const setButtonActive = (arr, type) => {
             })
         }
     } else {
-        if (obj.repeatType) {
-            arr.forEach(el => {
-                if (el.type == obj.repeatType) {
-                    el.isSelected = true
-                } else {
-                    el.isSelected = false
-                }
-            })
-        } else {
-            arr.forEach(element => {
-                element.isSelected = false
-            });
-        }
+        arr.forEach(element => {
+            element.isSelected = false
+        });
 
     }
 
@@ -420,7 +410,9 @@ const scaleBig = debounce((obj) => {
 }, 300);
 const lock = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-    if (activeObject.isLock == undefined || activeObject.isLock) {
+    console.log('activeObject.isLock', activeObject.isLock)
+    if (activeObject.isLock == undefined || !activeObject.isLock) {
+        console.log('锁定')
         activeObject.hasControls = false;
         activeObject.selectable = false;
         activeObject.isLock = true
@@ -429,7 +421,8 @@ const lock = () => {
             activeObject[key] = true;
         });
         store.commit('setAllIsLock')
-    } else if (activeObject.isLock === false) {
+    } else if (activeObject.isLock) {
+        console.log('解锁')
         activeObject.hasControls = true;
         // 修改默认属性
         lockAttrs.forEach((key) => {

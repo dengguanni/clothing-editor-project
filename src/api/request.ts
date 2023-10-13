@@ -1,9 +1,9 @@
 import axios from 'axios' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
-import { decrypt, encrypt } from '@/utils/decrypt.js'
-
 let baseURL = 'http://8.140.206.30:8011';
+import crypto from '@/utils/crypto'
+import { constants } from 'zlib';
 // console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 
 // 这一步的目的是判断出当前是开发环境还是生成环境，方法不止一种，达到目的就行
@@ -63,13 +63,20 @@ _axios.interceptors.response.use((res) => {
 
 // 封装post,get方法
 // 按理来说应该也可以封装其他的方法
+let userInfo = localStorage.getItem("userInfo")
+userInfo = userInfo ? userInfo.replace(' ', '+') : ''
+const USER_INFO = crypto.decrypt(userInfo)
 const http = {
     get(url = '', params = {}) {
         return new Promise((resolve, reject) => {
             _axios({
                 url,
                 params,
-                headers: { 'Content-Type': 'application/jsoncharset=UTF-8' },
+                headers: {
+                    userId: JSON.parse(USER_INFO).userId,
+                    userName: '',
+                    timestamp: JSON.parse(USER_INFO).timestamp
+                },
                 method: 'GET'
             }).then(res => {
                 resolve(res.data)
@@ -84,9 +91,14 @@ const http = {
             _axios({
                 url,
                 data: params,
-                headers: { 'Content-Type': 'text/plain' },
+                headers: {
+                    userId: JSON.parse(USER_INFO).userId,
+                    userName: '',
+                    timestamp: JSON.parse(USER_INFO).timestamp
+                },
                 method: 'POST'
             }).then(res => {
+                console.log('window.config.userInfo', localStorage.getItem("userInfo"))
                 resolve(res.data)
                 return res
             }).catch(error => {

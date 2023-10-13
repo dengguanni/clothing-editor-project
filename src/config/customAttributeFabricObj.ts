@@ -26,7 +26,9 @@ export const allCustomAttribute = [
     'event',
     'hoverCursor',
     'tileParentId',
-    'Sharpen'
+    'Sharpen',
+    'parentCroppingFileName',
+    'parentCroppingFilePath'
 ]
 export const basicCustomAttribute = [
     'tileParentFileName',  //平铺父级文件名
@@ -40,5 +42,20 @@ export const basicCustomAttribute = [
     'parentUrl',
     'customVisible',
     'id',
-    'isBackground'
+    'isLock',
+    'isBackground',
+    'filters',
+    'lockMovementX',
+    'lockMovementY',
+    'lockRotation',
+    'lockScalingX',
+    'lockScalingY',
+    'selectable',
+    'hasControls',
+    'event',
+    'hoverCursor',
+    'tileParentId',
+    'Sharpen',
+    'parentCroppingFileName',
+    'parentCroppingFilePath'
 ]

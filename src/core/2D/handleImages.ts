@@ -134,3 +134,7 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
         }
     }
 }
+// 替换图片
+const replaceImage = () => {
+
+}

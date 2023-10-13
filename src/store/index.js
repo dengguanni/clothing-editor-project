@@ -39,7 +39,7 @@ const store = createStore({
       pageLoading: false,
       isSetSteps: false,
       selected: '',
-
+      USERINFO: ''
     }
   },
   mutations: {
@@ -51,6 +51,9 @@ const store = createStore({
     },
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
+    },
+    USERINFO(state,val) {
+      state.USERINFO = val
     },
     setAllIsLock(state) {
       state.handleLock = state.handleLock + 1

@@ -101,7 +101,7 @@ class ControlsTile {
     static handelBasicRepeat() {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        
+        console.log('平铺',activeObject)
         activeObject.clone(cloned => {
             const { maxXcount, maxYcount } = self.getMaxCount(cloned)
             cloned.rotate(0)
