@@ -83,7 +83,7 @@ const props = defineProps({
     }
 })
 const bgColor = computed(() => {
-    return store.state.saveData.commodityInfo.bgColor
+    return store.state.bgColor
 })
 const sizeGUID = computed(() => {
     return store.state.saveData.commodityInfo.sizeGUID

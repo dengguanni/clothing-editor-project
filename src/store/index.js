@@ -11,7 +11,8 @@ const store = createStore({
           sizeList: [],
           ImageUrl: '',
           Title: '',
-          colorList: []
+          colorList: [],
+          cutParts: []
         },
         // 模型信息
         modelInfo: {
@@ -24,8 +25,11 @@ const store = createStore({
         // 裁片类型
 
         // 裁片
-        cutParts: []
+
       },
+      bgColor:'',
+      sizeGUID: '',
+      cutParts: [],
       cutPartsType: '',
       // 撤回-回退
       saveSteps: {
@@ -52,7 +56,7 @@ const store = createStore({
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
     },
-    USERINFO(state,val) {
+    USERINFO(state, val) {
       state.USERINFO = val
     },
     setAllIsLock(state) {
@@ -81,21 +85,25 @@ const store = createStore({
     },
     setGoodsSizeGUID(state, sizeGUID) {
       state.saveData.commodityInfo.sizeGUID = sizeGUID
+      state.sizeGUID = sizeGUID
     },
     setBgColor(state, val) {
       state.saveData.commodityInfo.bgColor = val
+      state.bgColor = val
     },
     setModelInfo(state, obj) {
       state.saveData.modelInfo = obj
     },
     setCutPartsType(state, val) {
+     
       state.cutPartsType = val
     },
     setCanvasObjects(state, val) {
       state.saveData.canvasObjects = val
     },
     setCutParts(state, val) {
-      state.saveData.cutParts = val
+      state.saveData.commodityInfo.cutParts = val
+      state.cutParts = val
     },
     setSaveData(state, val) {
       state.saveData = val

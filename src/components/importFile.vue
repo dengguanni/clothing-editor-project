@@ -279,7 +279,6 @@ const addItem = (item) => {
 }
 
 const insertTypeHand = (type) => {
-  console.log('type', type)
   const cb = HANDLEMAP[type];
   cb && typeof cb === 'function' && cb();
 };

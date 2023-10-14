@@ -43,22 +43,23 @@ const URLbase64 = ref('')
 const load3DScene = new LoadScene()
 const active = ref('')
 const cutParts = computed(() => {
-    return store.state.saveData.cutParts
+    return store.state.cutParts
 })
 const isSetSteps = computed(() => {
+    console.log('tore.state.isSetSteps', store.state.isSetSteps)
     return store.state.isSetSteps
 })
 const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
 const bgColor = computed(() => {
-    return store.state.saveData.commodityInfo.bgColor
+    return store.state.bgColor
 })
 const canvasObjects = computed(() => {
     return store.state.saveData.canvasObjects
 })
 const sizeGUID = computed(() => {
-    return store.state.saveData.commodityInfo.sizeGUID
+    return store.state.sizeGUID
 })
 const handelAllCuts = computed(() => {
     return store.state.handelAllCuts
@@ -66,6 +67,7 @@ const handelAllCuts = computed(() => {
 const goodsId = computed(() => {
     return store.state.saveData.commodityInfo.GUID
 })
+
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
         setAllCuts(false)
@@ -80,75 +82,78 @@ watch(cutPartsType, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(cutParts, (newVal, oldVal) => {
     if (newVal.length > 0) {
-        console.log('cutParts变了', newVal)
         loadCuts()
         changeSelection()
     }
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
+        console.log('bgColor', isSetSteps.value)
         setTimeout(() => {
-            console.log('bgColor')
-            setAllCuts(true)
-        }, 100);
+            setAllCuts(true, isSetSteps.value)
+        }, 200);
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
     if (newVal) {
-        // setTimeout(() => {
+        console.log('sizeGUID', sizeGUID)
         init(newVal)
-        // }, 100);
     }
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
+
     const fn = (isSetSteps) => {
+        console.log('fnfnfn')
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
-        let hasText = false
-        objects.forEach(el => {
-            if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
-                hasText = true
-                const FileName = guid() + '.png'
-                el.clone(clone => {
-                    clone.rotate(0);
-                    clone.set({
-                        angle: 0
-                    })
-                    const url = clone.toDataURL({
-                        width: clone.width,
-                        height: clone.height,
-                        scaleX: clone.scaleX,
-                        scaleY: clone.scaleY,
-                        multiplier: 1,
-                    })
-                    el.FileName = FileName
-                    el.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                    let callback = () => {
-                        if (cutPartsType.value) {
-                            setAllCuts(false, isSetSteps)
-                        }
-                    }
-                    setUserUploadFile(url, FileName, 'images_temp/', callback)
-                })
-            }
-        })
-        if (cutPartsType.value && !hasText) {
+        // let hasText = false
+        // objects.forEach(el => {
+        //     console.log('watchCanvas', el)
+        //     if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
+        //         console.log('text', el)
+        //         hasText = true
+        //         const FileName = guid() + '.png'
+        //         el.clone(clone => {
+        //             clone.rotate(0);
+        //             clone.set({
+        //                 angle: 0
+        //             })
+        //             const url = clone.toDataURL({
+        //                 width: clone.width,
+        //                 height: clone.height,
+        //                 scaleX: clone.scaleX,
+        //                 scaleY: clone.scaleY,
+        //                 multiplier: 1,
+        //             })
+        //             el.FileName = FileName
+        //             el.FilePath = 'images_temp/' + FileName.substring(0, 1)
+        //             let callback = () => {
+        //                 if (cutPartsType.value) {
+        //                     setAllCuts(false, isSetSteps)
+        //                 }
+        //             }
+        //             setUserUploadFile(url, FileName, 'images_temp/', callback)
+        //         })
+        //     }
+        // })
+        if (cutPartsType.value) {
             setAllCuts(false, isSetSteps)
-
         }
     }
     canvasEditor.canvas.on('object:added', () => {
-        console.log('added')
+        console.log('added', isSetSteps.value)
         fn(isSetSteps.value)
     })
     canvasEditor.canvas.on('object:modified', () => {
-        console.log('modified')
+        console.log('modified', isSetSteps.value)
         fn(isSetSteps.value)
     })
     canvasEditor.canvas.on('selection:created', (val) => {
         console.log('selection:created', val.selected[0])
-        store.commit('setSelected', val.selected[0])
+        store.commit('setSelected', {})
+        if (val) store.commit('setSelected', val.selected[0])
+
     })
     canvasEditor.canvas.on('before:transform', (val) => {
         if (val.transform.target.tileParentId) {
@@ -176,6 +181,37 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             ImagesList[el.Title] = {}
             ImagesList[el.Title].Images = []
         })
+        console.log('isSetSteps', isSetSteps)
+        isSetSteps ?'' : objects.forEach(el => {
+            if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
+                console.log('text', el)
+                // hasText = true
+                const FileName = guid() + '.png'
+                console.log('FileName', FileName)
+                el.clone(clone => {
+                    clone.rotate(0);
+                    clone.set({
+                        angle: 0
+                    })
+                    const url = clone.toDataURL({
+                        width: clone.width,
+                        height: clone.height,
+                        scaleX: clone.scaleX,
+                        scaleY: clone.scaleY,
+                        multiplier: 1,
+                    })
+                    el.FileName = FileName
+                    el.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                    // let callback = () => {
+                    //     if (cutPartsType.value) {
+                    //         setAllCuts(false, isSetSteps)
+                    //     }
+                    // }
+                    setUserUploadFile(url, FileName, 'images_temp/', null)
+                })
+            }
+        });
+
         const fn = (objects, index, p, indexP = null) => {
             if (objects.length > 0) {
                 objects[index].clone(cloned => {
@@ -191,7 +227,6 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                         Image_flipX: objects[index].flipX,
                         Image_flipY: objects[index].flipY,
                         Image_visible: objects[index].cutPartsType == p.Part_name
-                        // Image_visible: objects[index].customVisible 
                     }
                     if (objects[index].customVisible === false) obj.Image_visible = false
                     ImagesList[p.Part_name].Images.push(obj)
@@ -223,7 +258,7 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             }
             fn(objects, 0, p)
         } else {
-            store.commit('setIsSetSteps', true)
+            // store.commit('setIsSetSteps', true)
             cutParts.value.forEach((element, indexP) => {
                 let p = {
                     SizeGUID: sizeGUID.value,
@@ -239,10 +274,12 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
         }
     }
 }, 100)
-const setCutAllParts = (p, Title, isSetSteps) => {
+const setCutAllParts = (p, Title, isSetStep) => {
     picture.setCutAllParts(p).then(res => {
         console.log('总的剪裁参数', p)
-        isSetSteps ? '' : store.commit('setSave')
+        console.log('isSetSteps', isSetStep)
+        console.log('isSetSteps.value', isSetSteps.value)
+        isSetStep ? '' : store.commit('setSave')
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
@@ -282,13 +319,15 @@ const init = (newVal) => {
 }
 // 加载裁片
 const loadCuts = debounce(() => {
-    store.commit('setIsSetSteps', true)
+    console.log('loadCuts加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
+    console.log('cutParts.value[0]', cutParts.value[0], objects[0])
+    store.commit('setIsSetSteps', true)
+    console.log('setIsSetSteps', true)
     objects.forEach(el => {
         canvasEditor.canvas.remove(el)
     })
     canvasEditor.canvas.requestRenderAll();
-
     const fn = (index) => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         var img = new Image();
@@ -326,8 +365,10 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.add(maskRect);
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
+                setAllCuts(true)
                 store.commit('setIsSetSteps', false)
                 store.commit('setPageLoading', false)
+                console.log('setIsSetSteps', false)
             } else {
                 fn(index + 1)
             }
@@ -375,6 +416,7 @@ const changeSelection = () => {
 const loadCanvasObject = () => {
     console.log('刷新加载对象')
     store.commit('setIsSetSteps', true)
+    console.log('setIsSetSteps', true)
     const fn = (obj, index) => {
         if (obj.type == 'image') {
             const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
@@ -390,12 +432,12 @@ const loadCanvasObject = () => {
                     }
                     if (image.customVisible === false) image.visible = false
                     image.sendBackwards()
-
                     canvasEditor.canvas.add(image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {
                         store.commit('setIsSetSteps', false)
+                        console.log('setIsSetSteps', false)
                     }
 
                 }
@@ -420,7 +462,6 @@ const loadCanvasObject = () => {
     canvasEditor.canvas.bringToFront(mask)
     canvasEditor.canvas.sendToBack(backgroundImage)
     canvasEditor.canvas.requestRenderAll();
-
 }
 const addText = (option) => {
     const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)

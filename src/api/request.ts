@@ -98,7 +98,6 @@ const http = {
                 },
                 method: 'POST'
             }).then(res => {
-                console.log('window.config.userInfo', localStorage.getItem("userInfo"))
                 resolve(res.data)
                 return res
             }).catch(error => {

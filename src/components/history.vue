@@ -4,7 +4,7 @@
   <div style="display: inline-block">
     <!-- 后退 -->
     <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
-      <Button @click="undo" type="text" size="small" :disabled="saveSteps.ID_Previous <1" class="item">
+      <Button @click="undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
         <commonIcon angleKey="withdraw"></commonIcon>
       </Button>
     </Tooltip>
@@ -62,11 +62,13 @@ const cutPartsType = computed(() => {
 const saveSteps = computed(() => {
   return store.state.saveSteps
 })
+const bgColor = computed(() => {
+  return store.state.bgColor
+})
 const line = ref(false)
 // 后退
 const undo = () => {
   loadCanvasObject(true)
-
   // store.commit('setAllCuts')
 };
 
@@ -76,7 +78,6 @@ const redo = () => {
 };
 const loadCanvasObject = (isNext) => {
   store.commit('setIsSetSteps', true)
-  console.log('saveSteps.value.ID', saveSteps.value.ID)
   const p = {
     ID: isNext ? saveSteps.value.ID - 1 : Number(saveSteps.value.ID) + 1,
   }
@@ -87,16 +88,83 @@ const loadCanvasObject = (isNext) => {
       ID_Previous: res.Tag[0].Table[0].ID_Previous,
     }
     store.commit('setSaveSteps', steps)
-    console.log('steps', steps)
     const data = res.Tag[0].Table[0].JsonValue
     const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
     objects.forEach(element => {
       canvasEditor.canvas.remove(element)
     });
-    store.commit('setSaveData', JSON.parse(data))
-  })
+    const objectsData = JSON.parse(data)
 
+    store.commit('setSaveData', JSON.parse(data))
+    loadObject(JSON.parse(data).canvasObjects)
+    store.commit('setBgColor', objectsData.commodityInfo.bgColor)
+  })
 }
+const loadObject = (canvasObjects) => {
+  store.commit('setIsSetSteps', true)
+  const fn = (obj, index) => {
+    if (obj.type == 'image') {
+      const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
+      let callback = (image, isError) => {
+        if (!isError) {
+          for (var key in obj) {
+            image[key] = obj[key]
+          }
+          if (obj.cutPartsType == cutPartsType.value) {
+            image.visible = true
+          } else {
+            image.visible = false
+          }
+          if (image.customVisible === false) image.visible = false
+          image.sendBackwards()
+
+          canvasEditor.canvas.add(image)
+          if (canvasObjects[index + 1]) {
+            fn(canvasObjects[index + 1], index + 1)
+          } else {
+            const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+            const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
+            canvasEditor.canvas.bringToFront(mask)
+            canvasEditor.canvas.sendToBack(backgroundImage)
+            canvasEditor.canvas.requestRenderAll();
+            setTimeout(() => {store.commit('setIsSetSteps', false)}, 500)
+          }
+
+        }
+      };
+      const properties = {
+        left: 100,
+        top: 100
+      };
+      fabric.Image.fromURL(imageURL, callback, properties);
+    } else if (obj.type === 'text') {
+      addText(obj)
+      if (canvasObjects[index + 1]) {
+        fn(canvasObjects[index + 1], index + 1)
+      } else {
+        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+        const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
+        canvasEditor.canvas.bringToFront(mask)
+        canvasEditor.canvas.sendToBack(backgroundImage)
+        canvasEditor.canvas.requestRenderAll();
+        setTimeout(() => {store.commit('setIsSetSteps', false)}, 500)
+      }
+    }
+  }
+  if (canvasObjects[0]) fn(canvasObjects[0], 0)
+}
+const addText = (option) => {
+  console.log('option,option', option)
+  const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
+  const text = new fabric.IText(option.text, {
+    type: 'text',
+  });
+  for (var key in option) {
+    text[key] = option[key]
+  }
+  text.sendBackwards()
+  canvasEditor.canvas.add(text)
+};
 const clear = () => {
   canvasEditor.clear();
   store.commit('setAllCuts')

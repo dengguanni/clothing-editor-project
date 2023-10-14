@@ -115,7 +115,7 @@ const addItem = (item) => {
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(image);
-               
+
                 if (props.isBg) {
                     if (currentBackground) canvasEditor.canvas.remove(currentBackground)
                     image.isBackground = true
@@ -194,6 +194,7 @@ const dragItem = (event) => {
     width: 100%;
     padding: 10px 20px 0px 20px;
     overflow: hidden;
+
     .page {
         width: 100%;
         display: flex;

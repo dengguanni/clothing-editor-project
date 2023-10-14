@@ -9,7 +9,7 @@
 <template>
   <div v-if="mixinState.mSelectMode === 'one'" class="filp">
     <Tooltip :content="item.label" v-for="item in menuList" :key="item.type">
-      <greyButton @buttonClick="changeSelection(item)" :width="64" :svg="item.svg" :disabled="item.disabled">
+      <greyButton @buttonClick="changeSelection(item)" :width="64" :svg="item.svg" :disabled="disabled">
       </greyButton>
     </Tooltip>
   </div>
@@ -23,15 +23,26 @@ import buttonLimitions from '@/core/limitations/buttonLimitions'
 import { useStore } from 'vuex'
 const store = useStore()
 const { mixinState, canvasEditor } = useSelect();
-const handleLock = computed(() => {
-    return store.state.handleLock
+let disabled = ref(false)
+const selected = computed(() => {
+  return store.state.selected
 });
+const handleLock = computed(() => {
+  return store.state.handleLock
+});
+watch(selected, (newVal, oldVal) => {
+  if (newVal) {
+    console.log('newVal', newVal)
+    const activeObject = canvasEditor.canvas.getActiveObject()
+    console.log('activeObject.selectable', activeObject.selectable)
+    disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+  }
+}, { deep: true });
 watch(handleLock, (newVal, oldVal) => {
-    if (newVal) {
-      const activeObject = canvasEditor.canvas.getActiveObject()
-        buttonLimitions(menuList, activeObject)
-    }
-}, { immediate: true, deep: true });
+  console.log('handleLock', newVal)
+  const activeObject = canvasEditor.canvas.getActiveObject()
+  disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+}, { deep: true });
 const menuList = reactive([
   {
     type: 'flipX',

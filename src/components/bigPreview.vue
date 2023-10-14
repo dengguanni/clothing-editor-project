@@ -40,7 +40,7 @@ import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import { useStore } from 'vuex'
 const store = useStore()
 const bgColor = computed(() => {
-    return store.state.saveData.commodityInfo.bgColor
+    return store.state.bgColor
 })
 const colorSelection = ref('')
 const load3DScene = new LoadScene()

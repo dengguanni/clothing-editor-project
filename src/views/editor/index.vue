@@ -374,8 +374,13 @@ const getSaveData = () => {
       sendGoodsId(dataJson.commodityInfo)
     }
     store.commit('setSaveData', dataJson)
+    store.commit('setCutPartsType',  dataJson.commodityInfo.cutParts[0].Title)
+    store.commit('setCutParts', dataJson.commodityInfo.cutParts)
+    store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID)
+    store.commit('setBgColor', dataJson.commodityInfo.bgColor)
   })
 }
+
 const mapTileClick = (val) => {
   switch (val) {
     case 'filter':

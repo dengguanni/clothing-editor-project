@@ -28,9 +28,11 @@ export const allCustomAttribute = [
     'tileParentId',
     'Sharpen',
     'parentCroppingFileName',
-    'parentCroppingFilePath'
+    'parentCroppingFilePath',
+    'filtersType'
 ]
-export const basicCustomAttribute = [
+// 继承属性
+export const basicInheritAttribute = [
     'tileParentFileName',  //平铺父级文件名
     'isMask', //判断是否裁片
     'cutPartsType',
@@ -41,7 +43,6 @@ export const basicCustomAttribute = [
     'oldFilePath',
     'parentUrl',
     'customVisible',
-    'id',
     'isLock',
     'isBackground',
     'filters',
@@ -57,5 +58,11 @@ export const basicCustomAttribute = [
     'tileParentId',
     'Sharpen',
     'parentCroppingFileName',
-    'parentCroppingFilePath'
+    'parentCroppingFilePath',
+    'filtersType',
+    'scaleX',
+    'scaleY',
+    'width',
+    'height',
+    
 ]

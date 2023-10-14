@@ -84,6 +84,7 @@ import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import { Message } from 'view-ui-plus';
 import { useStore } from 'vuex'
+import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
 const store = useStore()
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
@@ -128,31 +129,22 @@ watch(
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
     console.log('selected', newVal)
-    setCheckBoxList(state.noParamsFilters, newVal)
+    setCheckBoxList(state.noParamsFilters, newVal.filtersType)
   }
 }, { immediate: true, deep: true });
-const setCheckBoxList = (arr, obj) => {
-  if (obj.filtersList) {
-    obj.filtersList.forEach(v => {
-      for (let key in arr) {
-        if (key == v) {
-          arr[key] = true
-        } else {
-          arr[key] = false
-        }
-      }
-    })
-  } else {
-    for (let key in arr) arr[key] = false
+const setCheckBoxList = (arr, type) => {
+  for (let key in arr) {
+    if (key == type) {
+      arr[key] = true
+    } else {
+      arr[key] = false
+    }
   }
-
-  console.log('state.noParamsFilters', state.noParamsFilters)
-
 }
 // 锐化、清晰
 const setSharpening = (val) => {
   const obj = canvasEditor.canvas.getActiveObjects()[0];
-  const goON = obj.filtersList ? (obj.filtersList.length == 0 ? true : false) : true
+  const goON = obj.filtersType ? (obj.filtersType == 'Sharpen' ? true : false) : true
   if (goON) {
     obj.Sharpen = obj.Sharpen ? false : true
     function applyFilter(index, filter) {
@@ -200,16 +192,25 @@ const setSharpening = (val) => {
 
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
-  console.log('changeFilters',)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   state.noParamsFilters[type] = value;
   if (value) {
     const itemFilter = _getFilter(activeObject, type);
     if (!itemFilter) {
-      _createFilter(activeObject, type);
+      if (activeObject.filtersType) {
+        restoreImage(() => {
+          _createFilter(activeObject, type);
+          setCheckBoxList(state.noParamsFilters, type)
+        })
+      } else {
+        setCheckBoxList(state.noParamsFilters, type)
+        _createFilter(activeObject, type);
+      }
     }
   } else {
-    _removeFilter(activeObject, type);
+    // _removeFilter(activeObject, type);
+
+    restoreImage()
   }
 };
 // 有参数与组合滤镜修改
@@ -269,62 +270,52 @@ const replaceImage = (url, type) => {
   const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
   const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
   const FileName = guid() + '.png'
-  const width = activeObject.width
-  const height = activeObject.height
-  console.log('width', width, activeObject.scaleX)
-  let filtersList = activeObject.filtersList ? activeObject.filtersList : []
-  type == 'Sharpen' ? '' : filtersList.push(type)
   let callback = () => {
     activeObject.setSrc(url, () => {
-      console.log('width', width)
-      console.log('activeObject.wi', activeObject.width, activeObject.scaleX)
-      activeObject.set('name', activeObject.Title);
+      basicInheritAttribute.forEach(element => {
+        activeObject.set(element, activeObject[element])
+      });
+      activeObject.set('name', activeObject.name);
       activeObject.set('id', uuid());
-      activeObject.set('width', width);
-      activeObject.set('height', height);
-      activeObject.set('scaleX', activeObject.scaleX);
-      activeObject.set('filtersList', filtersList);
-      activeObject.set('scaleY', activeObject.scaleY);
+      activeObject.set('width', activeObject.width);
       activeObject.set('filters', []);
+      activeObject.set('filtersType', type);
       activeObject.set('FileName', FileName);
       activeObject.set('oldFileName', oldFileName);
-      activeObject.set('cutPartsType', activeObject.cutPartsType);
       activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
       activeObject.set('oldFilePath', oldFilePath)
       activeObject.applyFilters()
       ControlsTile.setRepeat(activeObject.repeatType, true)
       canvasEditor.canvas.renderAll();
-      console.log('activeObject.wi', activeObject.width)
+      store.commit('setAllCuts')
     });
   }
   setUserUploadFile(url, FileName, 'images_temp//', callback)
 }
 // 恢复无滤镜状态/回退滤镜
-const restoreImage = () => {
+const restoreImage = (callback = null) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  if (activeObject.filtersList.length > 0) {
-    activeObject.filtersList.forEach(element => {
-      _createFilter(activeObject, element)
-    });
-  } else {
-    const url = baseUrl + 'UserUploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
-    activeObject.setSrc(url, () => {
-      activeObject.set('name', activeObject.Title);
-      activeObject.set('id', uuid());
-      activeObject.set('filters', []);
-      activeObject.set('width', activeObject.width);
-      activeObject.set('height', activeObject.height);
-      activeObject.set('height', activeObject.height);
-      activeObject.set('scaleX', activeObject.scaleX);
-      activeObject.set('FileName', activeObject.oldFileName);
-      activeObject.set('cutPartsType', activeObject.cutPartsType);
-      activeObject.set('FilePath', activeObject.oldFilePath);
-      activeObject.set('oldFilePath', null)
-      activeObject.applyFilters()
-      ControlsTile.setRepeat(activeObject.repeatType, true)
-      canvasEditor.canvas.renderAll();
-    });
-  }
+  const url = baseUrl + 'UserUploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
+  activeObject.setSrc(url, () => {
+    activeObject.set('name', activeObject.Title);
+    activeObject.set('id', uuid());
+    activeObject.set('filters', []);
+    activeObject.set('filtersType', null);
+    activeObject.set('width', activeObject.width);
+    activeObject.set('height', activeObject.height);
+    activeObject.set('scaleY', activeObject.scaleY);
+    activeObject.set('scaleX', activeObject.scaleX);
+    activeObject.set('FileName', activeObject.oldFileName);
+    activeObject.set('cutPartsType', activeObject.cutPartsType);
+    activeObject.set('FilePath', activeObject.oldFilePath);
+    activeObject.set('oldFilePath', null)
+    activeObject.applyFilters()
+    ControlsTile.setRepeat(activeObject.repeatType, true)
+    canvasEditor.canvas.renderAll();
+    setCheckBoxList(state.noParamsFilters, null)
+    store.commit('setAllCuts')
+    callback ? callback() : ''
+  });
 
 }
 onMounted(() => {
@@ -441,7 +432,7 @@ function _removeFilter(sourceImg, type) {
   const fabricType = _getFabricFilterType(type);
   sourceImg.filters = sourceImg.filters.filter((value) => value.type !== fabricType);
   sourceImg.applyFilters();
-  sourceImg.filtersList = sourceImg.filtersList.filter(el => el !== type)
+  sourceImg.filtersType = v
   canvasEditor.canvas.renderAll();
   restoreImage()
 }

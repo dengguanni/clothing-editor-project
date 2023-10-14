@@ -82,7 +82,7 @@ const lockAttrs = [
   'lockScalingY',
 ];
 const cutParts = computed(() => {
-  return store.state.saveData.cutParts
+ return store.state.saveData.cutParts
 })
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
@@ -128,7 +128,6 @@ const doLock = debounce(() => {
 
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   if (activeObject.isLock == undefined || activeObject.isLock) {
-   
     activeObject.hasControls = false;
     activeObject.selectable = false;
     activeObject.isLock = false

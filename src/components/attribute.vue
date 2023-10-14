@@ -7,24 +7,24 @@
       <Row align="middle" justify="space-between">
         <Col>
         <!-- <colorSelector :color="baseAttr.fill" @change="(value) => changeCommon('fill', value)"></colorSelector> -->
-        <ElColorPicker v-model="baseAttr.fill" @change="changeCommon('fill', baseAttr.fill)"></ElColorPicker>
+        <ElColorPicker v-model="baseAttr.fill" @change="changeCommon('fill', baseAttr.fill)" :disabled="disabled">
+        </ElColorPicker>
         </Col>
         <Col>
-        <Select v-model="fontAttr.fontFamily" @on-change="changeFontFamily" style="width: 130px;">
-          <Option v-for="item in fontFamilyList" :value="item.name" :key="`font-${item.name}`">
+        <Select v-model="fontAttr.fontFamily" @on-change="changeFontFamily" style="width: 130px;" :disabled="disabled">
+          <Option v-for="item in fontFamilyList" :value="item.name" :key="`font-${item.name}`" :disabled="disabled">
             <div class="font-item" v-if="!item.preview">{{ item.name }}</div>
             <div class="font-item" v-else :style="`background-image:url('${item.preview}');`">
               {{ !item.preview ? item : '' }}
-              <!-- 解决无法选中问题 -->
               <span style="display: none">{{ item.name }}</span>
             </div>
           </Option>
         </Select>
-
         </Col>
         <!-- <ElSelect></ElSelect> -->
         <Col>
-        <Select v-model="fontAttr.fontSize" @on-change="(value) => changeCommon('fontSize', value)" style="width: 64px;">
+        <Select v-model="fontAttr.fontSize" @on-change="(value) => changeCommon('fontSize', value)" style="width: 64px;"
+          :disabled="disabled">
           <Option :value="item" key="item" v-for="item in fontSizeList"></Option>
         </Select>
         </Col>
@@ -37,13 +37,14 @@
             <span class="label">间距</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.charSpacing" :max="4" :step=0.1
-                @on-input="(value) => changeCommon('char_spacing', value)" @mouseup="store.commit('setAllCuts')"></Slider>
+                @on-input="(value) => changeCommon('char_spacing', value)" @mouseup="store.commit('setAllCuts')"
+                :disabled="disabled"></Slider>
             </div>
           </div>
         </div>
         </Col>
         <Col span="5">
-        <Input v-model="fontAttr.charSpacing"></Input>
+        <Input v-model="fontAttr.charSpacing" :disabled="disabled"></Input>
         </Col>
         <Col>
         </Col>
@@ -55,14 +56,14 @@
           <div class="flex-item">
             <span class="label">行高</span>
             <div class="content slider-box">
-              <Slider v-model="fontAttr.lineHeigh" :max="4" :step=0.1
+              <Slider v-model="fontAttr.lineHeight" :max="4" :step=0.1 :disabled="disabled"
                 @on-input="(value) => changeCommon('lineHeight', value)" @mouseup="store.commit('setAllCuts')"></Slider>
             </div>
           </div>
         </div>
         </Col>
         <Col span="5">
-        <Input v-model="fontAttr.lineHeigh"></Input>
+        <Input v-model="fontAttr.lineHeight" :disabled="disabled"></Input>
         </Col>
         <Col>
         </Col>
@@ -75,25 +76,27 @@
             <span class="label">描边</span>
             <div class="content slider-box">
               <Slider v-model="baseAttr.strokeWidth" :max="10" :step=1
-                @on-input="(value) => changeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"></Slider>
+                @on-input="(value) => changeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"
+                :disabled="disabled"></Slider>
             </div>
           </div>
         </div>
         </Col>
         <Col>
-        <Input v-model="baseAttr.strokeWidth"></Input>
+        <Input v-model="baseAttr.strokeWidth" :disabled="disabled"></Input>
         </Col>
         <Col>
         <!-- <colorSelector :color="baseAttr.stroke" @change="(value) => changeCommon('stroke', value)"></colorSelector> -->
         <!-- <ColorPicker v-model="baseAttr.stroke" @on-change="(value) => changeCommon('stroke', value)" /> -->
-        <ElColorPicker v-model="baseAttr.stroke" @change="changeCommon('stroke', baseAttr.stroke)"></ElColorPicker>
+        <ElColorPicker v-model="baseAttr.stroke" @change="changeCommon('stroke', baseAttr.stroke)" :disabled="disabled">
+        </ElColorPicker>
         </Col>
       </Row>
       <!-- 对齐 -->
       <div class="flex-view">
         <div class="flex-item">
           <!-- <ButtonGroup class="button-group"> -->
-          <Button @click="changeFontWeight('fontWeight', fontAttr.fontWeight)" shape="circle" style="
+          <Button @click="changeFontWeight('fontWeight', fontAttr.fontWeight)" shape="circle" :disabled="disabled" style="
               background: #F0F2F5; border: none;height: 40px; width: 40px;">
             <svg viewBox="0 0 1024 1024" width="14" height="14">
               <path
@@ -101,7 +104,7 @@
                 :fill="fontAttr.fontWeight === 'bold' ? '#333333' : '#DDE2EA'"></path>
             </svg>
           </Button>
-          <Button @click="changeFontStyle('fontStyle', fontAttr.fontStyle)" shape="circle" style="
+          <Button @click="changeFontStyle('fontStyle', fontAttr.fontStyle)" shape="circle" :disabled="disabled" style=" 
               background: #F0F2F5; border: none; height: 40px; width: 40px; margin-left: 8px;">
             <svg viewBox="0 0 1024 1024" width="14" height="14">
               <path
@@ -126,7 +129,8 @@
           <!-- </ButtonGroup> -->
           <RadioGroup class="button-group" v-model="fontAttr.textAlign"
             @on-change="(value) => changeCommon('textAlign', value)" type="button">
-            <Radio v-for="(item, i) in textAlignList" :label="item" :key="item" shape="circle" style="margin-left: 8px;">
+            <Radio v-for="(item, i) in textAlignList" :label="item" :key="item" shape="circle" style="margin-left: 8px;"
+              :disabled="disabled">
               <span v-html="textAlignListSvg[i]" style="margin: 5px 0px 0px 3px;"></span>
             </Radio>
           </RadioGroup>
@@ -226,12 +230,13 @@
     v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
     <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
     <Col span="12">
-    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts">
+    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
+      :disabled="disabled">
     </Slider>
     </Col>
     <Col span="1">
     </Col>
-    <Col span="6"><Input v-model="baseAttr.angle" @on-change="setAllCuts"></Input></Col>
+    <Col span="6"><Input v-model="baseAttr.angle" @on-change="setAllCuts" :disabled="disabled"></Input></Col>
   </Row>
 </template>
 
@@ -256,6 +261,27 @@ const props = defineProps({
   }
 })
 const { fabric, mixinState, canvasEditor } = useSelect();
+let disabled = ref(false)
+const selected = computed(() => {
+  return store.state.selected
+});
+const handleLock = computed(() => {
+  return store.state.handleLock
+});
+watch(selected, (newVal, oldVal) => {
+  if (newVal) {
+    console.log('newVal', newVal)
+    const activeObject = canvasEditor.canvas.getActiveObject()
+    console.log('activeObject.selectable', activeObject.selectable)
+    disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+  }
+}, { deep: true });
+watch(handleLock, (newVal, oldVal) => {
+  console.log('handleLock', newVal)
+  const activeObject = canvasEditor.canvas.getActiveObject()
+  disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+}, { deep: true });
+
 // 通用元素
 const baseType = [
   'text',
@@ -491,8 +517,8 @@ const changeFontFamily = (fontName) => {
       const activeObject = canvasEditor.canvas.getActiveObjects()[0];
       activeObject && activeObject.set('fontFamily', fontName);
       canvasEditor.canvas.renderAll();
-      store.commit('setAllCuts')
       Spin.hide();
+      store.commit('setAllCuts')
     })
     .catch((err) => {
       Spin.hide();
@@ -517,7 +543,12 @@ const changeCommon = (key, value) => {
 
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
-  getObjectAttr();
+  console.log(key, value)
+  setTimeout(() => {
+    store.commit('setAllCuts')
+    console.log('activeObject',activeObject[key])
+  }, 500);
+
   // if (key == 'fill') {
   //   console.log('key', key)
   //   activeObject && activeObject.set(key, value);
@@ -533,6 +564,7 @@ const borderSet = (key) => {
     activeObject.set(stroke.value);
     canvasEditor.canvas.renderAll();
   }
+  store.commit('setAllCuts')
 };
 
 // 阴影设置
@@ -549,6 +581,7 @@ const changeFontWeight = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
+  store.commit('setAllCuts')
 };
 
 // 斜体
@@ -558,6 +591,7 @@ const changeFontStyle = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
+  store.commit('setAllCuts')
 };
 
 // 中划
@@ -861,5 +895,4 @@ onBeforeUnmount(() => {
     text-align: center;
     filter: invert(100%);
   }
-}
-</style>
+}</style>

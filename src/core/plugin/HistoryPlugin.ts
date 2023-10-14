@@ -82,7 +82,7 @@ class HistoryPlugin {
   // 快捷键扩展回调
   hotkeyEvent(eventName: string, e: any) {
     if (eventName === 'ctrl+z' && e.type === 'keydown') {
-      this.undo();
+      // this.undo();
     }
   }
   destroy() {
