@@ -101,42 +101,10 @@ watch(sizeGUID, (newVal, oldVal) => {
     }
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
-
     const fn = (isSetSteps) => {
-        console.log('fnfnfn')
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
-        // let hasText = false
-        // objects.forEach(el => {
-        //     console.log('watchCanvas', el)
-        //     if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
-        //         console.log('text', el)
-        //         hasText = true
-        //         const FileName = guid() + '.png'
-        //         el.clone(clone => {
-        //             clone.rotate(0);
-        //             clone.set({
-        //                 angle: 0
-        //             })
-        //             const url = clone.toDataURL({
-        //                 width: clone.width,
-        //                 height: clone.height,
-        //                 scaleX: clone.scaleX,
-        //                 scaleY: clone.scaleY,
-        //                 multiplier: 1,
-        //             })
-        //             el.FileName = FileName
-        //             el.FilePath = 'images_temp/' + FileName.substring(0, 1)
-        //             let callback = () => {
-        //                 if (cutPartsType.value) {
-        //                     setAllCuts(false, isSetSteps)
-        //                 }
-        //             }
-        //             setUserUploadFile(url, FileName, 'images_temp/', callback)
-        //         })
-        //     }
-        // })
         if (cutPartsType.value) {
             setAllCuts(false, isSetSteps)
         }
@@ -182,7 +150,7 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             ImagesList[el.Title].Images = []
         })
         console.log('isSetSteps', isSetSteps)
-        isSetSteps ?'' : objects.forEach(el => {
+        isSetSteps ? '' : objects.forEach(el => {
             if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
                 console.log('text', el)
                 // hasText = true
@@ -217,6 +185,7 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                 objects[index].clone(cloned => {
                     cloned.rotate(0)
                     maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+                    console.log('maskRect', maskRect)
                     const obj = {
                         Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
                         Image_width: (objects[index].width * objects[index].scaleX).toFixed(5) + '',
@@ -321,9 +290,7 @@ const init = (newVal) => {
 const loadCuts = debounce(() => {
     console.log('loadCuts加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
-    console.log('cutParts.value[0]', cutParts.value[0], objects[0])
     store.commit('setIsSetSteps', true)
-    console.log('setIsSetSteps', true)
     objects.forEach(el => {
         canvasEditor.canvas.remove(el)
     })
@@ -363,12 +330,12 @@ const loadCuts = debounce(() => {
                 });
             }
             canvasEditor.canvas.add(maskRect);
+            console.log('maskRect加载裁片', maskRect)
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
                 setAllCuts(true)
                 store.commit('setIsSetSteps', false)
                 store.commit('setPageLoading', false)
-                console.log('setIsSetSteps', false)
             } else {
                 fn(index + 1)
             }

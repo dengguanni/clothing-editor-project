@@ -73,9 +73,9 @@ const http = {
                 url,
                 params,
                 headers: {
-                    userId: JSON.parse(USER_INFO).userId,
+                    userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
                     userName: '',
-                    timestamp: JSON.parse(USER_INFO).timestamp
+                    timestamp: USER_INFO ?  JSON.parse(USER_INFO).timestamp : ''
                 },
                 method: 'GET'
             }).then(res => {
@@ -92,9 +92,9 @@ const http = {
                 url,
                 data: params,
                 headers: {
-                    userId: JSON.parse(USER_INFO).userId,
+                    userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
                     userName: '',
-                    timestamp: JSON.parse(USER_INFO).timestamp
+                    timestamp: USER_INFO ?  JSON.parse(USER_INFO).timestamp : ''
                 },
                 method: 'POST'
             }).then(res => {

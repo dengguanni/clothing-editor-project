@@ -89,6 +89,7 @@ const handelCutParts = (image) => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const mask = canvasEditor.canvas.getActiveObjects()[0]
+
     if (mask) {
         const p = {
             Canvas_width: workspace.width,
@@ -154,22 +155,6 @@ const handelCutParts = (image) => {
         })
 
     }
-
-    // const properties = {
-    //     left: 0,
-    //     top: 0
-    // };
-    // let callback = (image, isError) => {
-    //     if (!isError) {
-    //         image.id = uuid()
-    //         // const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-    //         // canvasEditor.canvas.discardActiveObject();
-    //         // canvasEditor.canvas.setActiveObject(info);
-    //         canvasEditor.canvas.requestRenderAll();
-    //     }
-    // }
-    // const imageURL = 'data:image/jpeg;base64,' + res.Tag[0].base64;
-    // fabric.Image.fromURL(imageURL, callback, properties);
 
 }
 const restore = () => {

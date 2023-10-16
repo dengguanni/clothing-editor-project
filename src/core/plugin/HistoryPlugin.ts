@@ -6,14 +6,14 @@
  * @LastEditTime: 2023-07-04 23:37:07
  * @Description: 历史记录插件
  */
-
 import { fabric } from 'fabric';
 import Editor from '../core';
 import { ref } from 'vue';
 import { useRefHistory } from '@vueuse/core';
 type IEditor = Editor;
-// import { v4 as uuid } from 'uuid';
-
+import { useStore } from 'vuex'
+import historyAip from '@/api/history.ts'
+import baseUrl from '@/config/constants/baseUrl';
 class HistoryPlugin {
   public canvas: fabric.Canvas;
   public editor: IEditor;
@@ -25,10 +25,16 @@ class HistoryPlugin {
   constructor(canvas: fabric.Canvas, editor: IEditor) {
     this.canvas = canvas;
     this.editor = editor;
-
     this._init();
   }
-
+  store = useStore()
+  // const this.store = useStore()
+  // const cutPartsType = computed(() => {
+  //   return this.store.state.cutPartsType
+  // })
+  saveSteps = computed(() => {
+    return this.store.state.saveSteps
+  })
   _init() {
     this.history = useRefHistory(ref(), {
       capacity: 50,
@@ -58,16 +64,108 @@ class HistoryPlugin {
   }
 
   undo() {
-    if (this.history.canUndo.value) {
-      console.log('this.history.canUndo.value', this.history.canUndo.value)
-      this.renderCanvas();
-      this.history.undo();
-    }
+    this.loadCanvasObject(true)
+    // if (this.history.canUndo.value) {
+    // console.log('this.history.canUndo.value', this.history.canUndo.value)
+    // this.renderCanvas();
+    // this.history.undo();
+    // }
   }
 
   redo() {
-    this.history.redo();
-    this.renderCanvas();
+    // this.history.redo();
+    // this.renderCanvas();
+    this.loadCanvasObject(false)
+  }
+  addText(option) {
+    console.log('option,option', option)
+    const mask = this.canvas.getObjects().find(el => el.isMask)
+    const text = new fabric.IText(option.text, {
+      type: 'text',
+    });
+    for (var key in option) {
+      text[key] = option[key]
+    }
+    text.sendBackwards()
+    this.canvas.add(text)
+  }
+  loadObject(canvasObjects) {
+    this.store.commit('setIsSetSteps', true)
+    const mask = this.canvas.getObjects().find((item) => item.isMask)
+    const fn = (obj, index) => {
+      if (obj.type == 'image') {
+        const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
+        let callback = (image, isError) => {
+          if (!isError) {
+            for (var key in obj) {
+              image[key] = obj[key]
+            }
+            if (obj.cutPartsType == mask.cutPartsType) {
+              image.visible = true
+            } else {
+              image.visible = false
+            }
+            if (image.customVisible === false) image.visible = false
+            image.sendBackwards()
+            this.canvas.add(image)
+            if (canvasObjects[index + 1]) {
+              fn(canvasObjects[index + 1], index + 1)
+            } else {
+              const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
+              this.canvas.bringToFront(mask)
+              this.canvas.sendToBack(backgroundImage)
+              this.canvas.requestRenderAll();
+              setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
+            }
+          }
+        };
+        const properties = {
+          left: 100,
+          top: 100
+        };
+        fabric.Image.fromURL(imageURL, callback, properties);
+      } else if (obj.type === 'text') {
+        this.addText(obj)
+        if (canvasObjects[index + 1]) {
+          fn(canvasObjects[index + 1], index + 1)
+        } else {
+          const mask = this.canvas.getObjects().find((item) => item.isMask)
+          const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
+          this.canvas.bringToFront(mask)
+          this.canvas.sendToBack(backgroundImage)
+          this.canvas.requestRenderAll();
+          setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
+        }
+      }
+    }
+    if (canvasObjects[0]) fn(canvasObjects[0], 0)
+  }
+  loadCanvasObject(isNext) {
+    this.store.commit('setIsSetSteps', true)
+    const p = {
+      ID: isNext ? this.saveSteps.value.ID - 1 : Number(this.saveSteps.value.ID) + 1,
+    }
+    console.log('this.saveSteps.value.ID', this.saveSteps.value.ID)
+    console.log('p', p)
+    historyAip.getHistory(p).then(res => {
+      console.log('res, ', res,)
+      const steps = {
+        ID: res.Tag[0].Table[0].ID,
+        ID_Next: res.Tag[0].Table[0].ID_Next,
+        ID_Previous: res.Tag[0].Table[0].ID_Previous,
+      }
+      this.store.commit('setSaveSteps', steps)
+      const data = res.Tag[0].Table[0].JsonValue
+      const objects = this.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+      objects.forEach(element => {
+        this.canvas.remove(element)
+      });
+      const objectsData = JSON.parse(data)
+
+      this.store.commit('setSaveData', JSON.parse(data))
+      this.loadObject(JSON.parse(data).canvasObjects)
+      this.store.commit('setBgColor', objectsData.commodityInfo.bgColor)
+    })
   }
 
   renderCanvas = () => {
@@ -82,7 +180,9 @@ class HistoryPlugin {
   // 快捷键扩展回调
   hotkeyEvent(eventName: string, e: any) {
     if (eventName === 'ctrl+z' && e.type === 'keydown') {
-      // this.undo();
+      this.undo();
+    } else if (eventName === 'ctrl+y' && e.type === 'keydown') {
+      this.redo()
     }
   }
   destroy() {

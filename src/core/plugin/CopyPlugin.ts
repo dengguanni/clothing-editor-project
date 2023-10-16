@@ -10,7 +10,8 @@ import { fabric } from 'fabric';
 import Editor from '../core';
 type IEditor = Editor;
 import { v4 as uuid } from 'uuid';
-
+import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 class CopyPlugin {
   public canvas: fabric.Canvas;
   public editor: IEditor;
@@ -56,16 +57,23 @@ class CopyPlugin {
   }
 
   // 单个对象复制
-  _copyObject(activeObject: fabric.Object) {
+  _copyObject(activeObject: any) {
     // 间距设置
+    let info: any = {}
     const grid = 10;
     const canvas = this.canvas;
     const cutPartsType = activeObject.cutPartsType
     const FileName = activeObject.FileName
     const FilePath = activeObject.FilePath
+    const isBackground = activeObject.isBackground
+    const repeatType = activeObject.repeatType
+    const isRepeat = activeObject.isRepeat
+    console.log('repeatType', repeatType)
     activeObject?.clone((cloned: fabric.Object) => {
       if (cloned.left === undefined || cloned.top === undefined) return;
-      
+      // cloned.set({
+      //   ...info
+      // });
       // 设置位置信息
       cloned.set({
         left: cloned.left + grid,
@@ -74,13 +82,19 @@ class CopyPlugin {
         id: uuid(),
         cutPartsType: cutPartsType,
         FileName: FileName,
-        FilePath: FilePath
+        FilePath: FilePath,
+        filters: [],
+        isBackground: isBackground,
+        repeatType: repeatType,
+        isRepeat: isRepeat
       });
-      
+
       canvas.discardActiveObject();
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
+      console.log('cloned.repeatType', cloned.repeatType)
+      ControlsTile.setRepeat(repeatType, true)
     });
   }
 

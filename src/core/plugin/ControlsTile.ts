@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import baseUrl from '@/config/constants/baseUrl';
+import { Message } from 'view-ui-plus';
 class ControlsTile {
     static lockObj = {
         'lockMovementX': false,
@@ -40,6 +41,10 @@ class ControlsTile {
     }
     static setRepeat(repeatType: string, val: boolean = false) {
         const activeObject = this.canvas.getActiveObjects()[0];
+        if(activeObject.parentCroppingFileName){
+            Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
+            return
+        }
         if (!val) {
             if (repeatType) {
                 if (activeObject.repeatType == repeatType) {

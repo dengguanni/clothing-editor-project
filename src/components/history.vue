@@ -4,13 +4,13 @@
   <div style="display: inline-block">
     <!-- 后退 -->
     <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
-      <Button @click="undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
+      <Button @click="canvasEditor.undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
         <commonIcon angleKey="withdraw"></commonIcon>
       </Button>
     </Tooltip>
     <!-- 重做 -->
     <Tooltip :content="$t('history.redo') + `(${saveSteps.ID_Next == -1 ? 0 : saveSteps.ID_Next})`">
-      <Button @click="redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
+      <Button @click="canvasEditor.redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
         <commonIcon angleKey="redo"></commonIcon>
         <!-- <commonIcon angleKey="prohibitRedo" v-show="saveSteps.ID_Next < 1"></commonIcon> -->
       </Button>
@@ -67,108 +67,8 @@ const bgColor = computed(() => {
 })
 const line = ref(false)
 // 后退
-const undo = () => {
-  loadCanvasObject(true)
-  // store.commit('setAllCuts')
-};
 
-// 重做
-const redo = () => {
-  loadCanvasObject(false)
-};
-const loadCanvasObject = (isNext) => {
-  store.commit('setIsSetSteps', true)
-  const p = {
-    ID: isNext ? saveSteps.value.ID - 1 : Number(saveSteps.value.ID) + 1,
-  }
-  historyAip.getHistory(p).then(res => {
-    const steps = {
-      ID: res.Tag[0].Table[0].ID,
-      ID_Next: res.Tag[0].Table[0].ID_Next,
-      ID_Previous: res.Tag[0].Table[0].ID_Previous,
-    }
-    store.commit('setSaveSteps', steps)
-    const data = res.Tag[0].Table[0].JsonValue
-    const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
-    objects.forEach(element => {
-      canvasEditor.canvas.remove(element)
-    });
-    const objectsData = JSON.parse(data)
 
-    store.commit('setSaveData', JSON.parse(data))
-    loadObject(JSON.parse(data).canvasObjects)
-    store.commit('setBgColor', objectsData.commodityInfo.bgColor)
-  })
-}
-const loadObject = (canvasObjects) => {
-  store.commit('setIsSetSteps', true)
-  const fn = (obj, index) => {
-    if (obj.type == 'image') {
-      const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
-      let callback = (image, isError) => {
-        if (!isError) {
-          for (var key in obj) {
-            image[key] = obj[key]
-          }
-          if (obj.cutPartsType == cutPartsType.value) {
-            image.visible = true
-          } else {
-            image.visible = false
-          }
-          if (image.customVisible === false) image.visible = false
-          image.sendBackwards()
-
-          canvasEditor.canvas.add(image)
-          if (canvasObjects[index + 1]) {
-            fn(canvasObjects[index + 1], index + 1)
-          } else {
-            const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-            const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
-            canvasEditor.canvas.bringToFront(mask)
-            canvasEditor.canvas.sendToBack(backgroundImage)
-            canvasEditor.canvas.requestRenderAll();
-            setTimeout(() => {store.commit('setIsSetSteps', false)}, 500)
-          }
-
-        }
-      };
-      const properties = {
-        left: 100,
-        top: 100
-      };
-      fabric.Image.fromURL(imageURL, callback, properties);
-    } else if (obj.type === 'text') {
-      addText(obj)
-      if (canvasObjects[index + 1]) {
-        fn(canvasObjects[index + 1], index + 1)
-      } else {
-        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-        const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
-        canvasEditor.canvas.bringToFront(mask)
-        canvasEditor.canvas.sendToBack(backgroundImage)
-        canvasEditor.canvas.requestRenderAll();
-        setTimeout(() => {store.commit('setIsSetSteps', false)}, 500)
-      }
-    }
-  }
-  if (canvasObjects[0]) fn(canvasObjects[0], 0)
-}
-const addText = (option) => {
-  console.log('option,option', option)
-  const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
-  const text = new fabric.IText(option.text, {
-    type: 'text',
-  });
-  for (var key in option) {
-    text[key] = option[key]
-  }
-  text.sendBackwards()
-  canvasEditor.canvas.add(text)
-};
-const clear = () => {
-  canvasEditor.clear();
-  store.commit('setAllCuts')
-};
 // 清空
 const beforeClear = () => {
   Modal.confirm({
@@ -186,12 +86,9 @@ const setAuxiliaryLine = () => {
     canvasEditor.canvas.renderAll();
   }
 }
-
-
 const setLine = debounce(() => {
   line.value = !line.value
-  const imageURL = 'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
-  // const imageURL = baseUrl+'/ImageSource/Other/Grid.png?t=1'
+  const imageURL =  'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
   if (!line.value) {
     const line = canvasEditor.canvas.getObjects().find((item) => item.id == 'grid');
     canvasEditor.canvas.remove(line)
@@ -214,19 +111,13 @@ const setLine = debounce(() => {
         lockAttrs.forEach((key) => {
           image[key] = true;
         });
-        // image.name = item.FileName
-        // image.FilePath = item.FilePath
-        // canvasEditor.workspaceSendToBack()
         canvasEditor.canvas.add(image);
-
         const line = canvasEditor.canvas.getObjects().find((item) =>
           item.id === 'grid'
         );
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        // canvasEditor.canvas.sendBackwards(line)
         line.bringToFront()
         workspace.sendToBack()
-        // canvasEditor.canvas.moveTo(line, 3)
         canvasEditor.canvas.requestRenderAll();
       }
     };
@@ -235,9 +126,7 @@ const setLine = debounce(() => {
       top: 0
     };
     fabric.Image.fromURL(imageURL, callback, properties);
-
   }
-
 }, 300)
 
 async function imgToBase64(url) {

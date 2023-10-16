@@ -340,6 +340,10 @@ const btnClick = (item) => {
         Message.error('添加清晰后不支持滤镜');
         return
     }
+    if (activeObject.repeatType) {
+        Message.error('平铺后不支持裁剪，请移除平铺后再试试')
+        return
+    }
     emit('btnClick', item);
 };
 const setIsScale = () => {
