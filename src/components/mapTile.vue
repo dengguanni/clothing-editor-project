@@ -212,7 +212,6 @@ watch(handleLock, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(selected, (newVal, oldVal) => {
     if (newVal) {
-        console.log('newVal', newVal)
         buttonLimitions(menuList3, newVal)
         buttonLimitions(filterList, newVal)
         buttonLimitions(menuList1, newVal)
@@ -257,7 +256,6 @@ const setButtonActive = (arr, type) => {
         } else {
             arr.forEach(el => {
                 if (el.type == type) {
-                    console.log('el.isSelected = true')
                     el.isSelected = true
                 } else {
                     el.isSelected = false
@@ -414,9 +412,7 @@ const scaleBig = debounce((obj) => {
 }, 300);
 const lock = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-    console.log('activeObject.isLock', activeObject.isLock)
     if (activeObject.isLock == undefined || !activeObject.isLock) {
-        console.log('锁定')
         activeObject.hasControls = false;
         activeObject.selectable = false;
         activeObject.isLock = true
@@ -426,7 +422,6 @@ const lock = () => {
         });
         store.commit('setAllIsLock')
     } else if (activeObject.isLock) {
-        console.log('解锁')
         activeObject.hasControls = true;
         // 修改默认属性
         lockAttrs.forEach((key) => {

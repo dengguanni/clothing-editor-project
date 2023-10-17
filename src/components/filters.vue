@@ -123,12 +123,11 @@ const props = defineProps({
 watch(
   () => props.singleFilters,
   (val) => {
-    setSharpening(val)
+    canvasEditor.setSharpening(val)
   }
 );
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
-    console.log('selected', newVal)
     setCheckBoxList(state.noParamsFilters, newVal.filtersType)
   }
 }, { immediate: true, deep: true });
@@ -187,31 +186,28 @@ const setSharpening = (val) => {
     Message.error('添加滤镜后不支持清晰化')
   }
 
-
 }
 
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
-  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  state.noParamsFilters[type] = value;
-  if (value) {
-    const itemFilter = _getFilter(activeObject, type);
-    if (!itemFilter) {
-      if (activeObject.filtersType) {
-        restoreImage(() => {
-          _createFilter(activeObject, type);
-          setCheckBoxList(state.noParamsFilters, type)
-        })
-      } else {
-        setCheckBoxList(state.noParamsFilters, type)
-        _createFilter(activeObject, type);
-      }
-    }
-  } else {
-    // _removeFilter(activeObject, type);
+  canvasEditor.changeFilters(type, value, state.noParamsFilters)
+  // const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  // state.noParamsFilters[type] = value;
+  // if (value) {
+  //   const itemFilter = _getFilter(activeObject, type);
+  //   if (!itemFilter) {
+  //     if (activeObject.filtersType) {
+  //       restoreImage(() => {
+  //         _createFilter(activeObject, type);
 
-    restoreImage()
-  }
+  //       })
+  //     } else {
+  //       _createFilter(activeObject, type);
+  //     }
+  //   }
+  // } else {
+  //   restoreImage()
+  // }
 };
 // 有参数与组合滤镜修改
 const changeFiltersByParams = (type) => {
@@ -286,8 +282,9 @@ const replaceImage = (url, type) => {
       activeObject.set('oldFilePath', oldFilePath)
       activeObject.applyFilters()
       ControlsTile.setRepeat(activeObject.repeatType, true)
-      canvasEditor.canvas.renderAll();
       store.commit('setAllCuts')
+      setCheckBoxList(state.noParamsFilters, type)
+      canvasEditor.canvas.renderAll();
     });
   }
   setUserUploadFile(url, FileName, 'images_temp//', callback)
@@ -316,7 +313,6 @@ const restoreImage = (callback = null) => {
     store.commit('setAllCuts')
     callback ? callback() : ''
   });
-
 }
 onMounted(() => {
   event.on('selectOne', handleSelectOne);
@@ -378,7 +374,6 @@ function _createFilter(sourceImg, type, options = null) {
   sourceImg.applyFilters();
   canvasEditor.canvas.renderAll();
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  console.log('activeObject.width  url', activeObject.width, activeObject.scaleX)
   // 变base64
   const scaleX = activeObject.scaleX
   const scaleY = activeObject.scaleY

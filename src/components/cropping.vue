@@ -89,7 +89,7 @@ const handelCutParts = (image) => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const mask = canvasEditor.canvas.getActiveObjects()[0]
-
+    console.log('image', image)
     if (mask) {
         const p = {
             Canvas_width: workspace.width,
@@ -161,7 +161,6 @@ const restore = () => {
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
-        console.log('activeObjects', activeObjects)
         "http://8.140.206.30:8099/UserUploadFile/images_library/6c4e5caa-4bd2-11ee-b1c4-00163e10d08e.png"
         const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
@@ -186,7 +185,6 @@ const restore = () => {
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
-                console.log('image', image)
             }
         };
         const properties = {
@@ -267,9 +265,6 @@ const addItem = (item) => {
             canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.requestRenderAll();
             state.hasCropping = true
-            info.on('remove', () => {
-                console.log('删除')
-            })
         }
     };
     const properties = {

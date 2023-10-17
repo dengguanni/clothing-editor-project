@@ -63,7 +63,6 @@ const lock = () => {
 
 };
 const unLock = () => {
-  console.log('unLock',)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   // 修改自定义属性
   activeObject.hasControls = true;

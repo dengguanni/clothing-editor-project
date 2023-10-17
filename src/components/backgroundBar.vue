@@ -104,6 +104,7 @@ const addItem = (item) => {
                 image.ImageUrl = item.ImageUrl
                 image.FileName = item.FileName
                 image.FilePath = item.FilePath
+                image.isLock = false
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(image);
@@ -152,6 +153,7 @@ const dragItem = (event) => {
                 image.ImageUrl = obj.ImageUrl
                 image.FileName = obj.FileName
                 image.FilePath = obj.FilePath
+                image.isLock = false
                 image.left = pointerVpt.x - image.width / 2;
                 image.top = pointerVpt.y - image.width / 2;
                 canvasEditor.canvas.add(image);

@@ -18,6 +18,7 @@ import DownFontPlugin from './plugin/DownFontPlugin';
 import HistoryPlugin from './plugin/HistoryPlugin';
 import FlipPlugin from './plugin/FlipPlugin';
 import RulerPlugin from './plugin/RulerPlugin';
+import FiltersPlugin from './plugin/FiltersPlugin';
 // import MaterialPlugin from './plugin/MaterialPlugin';
 import ControlsTile from './plugin/ControlsTile'
 
@@ -44,6 +45,7 @@ export {
   RulerPlugin,
   // MaterialPlugin,
   ControlsTile,
-  TestPlugin
+  TestPlugin,
+  FiltersPlugin
 };
 export default Editor;

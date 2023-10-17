@@ -270,14 +270,11 @@ const handleLock = computed(() => {
 });
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
-    console.log('newVal', newVal)
     const activeObject = canvasEditor.canvas.getActiveObject()
-    console.log('activeObject.selectable', activeObject.selectable)
     disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
   }
 }, { deep: true });
 watch(handleLock, (newVal, oldVal) => {
-  console.log('handleLock', newVal)
   const activeObject = canvasEditor.canvas.getActiveObject()
   disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
 }, { deep: true });
@@ -433,19 +430,18 @@ const getFreeFontList = () => {
 };
 
 const setAllCuts = debounce(() => {
-  console.log('baseAttr.angle', baseAttr.angle)
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   if (baseAttr.angle == NaN || !baseAttr.angle) {
     baseAttr.angle = 0
+    activeObject.rotate(baseAttr.angle)
   }
-  const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-
   if (activeObject.isRepeat) {
     const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentId == activeObject.id)
     obj.rotate(baseAttr.angle)
     canvasEditor.canvas.renderAll();
   }
   store.commit('setAllCuts')
-}, 500)
+}, 400)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   // 不是当前obj，跳过
@@ -536,24 +532,18 @@ const changeCommon = (key, value) => {
   }
   // 旋转角度适配
   if (key === 'angle') {
+    console.log('key', key, value)
     activeObject.rotate(value);
+    value === 0 ? activeObject.angle = 0 : ''
     canvasEditor.canvas.renderAll();
     return;
   }
 
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
-  console.log(key, value)
   setTimeout(() => {
     store.commit('setAllCuts')
-    console.log('activeObject',activeObject[key])
-  }, 500);
-
-  // if (key == 'fill') {
-  //   console.log('key', key)
-  //   activeObject && activeObject.set(key, value);
-  //   store.commit('setAllCuts')
-  // }
+  }, 300);
 };
 
 // 边框设置
@@ -895,4 +885,5 @@ onBeforeUnmount(() => {
     text-align: center;
     filter: invert(100%);
   }
-}</style>
+}
+</style>

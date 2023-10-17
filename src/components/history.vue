@@ -79,6 +79,13 @@ const beforeClear = () => {
     onOk: () => clear(),
   });
 };
+const clear = () => {
+  canvasEditor.canvas.getObjects().forEach(el => {
+    if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined) {
+      canvasEditor.canvas.remove(el)
+    }
+  })
+}
 const setAuxiliaryLine = () => {
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
   if (maskRect) {
@@ -88,7 +95,7 @@ const setAuxiliaryLine = () => {
 }
 const setLine = debounce(() => {
   line.value = !line.value
-  const imageURL =  'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
+  const imageURL = 'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
   if (!line.value) {
     const line = canvasEditor.canvas.getObjects().find((item) => item.id == 'grid');
     canvasEditor.canvas.remove(line)

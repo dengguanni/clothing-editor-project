@@ -36,10 +36,7 @@ import { useI18n } from 'vue-i18n';
 const repoSrc = import.meta.env.APP_REPO;
 const { fabric, canvasEditor } = useSelect();
 const { t } = useI18n();
-onMounted(() => {
-console.log('repoSrc', repoSrc)
 
-})
 // const list = [
 //   {
 //     label: '字体',

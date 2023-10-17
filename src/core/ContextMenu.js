@@ -107,7 +107,6 @@ class ContextMenu {
       data['subitems'].length > 0
     ) {
       const menu = new ContextMenu(this.container, data['subitems']);
-      console.log('this.container', this.container)
       menu.root = false;
       menu.parent = this;
 

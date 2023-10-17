@@ -69,8 +69,6 @@ class LoadScene {
         }
         callback ? callback() : ''
         setTimeout(() => {
-            // this.getScreenshotList('big')
-            console.log('LoadScene.canvasId', LoadScene.canvasId)
             LoadScene.canvasId == 'big-3d' ? this.getScreenshotList('big') : this.getScreenshotList('small')
         }, 100);
     }
@@ -135,7 +133,6 @@ class LoadScene {
         setTimeout(() => {
             callBack()
         }, 1000);
-        console.log('sdfg', this.store)
     }
     static change3dBox = (id, callback) => {
         const height = id == 'big-3d' ? 600 : 280
@@ -176,7 +173,6 @@ class LoadScene {
         let obj: any = {}
         obj[size] = LoadScene.screenshotList
         this.store.commit('setScreenshotList', obj)
-        console.log('setScreenshotList', obj)
         return LoadScene.screenshotList
     }
     destroyScene() {

@@ -28,7 +28,6 @@ const handleLock = computed(() => {
 });
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
-    console.log('替换图片newValselected', newVal)
     const activeObject = canvasEditor.canvas.getActiveObject()
     disabled.value = activeObject.isLock !== undefined ? newVal.isLock : false
   }
@@ -53,8 +52,6 @@ const replace = async () => {
     const fileStr = await getImgStr(file);
     // 字符串转El
     const imgEl = await insertImgFile(fileStr);
-    // console.log('上传图片', imgEl)
-    // insertImgFile(imgEl)
     mitts.emit('replaceImages', imgEl.src)
     imgEl.remove();
   }

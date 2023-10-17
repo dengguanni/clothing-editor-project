@@ -148,7 +148,6 @@ const checkColor = (val) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     if (activeObject) {
       // 控件属性设置
-      console.log('mixinState', mixinState)
       try {
         fabricGradientToCss(val, activeObject);
         // bar背景设置

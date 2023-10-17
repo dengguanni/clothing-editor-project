@@ -64,5 +64,6 @@ export const basicInheritAttribute = [
     'scaleY',
     'width',
     'height',
-    
+    'left',
+    'top'
 ]

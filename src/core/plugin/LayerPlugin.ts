@@ -14,45 +14,28 @@ class LayerPlugin {
   public canvas: fabric.Canvas;
   public editor: IEditor;
   static pluginName = 'LayerPlugin';
-  static apis = ['up', 'upTop', 'down', 'downTop'];
+  static apis = ['up', 'upTop', 'down', 'downTop', 'fixedLayer'];
   constructor(canvas: fabric.Canvas, editor: IEditor) {
     this.canvas = canvas;
     this.editor = editor;
   }
-
-  _getWorkspace() {
-    return this.canvas.getObjects().find((item) => item.id === 'workspace');
+  fixedLayer() {
+    const mask = this.canvas.getObjects().find((item) => item.isMask)
+    const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
+    const line = this.canvas.getObjects().find((item) => item.id == 'grid');
+    const workspace = this.canvas.getObjects().find((item) => item.id == 'workspace');
+    mask ? this.canvas.bringToFront(mask) : ''
+    line ? this.canvas.bringToFront(line) : ''
+    backgroundImage ? this.canvas.sendToBack(backgroundImage) : ''
+    workspace ? this.canvas.sendToBack(workspace) : ''
+    this.canvas.renderAll();
   }
-
-  _workspaceSendToBack() {
-    const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground);
-    const workspace = this._getWorkspace();
-    backgroundImage && backgroundImage.sendToBack();
-    workspace && workspace.sendToBack();
-
-  }
-  _lineSendToBack() {
-    // const line = this.canvas.getObjects().find((item) => item.id === '0');
-    // line && line.sendToBack();
-  }
-  _maskBringToFront() {
-    const line = this.canvas.getObjects().find((item) =>
-      item.id === 'grid'
-    );
-    const mask = this.canvas.getObjects().find((item) => item.isMask);
-    mask && mask.bringToFront();
-    line && line.bringToFront();
-  }
-
   up() {
     const actives = this.canvas.getActiveObjects();
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.bringForward();
-      this.canvas.renderAll();
-      this._lineSendToBack()
-      this._workspaceSendToBack();
-      this._maskBringToFront()
+      this.fixedLayer()
     }
   }
 
@@ -61,10 +44,7 @@ class LayerPlugin {
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.bringToFront();
-      this.canvas.renderAll();
-      this._lineSendToBack()
-      this._workspaceSendToBack();
-      this._maskBringToFront()
+      this.fixedLayer()
     }
   }
 
@@ -73,10 +53,7 @@ class LayerPlugin {
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.sendBackwards();
-      this.canvas.renderAll();
-      this._lineSendToBack()
-      this._workspaceSendToBack();
-      this._maskBringToFront()
+      this.fixedLayer()
     }
   }
 
@@ -85,10 +62,8 @@ class LayerPlugin {
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
       activeObject && activeObject.sendToBack();
+      this.fixedLayer()
       this.canvas.renderAll();
-      this._lineSendToBack()
-      this._workspaceSendToBack();
-      this._maskBringToFront()
     }
   }
 

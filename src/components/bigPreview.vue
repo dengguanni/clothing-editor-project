@@ -91,6 +91,7 @@ onUnmounted(() => {
     LoadScene.change3dBox('small-3d')
 })
 const changeDirection = (item) => {
+
     directionSelection.value = item.id
     imageActive.value = item.src
 }
@@ -105,7 +106,6 @@ const changeImage = (val) => {
     } else {
         let key = 0
         screenshotList.value.forEach((el, index) => {
-            console.log(directionSelection.value, screenshotList.value[index + 1])
             if (el.id == directionSelection.value && screenshotList.value[index + 1]) {
                 key = index + 1
             }
@@ -117,13 +117,10 @@ const changeImage = (val) => {
 const changeColor = (item) => {
     colorSelection.value = item.GUID
     store.commit('setBgColor', item)
-    // load3DScene.getScreenshotList('big')
-    console.log('screenshotList', screenshotList)
-
-
 }
 const changeMode = (val) => {
     is3D.value = val
+    if (!is3D.value) load3DScene.getScreenshotList('big')
 }
 </script>
 <style lang="less" scoped>

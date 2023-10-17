@@ -263,7 +263,8 @@ import Editor, {
   HistoryPlugin,
   FlipPlugin,
   RulerPlugin,
-  TestPlugin
+  TestPlugin,
+  FiltersPlugin
   // MaterialPlugin,
 } from '@/core';
 let selectedProduct = ref(0)
@@ -300,7 +301,6 @@ const saveData = computed(() => {
   return store.state.saveData
 })
 const goodsGUID = computed(() => {
-  console.log('变了')
   return store.state.saveData.commodityInfo.GUID
 })
 const pageLoading = computed(() => {
@@ -309,7 +309,7 @@ const pageLoading = computed(() => {
 
 onMounted(() => {
   window.localStorage.userInfo = route.query.key
-  store.commit('setPageLoading', true)
+  // store.commit('setPageLoading', true)
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
     fireRightClick: true, // 启用右键，button的数字为3
@@ -339,6 +339,7 @@ onMounted(() => {
   canvasEditor.use(FlipPlugin);
   canvasEditor.use(RulerPlugin);
   canvasEditor.use(TestPlugin);
+  canvasEditor.use(FiltersPlugin);
   // canvasEditor.use(MaterialPlugin);
   event.init(canvas);
   state.show = true;
@@ -377,8 +378,6 @@ const getSaveData = () => {
     store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID)
     store.commit('setBgColor', dataJson.commodityInfo.bgColor)
     store.commit('setBgColorList', dataJson.commodityInfo.colorList)
-    console.log(' dataJson.commodityInfoe', dataJson.commodityInfo)
-    console.log('dataJson.commodityInfo.colorList', dataJson.commodityInfo.colorList)
   })
 }
 
@@ -482,7 +481,6 @@ const changeMode = (val) => {
 };
 const preview = (is3D) => {
   dialogType.value = is3D ? 4 : 5
-  console.log('dialogType.value', dialogType.value)
   showDailog.value = true
 }
 

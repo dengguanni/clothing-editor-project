@@ -111,7 +111,6 @@ const getGoodsDetails = () => {
     getLeftClassificationList.getGoodsDetails(p).then(res => {
         if (res.Tag[0].Table) {
             goodsDetailInfo.value = { ...res.Tag[0].Table[0] }
-            console.log('goodsDetailInfo', goodsDetailInfo)
         }
     })
 }

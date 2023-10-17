@@ -106,7 +106,6 @@ class ControlsTile {
     static handelBasicRepeat() {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        console.log('平铺',activeObject)
         activeObject.clone(cloned => {
             const { maxXcount, maxYcount } = self.getMaxCount(cloned)
             cloned.rotate(0)
@@ -158,7 +157,6 @@ class ControlsTile {
     // 更新图片
     static replaceImage = (rect: fabric.Rect, imageLeft: number, imageTop: number) => {
         const FileName = guid() + '.png'
-        console.log('rect', rect)
         const url = rect.toDataURL({
             width: rect.width,
             height: rect.height,
@@ -577,7 +575,6 @@ class ControlsTile {
                             angle: 0,
                         })
                         newObjArr2.push(group1, cloned)
-                        console.log('4')
                     })
                     group1.clone(cloned => {
                         cloned.rotate(0)
@@ -591,7 +588,6 @@ class ControlsTile {
                             flipY: true
                         })
                         newObjArr2.push(cloned)
-                        console.log('5')
                         const group2: fabric.Group = new fabric.Group(newObjArr2, {
                             left: 0,
                             top: 0,

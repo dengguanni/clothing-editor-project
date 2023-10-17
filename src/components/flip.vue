@@ -32,14 +32,11 @@ const handleLock = computed(() => {
 });
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
-    console.log('newVal', newVal)
     const activeObject = canvasEditor.canvas.getActiveObject()
-    console.log('activeObject.selectable', activeObject.selectable)
     disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
   }
 }, { deep: true });
 watch(handleLock, (newVal, oldVal) => {
-  console.log('handleLock', newVal)
   const activeObject = canvasEditor.canvas.getActiveObject()
   disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
 }, { deep: true });

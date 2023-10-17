@@ -43,7 +43,6 @@ class HistoryPlugin {
   }
 
   getHistory() {
-    console.log('this.history', this.history)
     return this.history;
   }
   _save(event) {
@@ -62,7 +61,6 @@ class HistoryPlugin {
   undo() {
     this.loadCanvasObject(true)
     // if (this.history.canUndo.value) {
-    // console.log('this.history.canUndo.value', this.history.canUndo.value)
     // this.renderCanvas();
     // this.history.undo();
     // }
@@ -74,7 +72,6 @@ class HistoryPlugin {
     this.loadCanvasObject(false)
   }
   addText(option) {
-    console.log('option,option', option)
     const mask = this.canvas.getObjects().find(el => el.isMask)
     const text = new fabric.IText(option.text, {
       type: 'text',
@@ -141,10 +138,7 @@ class HistoryPlugin {
     const p = {
       ID: isNext ? this.saveSteps.value.ID - 1 : Number(this.saveSteps.value.ID) + 1,
     }
-    console.log('this.saveSteps.value.ID', this.saveSteps.value.ID)
-    console.log('p', p)
     historyAip.getHistory(p).then(res => {
-      console.log('res, ', res,)
       const steps = {
         ID: res.Tag[0].Table[0].ID,
         ID_Next: res.Tag[0].Table[0].ID_Next,

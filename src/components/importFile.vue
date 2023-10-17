@@ -47,7 +47,9 @@ import { ElMessage, ElButton } from 'element-plus';
 import { getImagesCustom, setUserUploadFile } from '@/core/2D/handleImages.ts'
 import mitts from '@/utils/mitts'
 import baseUrl from '@/config/constants/baseUrl'
+import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
 import { useStore } from 'vuex'
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 const store = useStore()
 const { fabric, canvasEditor } = useSelect();
 const state = reactive({
@@ -90,34 +92,54 @@ const showIcon = (item) => {
 const replaceImage = (str, fileHeaderPath) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   const FileName = guid() + '.png'
+  const oldFileName = activeObject.FileName
   const callback = () => {
     const width = activeObject.get('width');
     const height = activeObject.get('height');
-    const properties = {
-      left: 0,
-      top: 0
-    };
     let callback2 = (() => {
-      const ImageUrl = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/' + FileName
-      activeObject.setSrc(ImageUrl, () => {
-        activeObject.set('name', activeObject.Title);
-        activeObject.set('id', uuid());
-        activeObject.set('width', width);
-        activeObject.set('height', height);
-        activeObject.set('scaleX', activeObject.scaleX);
-        activeObject.set('scaleY', activeObject.scaleY);
-        activeObject.set('FileName', FileName);
-        activeObject.set('FilePath', 'UserUploadFile/images_custom/' + FileName.substring(0, 1));
-        activeObject.set('cutPartsType', activeObject.cutPartsType);
-        canvasEditor.canvas.renderAll();
-      });
+      const imageURL = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/' + FileName
+      let callback = (image, isError) => {
+        if (!isError) {
+          console.log('image', image.width)
+          console.log(JSON.stringify(image.width))
+          const width = image.width
+          const height = image.height
+          const oldActiveObject = canvasEditor.canvas.getObjects().find((item) => item.FileName === oldFileName);
+          basicInheritAttribute.forEach(el => image.set(el, oldActiveObject[el]))
+          image.height = height
+          image.width = width
+          image.name = FileName
+          image.scaleX = oldActiveObject.width / (image.width / oldActiveObject.scaleX)
+          image.scaleY = oldActiveObject.height / (image.height / oldActiveObject.scaleY)
+          image.id = uuid()
+          image.FileName = FileName
+          image.FilePath = 'images_custom/' + FileName.substring(0, 1)
+          image.cutPartsType = cutPartsType.value
+          image.oldFilePath = image.FilePath
+          image.oldFileName = FileName
+          image.filters = []
+          canvasEditor.canvas.add(image);
+          canvasEditor.canvas.remove(oldActiveObject)
+          const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+          canvasEditor.canvas.setActiveObject(info);
+          ControlsTile.setRepeat(image.repeatType, true)
+          image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
+          image.Sharpen ? canvasEditor.setSharpening(val) : ''
+          canvasEditor.canvas.requestRenderAll();
+
+        }
+      };
+      const properties = {
+        left: 0,
+        top: 0
+      };
+      fabric.Image.fromURL(imageURL, callback, properties);
     })
     picture.setImagesCustom({ FileName }).then(e => {
       if (e.OK == 'True') {
         getImagesCustom(imageList, pageIndex.value, callback2)
       }
     })
-
     ElMessage({
       showClose: true,
       message: '上传成功',
@@ -141,7 +163,6 @@ const delImage = (item) => {
 
 // 获取选取图片
 const getFile = (file) => {
-  console.log('file', file.target.files)
   if (!file) {
     return;
   }
@@ -188,7 +209,6 @@ const HANDLEMAP = {
     selectFiles({ accept: 'image/*', multiple: true }).then((fileList) => {
       Array.from(fileList).forEach((item) => {
         getImgStr(item).then((file) => {
-          // console.log('item', item)
           insertImgFile(file);
         });
       });

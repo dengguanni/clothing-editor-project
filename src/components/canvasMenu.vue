@@ -46,7 +46,6 @@ const cutParts = computed(() => {
     return store.state.cutParts
 })
 const isSetSteps = computed(() => {
-    console.log('tore.state.isSetSteps', store.state.isSetSteps)
     return store.state.isSetSteps
 })
 const cutPartsType = computed(() => {
@@ -71,13 +70,11 @@ const goodsId = computed(() => {
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
         setAllCuts(false)
-        console.log('handelAllCuts')
     }
 }, { immediate: true, deep: true });
 watch(cutPartsType, (newVal, oldVal) => {
     if (newVal) {
         changeSelection()
-        console.log('cutPartsType变了', newVal)
     }
 }, { immediate: true, deep: true });
 watch(cutParts, (newVal, oldVal) => {
@@ -95,7 +92,6 @@ watch(bgColor, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
     if (newVal) {
-        console.log('sizeGUID', sizeGUID)
         init(newVal)
     }
 }, { immediate: true, deep: true });
@@ -203,8 +199,6 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                 if (indexP && !cutParts.value[indexP + 1]) store.commit('setIsSetSteps', false)
             }
         }
-
-        console.log('isColorChange', isColorChange, bgColor.value)
         if (!isColorChange) {
             let p = {
                 SizeGUID: sizeGUID.value,
@@ -233,15 +227,15 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
     }
 }, 100)
 const setCutAllParts = (p, Title, isSetStep) => {
+    canvasEditor.fixedLayer()
     picture.setCutAllParts(p).then(res => {
         console.log('总的剪裁参数', p)
-        console.log('isSetSteps', isSetStep)
-        console.log('isSetSteps.value', isSetSteps.value)
         isSetStep ? '' : store.commit('setSave')
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
         load3DScene.setTexture(p.Part_name, url, () => { })
+
     })
 }
 
@@ -348,7 +342,6 @@ const changeSelection = () => {
             } else if (el.id !== 'workspace') {
                 el.visible = false
             }
-
             if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
                 el.visible = true
                 el.isMask = true
@@ -391,7 +384,6 @@ const loadCanvasObject = () => {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {
                         store.commit('setIsSetSteps', false)
-                        console.log('setIsSetSteps', false)
                     }
 
                 }

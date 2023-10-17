@@ -139,7 +139,6 @@ watch(
     () => props.sizeList,
     (val) => {
         if (val.length > 0) {
-            console.log('watch')
             if (!sizeGUID.value) sizeSelected.value = val[0].GUID
 
         }
@@ -170,7 +169,6 @@ const getBgColor = (GUID: string) => {
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
         colorList.value = [...res.Tag[0].Table]
         store.commit('setBgColorList', [...res.Tag[0].Table])
-        console.log('colorList.value',colorList.value)
         if (!bgColor.value) {
             colorSelected.value = colorList.value[0].GUID
             GoodsInfo.modelColorList = colorList.value

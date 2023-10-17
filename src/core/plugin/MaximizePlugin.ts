@@ -9,7 +9,6 @@ class MaximizePlugin {
     static setMax(type: string, mask: any) {
         this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
         this.mask = this.canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        console.log('tthis.activeObjec', this.activeObject)
         this.activeObject.rotate(0);
         if (type == 'bigFull') {
             this.designMaximization()

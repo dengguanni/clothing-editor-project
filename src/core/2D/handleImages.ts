@@ -17,7 +17,6 @@ export const getImagesCustom = async (imageList: any, Page_Index: number | Strin
     picture.getImagesCustom(p).then(res => {
         imageList.value = [...res.Tag[0].Table]
         callback ? callback() : ''
-        console.log('历史记录', res)
     })
 }
 const splitBase64 = (base64String, chunkSize) => {
@@ -91,7 +90,6 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
                 base64Str: splitBase64Str[0]
             }
             picture.setUserUploadFile(p).then(res => {
-                console.log('上传', res)
                 if (res.OK == 'True') {
                     callback ? callback(FileName) : ''
                 }
@@ -103,7 +101,6 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
             let index = 0
             const fn = () => {
                 const size = splitBase64Str[index]
-                console.log('index', index, (index + 1) == splitBase64Str.length)
                 const p = {
                     FileName: FileName,
                     FilePath: FilePath,

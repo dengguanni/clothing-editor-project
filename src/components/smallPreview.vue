@@ -46,8 +46,7 @@ const loadScreenshotList = ref(true)
 const changeMode = (val) => {
     is3D.value = val
     if (!is3D.value) {
-        // load3DScene.getScreenshotList('small')
-        console.log('screenshot', screenshot)
+        load3DScene.getScreenshotList('small')
     }
 }
 const preview = () => {

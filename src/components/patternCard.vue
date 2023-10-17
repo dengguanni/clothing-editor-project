@@ -61,12 +61,10 @@ const init = () => {
 }
 const getGoodsId = (item) => {
   store.commit('setCommodityInfo', item)
-  console.log(item)
   store.commit('setGoodsId', item.GUID)
   emit('sendGoodsId', item)
 }
 const searchGoods = (val) => {
-  console.log(val)
   const p = {
     TreeNodeGUID: currentParentNodeId.value,
     Page_Index: 0,
@@ -103,7 +101,6 @@ const getNode = (val) => {
             Page_RowCount: 1
           }
           commodityApi.getGoodsImageListByTreeNode(p).then(res => {
-            console.log('缩略图', res)
           })
         }
         const obj = {
@@ -120,7 +117,6 @@ const getNode = (val) => {
   }
 }
 const selectNOde = (val) => {
-  console.log('selectNOde', val)
   const p = {
     TreeNodeGUID: val.id,
     Page_Index: 0,
@@ -141,7 +137,6 @@ const selectNOde = (val) => {
 
 const getTreeInfo = () => {
   commodityApi.getLeftClassificationList({ PGUID: '' }).then(res => {
-    console.log('res', res)
     let arr1 = []
     res.Tag[0].Table.forEach(el => {
       let children = []
