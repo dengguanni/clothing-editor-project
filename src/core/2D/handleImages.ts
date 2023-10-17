@@ -60,7 +60,7 @@ export const setAllCuts = (SizeGUID) => {
     picture.setCutAllParts(p).then(res => {
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         LoadScene.setTexture(maskRect.cutPartsType, url, null)
-    })
+            })
 }
 const imageSize = (base64Str) => {
     const indexBase64 = base64Str.indexOf('base64,') == -1 ? base64Str : base64Str.indexOf('base64,');

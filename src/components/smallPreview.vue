@@ -3,12 +3,12 @@
         <div class="small-preview">
             <div class="change-mode">
                 <div class="btn-box">
-                    <button :class="is3D ? 'btn-active' : 'btn'" @click="changeMode()">3D</button>
-                    <button :class="!is3D ? 'btn-active' : 'btn'" @click="changeMode()">2D</button>
+                    <button :class="is3D ? 'btn-active' : 'btn'" @click="changeMode(true)">3D</button>
+                    <button :class="!is3D ? 'btn-active' : 'btn'" @click="changeMode(false)">2D</button>
                 </div>
             </div>
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
-                <CarouselItem v-for="(item, index ) in screenshotList" :key="item.id" style="height: 280px; width: 280px;"
+                <CarouselItem v-for="(item, index ) in screenshot" :key="item.id" style="height: 280px; width: 280px;"
                     v-loading="loadScreenshotList">
                     <img :src="item.src" style="height: 280px; width: 280px;" />
                 </CarouselItem>
@@ -27,25 +27,27 @@ import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import mitts from '@/utils/mitts.js';
 import { useStore } from 'vuex'
 const store = useStore()
+const load3DScene = new LoadScene()
+
 const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
-const load3DScene = new LoadScene()
-let screenshotList = reactive([])
+const screenshot = computed(() => {
+    return store.state.screenshotList.small
+})
+
 let scene, renderer, camera
 const emit = defineEmits()
 let is3D = ref(true)
 let carousel = ref(0)
 const load3d = ref(true)
 const loadScreenshotList = ref(true)
-const changeMode = () => {
-    is3D.value = !is3D.value
+
+const changeMode = (val) => {
+    is3D.value = val
     if (!is3D.value) {
-        screenshotList = []
-        let arr = LoadScene.getImages()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
+        // load3DScene.getScreenshotList('small')
+        console.log('screenshot', screenshot)
     }
 }
 const preview = () => {
@@ -53,20 +55,8 @@ const preview = () => {
 }
 
 onMounted(() => {
-    // const modelColor = GoodsInfo.modelColorList[0]
-    // load3DScene.setModelColor('rgb(' + modelColor.R + ',' + modelColor.G + ',' + modelColor.B + ')', () => {
-    //     screenshotList = []
-    //     let arr = LoadScene.getImages()
-    //     arr.forEach(element => {
-    //         screenshotList.push(element)
-    //     });
-    // })
     load3DScene.init(scene, camera, renderer, 'small-3d', () => {
-        screenshotList = []
-        let arr = LoadScene.setCameraAngle()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
+        load3DScene.getScreenshotList('small')
         load3d.value = false
         loadScreenshotList.value = false
     })
@@ -75,26 +65,6 @@ onMounted(() => {
 onUnmounted(() => {
     load3DScene.destroyScene()
 })
-
-// 截图
-const saveAsPNG = () => {
-    let image = new Image();
-    renderer.render(scene, camera);//renderer为three.js里的渲染器，scene为场景 camera为相机
-    let imgData = renderer.domElement.toDataURL("image/jpeg");
-    image.src = imgData;
-    img.value = imgData
-    // document.getElementById('aaa').appendChild(image)
-    console.log('imgData', imgData)
-    //return canvas.toDataURL('image/bmp');//bmp有些浏览器不支持
-}
-const downLoad = (url) => {
-    let fd = document.createElement('a');
-    fd.download = '截图文件';//默认名是下载
-    fd.href = url;
-    document.body.appendChild(fd);
-    fd.click();
-    fd.remove();
-}
 
 
 </script>

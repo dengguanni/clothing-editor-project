@@ -1,8 +1,8 @@
 <template>
     <div class="big-preview" @click.stop>
         <div class="mode-selection">
-            <button :class="is3D ? 'btn-active' : 'btn'" @click="changeMode(true)">3D</button>
-            <button :class="!is3D ? 'btn-active' : 'btn'" @click="changeMode(false)">2D</button>
+            <button :class="is3D ? 'btn-active' : 'btn'" @click.native="changeMode(true)">3D</button>
+            <button :class="!is3D ? 'btn-active' : 'btn'" @click.native="changeMode(false)">2D</button>
         </div>
         <div class="box" v-show="is3D" id="big-3d">
 
@@ -42,6 +42,13 @@ const store = useStore()
 const bgColor = computed(() => {
     return store.state.bgColor
 })
+const screenshotList = computed(() => {
+    return store.state.screenshotList.big
+})
+const colorList = computed(() => {
+    return store.state.saveData.commodityInfo.colorList
+})
+
 const colorSelection = ref('')
 const load3DScene = new LoadScene()
 const props = defineProps({
@@ -50,13 +57,8 @@ const props = defineProps({
         default: 4
     }
 })
-let screenshotList = reactive([])
 let scene, renderer, camera
 const is3D = ref(false)
-
-const colorList = ref([
-
-])
 
 let directionSelection = ref('')
 let imageActive = ref('')
@@ -64,24 +66,27 @@ const list = reactive([0, 2, 34, 6, 9])
 watch(bgColor, (newVal, oldVal) => {
     if (newVal) {
         colorSelection.value = newVal.GUID
-        
     }
 }, { immediate: true, deep: true });
+watch(screenshotList, (newVal, oldVal) => {
+    if (newVal.length > 0) {
+        imageActive.value = newVal[0].src
+        directionSelection.value = newVal[0].id
+    }
+}, { immediate: true, deep: true });
+
 onMounted(() => {
-    colorList.value = [...GoodsInfo.modelColorList]
     is3D.value = props.is3D === 4 ? true : false
     LoadScene.change3dBox('big-3d', () => {
-        screenshotList = []
-        let arr = LoadScene.getImages()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
-        imageActive.value = screenshotList[0].src
-        directionSelection.value = screenshotList[0].id
+        load3DScene.getScreenshotList('big')
+        if (screenshotList.value.length > 0) {
+            imageActive.value = screenshotList.value[0].src
+            directionSelection.value = screenshotList.value[0].id
+        }
+
     })
 
 })
-
 onUnmounted(() => {
     LoadScene.change3dBox('small-3d')
 })
@@ -91,45 +96,34 @@ const changeDirection = (item) => {
 }
 const changeImage = (val) => {
     if (val == 'up') {
-        screenshotList.forEach((el, index) => {
-            if (el.id == directionSelection.value && screenshotList[index - 1]) {
-                directionSelection.value = screenshotList[index - 1].id
-                imageActive.value = screenshotList[index - 1].src
+        screenshotList.value.forEach((el, index) => {
+            if (el.id == directionSelection.value && screenshotList.value[index - 1]) {
+                directionSelection.value = screenshotList.value[index - 1].id
+                imageActive.value = screenshotList.value[index - 1].src
             }
         })
     } else {
         let key = 0
-        screenshotList.forEach((el, index) => {
-            console.log(directionSelection.value, screenshotList[index + 1])
-            if (el.id == directionSelection.value && screenshotList[index + 1]) {
+        screenshotList.value.forEach((el, index) => {
+            console.log(directionSelection.value, screenshotList.value[index + 1])
+            if (el.id == directionSelection.value && screenshotList.value[index + 1]) {
                 key = index + 1
             }
         })
-        directionSelection.value = screenshotList[key].id
-        imageActive.value = screenshotList[key].src
+        directionSelection.value = screenshotList.value[key].id
+        imageActive.value = screenshotList.value[key].src
     }
 }
 const changeColor = (item) => {
     colorSelection.value = item.GUID
-    store.commit('setBgColor', colorList.value[0])
-    screenshotList = []
-    let arr = LoadScene.getImages()
-    arr.forEach(element => {
-        screenshotList.push(element)
-    });
-    imageActive.value = screenshotList[0].src
-    directionSelection.value = screenshotList[0].id
+    store.commit('setBgColor', item)
+    // load3DScene.getScreenshotList('big')
+    console.log('screenshotList', screenshotList)
+
+
 }
 const changeMode = (val) => {
     is3D.value = val
-    if (!is3D.value) {
-        screenshotList = []
-        let arr = LoadScene.getImages()
-        arr.forEach(element => {
-            screenshotList.push(element)
-        });
-        changeDirection(screenshotList[0])
-    }
 }
 </script>
 <style lang="less" scoped>

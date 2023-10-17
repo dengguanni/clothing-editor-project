@@ -169,13 +169,14 @@ const changeColor = (item: any) => {
 const getBgColor = (GUID: string) => {
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
         colorList.value = [...res.Tag[0].Table]
+        store.commit('setBgColorList', [...res.Tag[0].Table])
+        console.log('colorList.value',colorList.value)
         if (!bgColor.value) {
             colorSelected.value = colorList.value[0].GUID
             GoodsInfo.modelColorList = colorList.value
             store.commit('setBgColor', colorList.value[0])
-            store.commit('setBgColorList', colorList)
+           
         }
-
     })
 }
 </script>

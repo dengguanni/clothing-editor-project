@@ -5,8 +5,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import baseUrl from '@/config/constants/baseUrl';
+import { useStore } from 'vuex'
 class LoadScene {
-    static canvasId: string
+    store = useStore()
+    static canvasId: string = 'small-3d'
     static camera: any
     static scene: any
     static renderer: any
@@ -20,9 +22,7 @@ class LoadScene {
                 }
             })
         }
-
         const loader = new GLTFLoader();
-        // http://192.168.1.3/ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb
         loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
             object.name = name
             object.scene.traverse(v => {
@@ -35,14 +35,10 @@ class LoadScene {
                 }
             })
             LoadScene.scene.add(object.scene);
-            LoadScene.setCameraAngle()
         });
 
     }
-    static getImages = () => {
-        this.setCameraAngle()
-        return this.screenshotList
-    }
+
     static setTexture = (name, url, callback) => {
         if (url) {
             LoadScene.scene.traverse((child: any) => {
@@ -56,16 +52,34 @@ class LoadScene {
                 }
             })
         }
-
-        LoadScene.setCameraAngle()
         callback ? callback() : ''
+    }
+    setTexture = (name, url, callback) => {
+        if (url) {
+            LoadScene.scene.traverse((child: any) => {
+                if (child.isMesh && child.name == name) {
+                    const mapTexture = new THREE.TextureLoader().load(url)
+                    mapTexture.encoding = THREE.sRGBEncoding
+                    mapTexture.repeat.set(1, 1)
+                    child.material = new THREE.MeshLambertMaterial({
+                        map: mapTexture,
+                    })
+                }
+            })
+        }
+        callback ? callback() : ''
+        setTimeout(() => {
+            // this.getScreenshotList('big')
+            console.log('LoadScene.canvasId', LoadScene.canvasId)
+            LoadScene.canvasId == 'big-3d' ? this.getScreenshotList('big') : this.getScreenshotList('small')
+        }, 100);
     }
     init(scene: any, camera: any, renderer: any, id: string, callBack: Function) {
         LoadScene.scene = scene
         LoadScene.camera = camera
         LoadScene.renderer = renderer
         LoadScene.scene = new THREE.Scene();
-        LoadScene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
+        LoadScene.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 200);
         LoadScene.camera.position.z = -3;
         LoadScene.scene.add(LoadScene.camera);
         LoadScene.scene.background = new THREE.Color("#F5F5F5");
@@ -121,17 +135,17 @@ class LoadScene {
         setTimeout(() => {
             callBack()
         }, 1000);
+        console.log('sdfg', this.store)
     }
     static change3dBox = (id, callback) => {
         const height = id == 'big-3d' ? 600 : 280
         const width = id == 'big-3d' ? 600 : 280
+        this.canvasId = id
         LoadScene.renderer.setSize(height, width);
         document.getElementById(id)?.appendChild(LoadScene.renderer.domElement);
         callback ? callback() : ''
     }
-
-
-    static setCameraAngle() {
+    getScreenshotList(size) {
         LoadScene.screenshotList = []
         const setImage = () => {
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera)
@@ -142,7 +156,11 @@ class LoadScene {
             }
             LoadScene.screenshotList.push(obj)
         }
-
+        // LoadScene.camera.position.set({ x: 3.6739403974420594, y: 1.8369701987210297, z: -3 })
+        // LoadScene.camera.position.x = 0.06689093537133349
+        // LoadScene.camera.position.y = -0.33589342830992186
+        // LoadScene.camera.position.z = -3
+        // console.log('LoadScene.camera', LoadScene.camera.position)
         LoadScene.scene.traverse((c: any) => {
             if (c.name == 'duanxiu') {
                 c.rotation.y = 0
@@ -155,10 +173,12 @@ class LoadScene {
             }
 
         })
-
+        let obj: any = {}
+        obj[size] = LoadScene.screenshotList
+        this.store.commit('setScreenshotList', obj)
+        console.log('setScreenshotList', obj)
         return LoadScene.screenshotList
     }
-
     destroyScene() {
         LoadScene.scene = null
     }
@@ -169,32 +189,11 @@ class LoadScene {
         screenshotList.push(imgData)
         return screenshotList
     }
-    setModelColor(color1: string, callBack: Function) {
-        console.log('LoadScene.scene', LoadScene.scene)
-        const color = new THREE.Color(color1)
-        // const material = new THREE.MeshBasicMaterial({ color })
-        LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
-                c.traverse((v: any) => {
-                    if (v.type == 'Mesh') {
-                        v.material.color = color
 
-                        console.log('Mesh',v)
-                    }
-                })
-
-            }
-        })
-        setTimeout(() => {
-            callBack ? callBack() : ''
-        }, 1000);
-    }
     setModelCamera(direction: string) {
         if (LoadScene.scene) {
             LoadScene.scene.traverse((c: any) => {
                 const setModelRotation = (targetPosition: any) => {
-                    console.log('LoadScene.camera', LoadScene.camera.position)
-                    console.log('target', LoadScene.control.target)
                     let position = { x: LoadScene.camera.position.x, y: LoadScene.camera.position.y, z: LoadScene.camera.position.z };
                     let testTween = new TWEEN.Tween(position);
                     testTween.to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 1000);

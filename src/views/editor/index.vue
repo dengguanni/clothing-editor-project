@@ -339,9 +339,7 @@ onMounted(() => {
   canvasEditor.use(FlipPlugin);
   canvasEditor.use(RulerPlugin);
   canvasEditor.use(TestPlugin);
-
   // canvasEditor.use(MaterialPlugin);
-
   event.init(canvas);
   state.show = true;
   state.isShowHeader = true;
@@ -374,10 +372,13 @@ const getSaveData = () => {
       sendGoodsId(dataJson.commodityInfo)
     }
     store.commit('setSaveData', dataJson)
-    store.commit('setCutPartsType',  dataJson.commodityInfo.cutParts[0].Title)
+    store.commit('setCutPartsType', dataJson.commodityInfo.cutParts[0].Title)
     store.commit('setCutParts', dataJson.commodityInfo.cutParts)
     store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID)
     store.commit('setBgColor', dataJson.commodityInfo.bgColor)
+    store.commit('setBgColorList', dataJson.commodityInfo.colorList)
+    console.log(' dataJson.commodityInfoe', dataJson.commodityInfo)
+    console.log('dataJson.commodityInfo.colorList', dataJson.commodityInfo.colorList)
   })
 }
 

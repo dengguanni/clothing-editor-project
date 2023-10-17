@@ -28,10 +28,6 @@ class HistoryPlugin {
     this._init();
   }
   store = useStore()
-  // const this.store = useStore()
-  // const cutPartsType = computed(() => {
-  //   return this.store.state.cutPartsType
-  // })
   saveSteps = computed(() => {
     return this.store.state.saveSteps
   })

@@ -30,6 +30,7 @@ import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
 import { useStore } from 'vuex'
 import { debounce } from 'lodash-es';
+const load3DScene = new LoadScene()
 const store = useStore()
 const props = defineProps({
     sizeList: {
@@ -40,7 +41,6 @@ const props = defineProps({
     }
 })
 const URLbase64 = ref('')
-const load3DScene = new LoadScene()
 const active = ref('')
 const cutParts = computed(() => {
     return store.state.cutParts
@@ -88,7 +88,6 @@ watch(cutParts, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
-        console.log('bgColor', isSetSteps.value)
         setTimeout(() => {
             setAllCuts(true, isSetSteps.value)
         }, 200);
@@ -149,11 +148,8 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             ImagesList[el.Title] = {}
             ImagesList[el.Title].Images = []
         })
-        console.log('isSetSteps', isSetSteps)
         isSetSteps ? '' : objects.forEach(el => {
             if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
-                console.log('text', el)
-                // hasText = true
                 const FileName = guid() + '.png'
                 console.log('FileName', FileName)
                 el.clone(clone => {
@@ -170,11 +166,6 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                     })
                     el.FileName = FileName
                     el.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                    // let callback = () => {
-                    //     if (cutPartsType.value) {
-                    //         setAllCuts(false, isSetSteps)
-                    //     }
-                    // }
                     setUserUploadFile(url, FileName, 'images_temp/', null)
                 })
             }
@@ -185,7 +176,6 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                 objects[index].clone(cloned => {
                     cloned.rotate(0)
                     maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-                    console.log('maskRect', maskRect)
                     const obj = {
                         Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
                         Image_width: (objects[index].width * objects[index].scaleX).toFixed(5) + '',
@@ -227,7 +217,6 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             }
             fn(objects, 0, p)
         } else {
-            // store.commit('setIsSetSteps', true)
             cutParts.value.forEach((element, indexP) => {
                 let p = {
                     SizeGUID: sizeGUID.value,
@@ -252,8 +241,7 @@ const setCutAllParts = (p, Title, isSetStep) => {
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
-        LoadScene.setTexture(p.Part_name, url)
-
+        load3DScene.setTexture(p.Part_name, url, () => { })
     })
 }
 
@@ -330,7 +318,6 @@ const loadCuts = debounce(() => {
                 });
             }
             canvasEditor.canvas.add(maskRect);
-            console.log('maskRect加载裁片', maskRect)
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
                 setAllCuts(true)

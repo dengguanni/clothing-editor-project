@@ -82,14 +82,6 @@ const getImagesLibrary = (QueryKeyWord) => {
     })
 
 }
-const upDateTexture = () => {
-    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-    if (cutPartsType.value) {
-        LoadScene.setTexture(cutPartsType.value, '', () => {
-        })
-    }
-}
 
 // 点击添加
 const addItem = (item) => {
@@ -169,7 +161,6 @@ const dragItem = (event) => {
                 store.commit('setSelected', image)
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
-                upDateTexture()
             }
         };
         const properties = {

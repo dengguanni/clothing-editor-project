@@ -27,10 +27,11 @@ const store = createStore({
         // 裁片
 
       },
-      bgColor:'',
+      bgColor: '',
       sizeGUID: '',
       cutParts: [],
       cutPartsType: '',
+      colorList: [],
       // 撤回-回退
       saveSteps: {
         ID: '',
@@ -43,7 +44,11 @@ const store = createStore({
       pageLoading: false,
       isSetSteps: false,
       selected: '',
-      USERINFO: ''
+      USERINFO: '',
+      screenshotList: {
+        big: [],
+        small: []
+      }
     }
   },
   mutations: {
@@ -58,6 +63,10 @@ const store = createStore({
     },
     USERINFO(state, val) {
       state.USERINFO = val
+    },
+    setScreenshotList(state, val) {
+      state.screenshotList.big = val.big ? val.big : state.screenshotList.big
+      state.screenshotList.small = val.small ? val.small : state.screenshotList.small
     },
     setAllIsLock(state) {
       state.handleLock = state.handleLock + 1
@@ -78,7 +87,7 @@ const store = createStore({
       state.saveData.commodityInfo.GUID = GUID
     },
     setBgColorList(state, val) {
-      state.saveData.commodityInfo.setBgColorList = val
+      state.saveData.commodityInfo.colorList = val
     },
     setSizeList(state, val) {
       state.saveData.commodityInfo.sizeList = val
@@ -95,7 +104,7 @@ const store = createStore({
       state.saveData.modelInfo = obj
     },
     setCutPartsType(state, val) {
-     
+
       state.cutPartsType = val
     },
     setCanvasObjects(state, val) {
