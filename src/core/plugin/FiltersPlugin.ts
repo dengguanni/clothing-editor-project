@@ -23,6 +23,7 @@ class FiltersPlugin {
         this.editor = editor;
     }
     store = useStore()
+
     changeFilters(type, value, noParamsFilters) {
         const activeObject = this.canvas.getActiveObjects()[0];
         noParamsFilters ? noParamsFilters[type] = value : ''

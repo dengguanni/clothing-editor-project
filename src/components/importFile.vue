@@ -47,9 +47,10 @@ import { ElMessage, ElButton } from 'element-plus';
 import { getImagesCustom, setUserUploadFile } from '@/core/2D/handleImages.ts'
 import mitts from '@/utils/mitts'
 import baseUrl from '@/config/constants/baseUrl'
-import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
+import { basicInheritAttribute, initializationAttribute } from '@/config/customAttributeFabricObj.ts'
 import { useStore } from 'vuex'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
+import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
 const store = useStore()
 const { fabric, canvasEditor } = useSelect();
 const state = reactive({
@@ -124,9 +125,8 @@ const replaceImage = (str, fileHeaderPath) => {
           canvasEditor.canvas.setActiveObject(info);
           ControlsTile.setRepeat(image.repeatType, true)
           image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
-          image.Sharpen ? canvasEditor.setSharpening(val) : ''
+          image.Sharpen ? canvasEditor.setSharpening(true) : ''
           canvasEditor.canvas.requestRenderAll();
-
         }
       };
       const properties = {
@@ -277,18 +277,22 @@ const addItem = (item) => {
   const imageURL = baseUrl + item.ImageUrl_Path;
   let callback = (image, isError) => {
     if (!isError) {
+      for (let key in initializationAttribute) {
+        image[key] = initializationAttribute[key]
+      }
       image.name = item.Title
       image.id = uuid()
       canvasEditor.canvas.add(image);
       image.FileName = item.FileName
       image.FilePath = item.FilePath
       image.cutPartsType = cutPartsType.value
-      image.mask = maskRect
+      image.angle = 0
       canvasEditor.canvas.bringToFront(maskRect)
       const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-      canvasEditor.canvas.discardActiveObject();
       canvasEditor.canvas.setActiveObject(info);
+      MaximizePlugin.setMax('bigFull')
       canvasEditor.canvas.requestRenderAll();
+
     }
   };
   const properties = {

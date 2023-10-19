@@ -309,7 +309,7 @@ const pageLoading = computed(() => {
 
 onMounted(() => {
   window.localStorage.userInfo = route.query.key
-  // store.commit('setPageLoading', true)
+  store.commit('setPageLoading', true)
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
     fireRightClick: true, // 启用右键，button的数字为3

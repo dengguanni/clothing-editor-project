@@ -80,6 +80,7 @@ const beforeClear = () => {
   });
 };
 const clear = () => {
+  console.log('canvasEditor.canvas.getObjects()', canvasEditor.canvas.getObjects())
   canvasEditor.canvas.getObjects().forEach(el => {
     if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined) {
       canvasEditor.canvas.remove(el)

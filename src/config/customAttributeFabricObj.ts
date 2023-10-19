@@ -67,3 +67,16 @@ export const basicInheritAttribute = [
     'left',
     'top'
 ]
+export const initializationAttribute = {
+    Sharpen: null,
+    isLock: false,
+    filters: [],
+    filtersType: null,
+    isBackground: false,
+    tileParentId: null,
+    selectable:true,
+    parentCroppingFileName: null,
+    parentCroppingFilePath: null,
+    isMask: undefined,
+    tileParentFileName: null,
+}

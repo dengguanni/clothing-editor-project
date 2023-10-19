@@ -39,12 +39,43 @@ class ControlsTile {
             ControlsTile.setRepeat(activeObject.repeatType, true)
         })
     }
-    static setRepeat(repeatType: string, val: boolean = false) {
-        const activeObject = this.canvas.getActiveObjects()[0];
-        if(activeObject.parentCroppingFileName){
-            Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
-            return
+    static setButtonActive = (arr, type) => {
+        const obj = this.canvas.getActiveObjects()[0]
+        if (type) {
+            if (obj.repeatType) {
+                if (obj.repeatType == type) {
+                    arr.forEach(element => {
+                        element.isSelected = false
+                    });
+                } else {
+                    arr.forEach(el => {
+                        if (el.type == type) {
+                            el.isSelected = true
+                        } else {
+                            el.isSelected = false
+                        }
+                    })
+                }
+
+            } else {
+                arr.forEach(el => {
+                    if (el.type == type) {
+                        el.isSelected = true
+                    } else {
+                        el.isSelected = false
+                    }
+                })
+            }
+        } else {
+            arr.forEach(element => {
+                element.isSelected = false
+            });
         }
+    }
+    static setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
+        const activeObject = this.canvas.getActiveObjects()[0];
+        console.log('activeObject', activeObject)
+
         if (!val) {
             if (repeatType) {
                 if (activeObject.repeatType == repeatType) {
@@ -64,6 +95,11 @@ class ControlsTile {
         })
 
         if (activeObject.isRepeat && activeObject.repeatType) {
+            if (activeObject.parentCroppingFileName) {
+                Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
+                return
+            }
+            arr.length > 0 ? this.setButtonActive(arr,activeObject.repeatType ) : ''
             if (activeObject.repeatType == 'basic') {
                 this.handelBasicRepeat()
             } else if (activeObject.repeatType == 'mirror') {
@@ -214,7 +250,7 @@ class ControlsTile {
         const self = this
         let arr1 = []
         const activeObject = this.canvas.getActiveObjects()[0];
-        
+
         const createPattern = () => {
             let isOffsetX = false
             activeObject.clone(cloned => {
@@ -318,7 +354,7 @@ class ControlsTile {
     static handelRepeatY = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        
+
         const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
         let left
         let top
@@ -510,7 +546,7 @@ class ControlsTile {
     static handelRepeatMirror = () => {
         const self = this
         const activeObject = this.canvas.getActiveObjects()[0];
-        
+
         const workspace = this.canvas.getObjects().find((item: any) => item.id === 'workspace');
         let newObjArr1 = []
         let newObjArr2 = []

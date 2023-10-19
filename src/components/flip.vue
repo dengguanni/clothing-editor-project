@@ -33,12 +33,12 @@ const handleLock = computed(() => {
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
     const activeObject = canvasEditor.canvas.getActiveObject()
-    disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+    activeObject && (disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false)
   }
 }, { deep: true });
 watch(handleLock, (newVal, oldVal) => {
   const activeObject = canvasEditor.canvas.getActiveObject()
-  disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false
+  activeObject && (disabled.value = activeObject.isLock !== undefined ? activeObject.isLock : false)
 }, { deep: true });
 const menuList = reactive([
   {

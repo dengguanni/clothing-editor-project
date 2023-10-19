@@ -25,6 +25,8 @@ class MaximizePlugin {
     }
     // 设计最大化
     static designMaximization() {
+        this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
+        console.log(' this.activeObject',  this.activeObject)
         if (this.activeObject.width >= this.activeObject.height) {
             this.widthMaximization()
         } else {

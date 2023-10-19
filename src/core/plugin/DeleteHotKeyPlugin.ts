@@ -42,7 +42,7 @@ class DeleteHotKeyPlugin {
   contextMenu() {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
-      return [null, { text: '删除', hotkey: 'Ctrl+V', disabled: false, onclick: () => this.del() }];
+      // return [null, { text: '删除', hotkey: 'Ctrl+V', disabled: false, onclick: () => this.del() }];
     }
   }
 

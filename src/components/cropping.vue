@@ -23,6 +23,7 @@ import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import baseUrl from '@/config/constants/baseUrl'
+import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 let croppedImage = ref()
@@ -122,8 +123,8 @@ const handelCutParts = (image) => {
                 imgInstance = new fabric.Image(imgEl, {
                     id: uuid(),
                     name: image.name,
-                    width: image.width,
-                    height: image.height,
+                    width: image.width * image.scaleX,
+                    height: image.height * image.scaleY ,
                     angle: image.angle,
                     top: image.top,
                     left: image.left,
@@ -136,12 +137,10 @@ const handelCutParts = (image) => {
                 imgInstance.parentCroppingFileName = image.FileName
                 imgInstance.parentUrl = image.ImageUrl
                 imgInstance.ImageUrl = image.ImageUrl
-                imgInstance.skewX = image.skewX
-                imgInstance.skewY = image.skewY
-
                 imgEl.onload = () => {
                     const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
                     canvasEditor.canvas.remove(oldObj)
+
                     canvasEditor.canvas.add(imgInstance);
                     canvasEditor.canvas.bringToFront(maskRect)
                     canvasEditor.canvas.renderAll();
@@ -161,11 +160,11 @@ const restore = () => {
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
-        "http://8.140.206.30:8099/UserUploadFile/images_library/6c4e5caa-4bd2-11ee-b1c4-00163e10d08e.png"
         const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
             if (!isError) {
                 canvasEditor.canvas.remove(activeObjects)
+                basicInheritAttribute.forEach(el => image.set(el, activeObjects[el]))
                 image.id = uuid()
                 image.name = activeObjects.name
                 image.scaleX = activeObjects.scaleX
@@ -175,16 +174,24 @@ const restore = () => {
                 image.angle = activeObjects.angle
                 image.FilePath = activeObjects.parentCroppingFilePath
                 image.FileName = activeObjects.parentCroppingFileName
+                image.oldFileName = activeObjects.parentCroppingFileName
+                image.oldFilePath = activeObjects.parentCroppingFilePath
                 image.ImageUrl = activeObjects.ImageUrl
                 image.cutPartsType = activeObjects.cutPartsType
+                image.filtersType = activeObjects.filtersType
+                image.Sharpen = activeObjects.Sharpen
+                image.isBackground = activeObjects.isBackground
                 image.visible = true
                 croppedImage.value = image
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-                canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
+                console.log('image', image)
+                image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
+                image.Sharpen ? canvasEditor.setSharpening(true) : ''
                 canvasEditor.canvas.requestRenderAll();
+
             }
         };
         const properties = {

@@ -29,6 +29,7 @@ import mitts from '@/utils/mitts'
 import LoadScene from '@/core/3D/loadScene.ts'
 import baseUrl from '@/config/constants/baseUrl'
 import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
+import { initializationAttribute } from '@/config/customAttributeFabricObj.ts'
 const props = defineProps({
     isBg: {
         type: Boolean,
@@ -98,12 +99,16 @@ const addItem = (item) => {
         const imageURL = baseUrl + item.ImageUrl_Path;
         let callback = (image, isError) => {
             if (!isError) {
+                for (let key in initializationAttribute) {
+                    image[key] = initializationAttribute[key]
+                }
                 image.name = item.Title
                 image.cutPartsType = cutPartsType.value
                 image.id = uuid()
                 image.ImageUrl = item.ImageUrl
                 image.FileName = item.FileName
                 image.FilePath = item.FilePath
+
                 image.isLock = false
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
@@ -117,6 +122,8 @@ const addItem = (item) => {
                     MaximizePlugin.setMax('width')
                     MaximizePlugin.setMax('height')
                 }
+                image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX)/2
+                image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY)/2
                 canvasEditor.canvas.bringToFront(maskRect)
                 store.commit('setSelected', image)
                 canvasEditor.canvas.requestRenderAll();
@@ -147,6 +154,9 @@ const dragItem = (event) => {
                     y: event.y - top,
                 };
                 const pointerVpt = canvasEditor.canvas.restorePointerVpt(point);
+                for (let key in initializationAttribute) {
+                    image[key] = initializationAttribute[key]
+                }
                 image.id = uuid()
                 image.name = obj.Title
                 image.cutPartsType = cutPartsType.value

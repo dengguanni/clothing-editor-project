@@ -12,6 +12,9 @@ type IEditor = Editor;
 import { v4 as uuid } from 'uuid';
 import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
 import ControlsTile from '@/core/plugin/ControlsTile.ts'
+import { useStore } from 'vuex'
+import guid from '@/utils/guiId';
+import { Message } from 'view-ui-plus';
 class CopyPlugin {
   public canvas: fabric.Canvas;
   public editor: IEditor;
@@ -24,7 +27,10 @@ class CopyPlugin {
     this.editor = editor;
     this.cache = null;
   }
-
+  store = useStore()
+  cutPartsType = computed(() => {
+    return this.store.state.cutPartsType
+  })
   // 多选对象复制
   _copyActiveSelection(activeObject: fabric.Object) {
     // 间距设置
@@ -68,13 +74,13 @@ class CopyPlugin {
     const isBackground = activeObject.isBackground
     const repeatType = activeObject.repeatType
     const isRepeat = activeObject.isRepeat
-    console.log('repeatType', repeatType)
     activeObject?.clone((cloned: fabric.Object) => {
       if (cloned.left === undefined || cloned.top === undefined) return;
       // cloned.set({
       //   ...info
       // });
       // 设置位置信息
+
       cloned.set({
         left: cloned.left + grid,
         top: cloned.top + grid,
@@ -88,12 +94,10 @@ class CopyPlugin {
         repeatType: repeatType,
         isRepeat: isRepeat
       });
-
       canvas.discardActiveObject();
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
-      console.log('cloned.repeatType', cloned.repeatType)
       ControlsTile.setRepeat(repeatType, true)
     });
   }
@@ -114,10 +118,42 @@ class CopyPlugin {
     if (eventName === 'ctrl+c' && e.type === 'keydown') {
       const activeObject = this.canvas.getActiveObject();
       this.cache = activeObject;
+      this.cache.FileName = activeObject.FileName
+      this.cache.FilePath = activeObject.FilePath
+      this.cache.repeatType = activeObject.repeatType
+      basicInheritAttribute.forEach(el => {
+        this.cache[el] = activeObject[el]
+      })
+
     }
     if (eventName === 'ctrl+v' && e.type === 'keydown') {
       if (this.cache) {
-        this.clone(this.cache);
+        // this.clone(this.cache);
+        if (this.cache.isBackground && this.cutPartsType.value == this.cache.cutPartsType) {
+          Message.error('粘贴失败，一个裁片只能有一张背景图，请粘贴至别的裁片试试')
+          return
+        }
+        console.log('this.cache粘贴', this.cache, this.cutPartsType.value)
+        this.cache.clone(c => {
+          const grid = this.cutPartsType.value == this.cache.cutPartsType ? 10 : 0
+          basicInheritAttribute.forEach(el => {
+            c[el] = this.cache[el]
+          })
+          c.set({
+            cutPartsType: this.cutPartsType.value,
+            FileName: this.cache.FileName,
+            FilePath: this.cache.FilePath,
+            id: guid(),
+            left: this.cache.left + grid,
+            top: this.cache.top + grid,
+            visible: true,
+            repeatType: this.cache.repeatType
+          })
+          this.canvas.add(c)
+          this.canvas.setActiveObject(c)
+          ControlsTile.setRepeat(c.repeatType, true)
+        })
+
       }
     }
   }

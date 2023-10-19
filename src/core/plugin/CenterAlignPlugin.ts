@@ -52,12 +52,12 @@ class CenterAlignPlugin {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
       return [
-        {
-          text: '水平垂直居中',
-          hotkey: 'Ctrl+V',
-          disabled: false,
-          onclick: () => this.position('center'),
-        },
+        // {
+        //   text: '水平垂直居中',
+        //   hotkey: 'Ctrl+V',
+        //   disabled: false,
+        //   onclick: () => this.position('center'),
+        // },
       ];
     }
   }

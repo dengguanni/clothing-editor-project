@@ -296,19 +296,38 @@ const setCopyTo = (item) => {
                 FileName: activeObject.FileName,
                 FilePath: activeObject.FilePath,
             })
+            if (c.repeatType) {
+                canvasEditor.canvas.getObjects().forEach(element => {
+                    if (element.tileParentId == c.id) {
+                        element.clone((cloned) => {
+                            cloned.set({
+                                id: uuid(),
+                                ImageUrl: element.ImageUrl,
+                                FileName: element.FileName,
+                                FilePath: element.FilePath,
+                                tileParentFileName: c.FileName,
+                                tileParentId: c.id,
+                                cutPartsType: c.cutPartsType
+                            })
+                            canvasEditor.canvas.add(cloned)
+                        })
+                    }
+                });
+            }
             canvasEditor.canvas.add(c)
         })
     }
+    // ControlsTile.setRepeat(repeatType, true)
     canvasEditor.canvas.renderAll();
     state.copyTo = false
-    Message.success('复制成功');
 
+    Message.success('复制成功');
 }
 const menuList1Click = (type) => {
-    setButtonActive(menuList1, type)
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     switch (type) {
         case 'basic':
-            ControlsTile.setRepeat('basic')
+            ControlsTile.setRepeat('basic', false, menuList1)
             break;
         case 'cropping':
             //   state.isShowCropping = true
@@ -316,13 +335,13 @@ const menuList1Click = (type) => {
         case 'clearness':
             break;
         case 'mirror':
-            ControlsTile.setRepeat('mirror')
+            ControlsTile.setRepeat('mirror', false, menuList1)
             break;
         case 'transverse':
-            ControlsTile.setRepeat('transverse')
+            ControlsTile.setRepeat('transverse', false, menuList1)
             break;
         case 'direction':
-            ControlsTile.setRepeat('direction')
+            ControlsTile.setRepeat('direction', false, menuList1)
             break;
         default:
     }
@@ -334,11 +353,12 @@ const del = debounce(function () {
 }, 300);
 const btnClick = (item) => {
     const activeObject = canvasEditor.canvas.getActiveObject()
-    if (activeObject.Sharpen && item == 'filter') {
+    console.log('activeObject', activeObject)
+    if (activeObject && activeObject.Sharpen && item == 'filter') {
         Message.error('添加清晰后不支持滤镜');
         return
     }
-    if (activeObject.repeatType) {
+    if (activeObject && activeObject.repeatType) {
         Message.error('平铺后不支持裁剪，请移除平铺后再试试')
         return
     }
