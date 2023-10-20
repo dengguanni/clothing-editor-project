@@ -5,7 +5,7 @@
 <template>
   <div class="save-box">
     <Button type="primary" @click="getData">
-      测试
+      <commonIconfont></commonIconfont>
       <Icon type="ios-arrow-down"></Icon>
     </Button>
     <Button type="primary" @click="setSaveData(true)">
@@ -24,6 +24,7 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex'
 import crypto from '@/utils/crypto'
 import { allCustomAttribute } from '@/config/customAttributeFabricObj.ts'
+import commonIconfont from '@/components/fontClass/commonIconfont.vue'
 const store = useStore()
 const saveData = computed(() => {
   return store.state.saveData
@@ -63,7 +64,7 @@ const cbMap = {
 };
 let a = ref(0)
 const getData = () => {
-console.log('getObjects',canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
+  console.log('getObjects', canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
   // canvasEditor.test(1111)
   // saveSteps.value.ID
   // const p = {

@@ -4,21 +4,29 @@
         {{ content }}
         <v-slot></v-slot>
         <span v-html="svg" v-if="svg"></span>
+        
+        <!-- <commonIconfont :type="type" size="26" v-if="type"></commonIconfont> -->
     </button>
     <button class="btn-box-disabled" disabled :style="'width:' + props.width + 'px;cursor:' + 'not-allowed;'" type="submit"
         v-show="disabled">
         <v-slot></v-slot>
         {{ content }}
         <span v-html="svg" v-if="svg" :style="'cursor:' + 'not-allowed;'"></span>
+        <!-- <commonIconfont size="26"></commonIconfont> -->
     </button>
 </template>
   
 <script setup>
+import commonIconfont from '@/components/fontClass/commonIconfont.vue'
 const emit = defineEmits()
 const props = defineProps({
     bgColor: {
         type: String,
         default: '#F0F2F5'
+    },
+    type: {
+        type: String,
+        default: ''
     },
     textColor: {
         type: String,
@@ -107,36 +115,6 @@ const buttonClick = () => {
     margin-bottom: 12px;
 }
 
-.a,
-.b,
-.c {
-    fill: #4e5969;
-}
 
-.a,
-.b,
-.c,
-.d {
-    stroke: #4e5969;
-}
-
-.a {
-    opacity: 0;
-}
-
-.b {
-    stroke-linecap: round;
-}
-
-.b,
-.c,
-.d {
-    stroke-linejoin: round;
-    stroke-width: 2px;
-}
-
-.d {
-    fill: none;
-}
 </style>
   

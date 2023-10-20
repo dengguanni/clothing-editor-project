@@ -101,15 +101,15 @@ const angle = (value) => {
 <style scoped lang="less">
 .icon-3 {
 
-  .a,
-  .b {
-    fill: #4e5969;
-    stroke: rgba(0, 0, 0, 0);
-  }
+  // .a,
+  // .b {
+  //   fill: #4e5969;
+  //   stroke: rgba(0, 0, 0, 0);
+  // }
 
-  .a {
-    opacity: 0;
-  }
+  // .a {
+  //   opacity: 0;
+  // }
 }
 
 .filp {
@@ -138,35 +138,35 @@ const angle = (value) => {
   }
 }
 
-.a,
-.b,
-.c {
-  fill: #4e5969;
-}
+// .a,
+// .b,
+// .c {
+//   fill: #4e5969;
+// }
 
-.a,
-.b,
-.c,
-.d {
-  stroke: #4e5969;
-}
+// .a,
+// .b,
+// .c,
+// .d {
+//   stroke: #4e5969;
+// }
 
-.a {
-  opacity: 0;
-}
+// .a {
+//   opacity: 0;
+// }
 
-.b {
-  stroke-linecap: round;
-}
+// .b {
+//   stroke-linecap: round;
+// }
 
-.b,
-.c,
-.d {
-  stroke-linejoin: round;
-  stroke-width: 2px;
-}
+// .b,
+// .c,
+// .d {
+//   stroke-linejoin: round;
+//   stroke-width: 2px;
+// }
 
-.d {
-  fill: none;
-}
+// .d {
+//   fill: none;
+// }
 </style>

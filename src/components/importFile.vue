@@ -15,12 +15,19 @@
     </p>
     <div class="title">最近上传记录 </div>
     <div class="image-list">
-      <div v-for="item in imageList" :key="item.GUID" style="position: relative;">
-        <img class="item" :id="item.GUID" :src="item.ImageUrl" @click="addItem(item)" @mouseenter="showIcon(item)"
-          @mouseleave="closeIcon(item)" />
-        <Icon type="md-trash" class="icon" size="27" v-show="showDelIcon == item.GUID" @mouseenter="showIcon(item)"
-          @click="delImage(item)" />
-      </div>
+      <el-popover placement="right" :width="220" trigger="hover" v-for="item in imageList" :key="item.GUID">
+        <template #reference>
+          <div style="position: relative;">
+            <img class="item" :id="item.GUID" :src="item.ImageUrl" @click="addItem(item)" @mouseenter="showIcon(item)"
+              @mouseleave="closeIcon(item)" />
+            <Icon type="md-trash" class="icon" size="27" v-show="showDelIcon == item.GUID" @mouseenter="showIcon(item)"
+              @click="delImage(item)" />
+          </div>
+        </template>
+        <img :src="item.ImageUrl" style="width: 200px;height:auto">
+        <div>{{ item.FileName }}</div>
+      </el-popover>
+
     </div>
     <div class="page-box">
       <ElButton type="primary" text :icon="Delete" @click="changePage(false)" :disabled="pageIndex < 1"> <el-icon>

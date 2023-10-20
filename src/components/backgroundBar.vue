@@ -4,8 +4,14 @@
             @keyup.enter="searchImg" />
         <div class="line"></div>
         <div class="content">
-            <img class="item" :src="item.ImageUrl" v-for="item in imageList" :key="item.GUID" @click="addItem(item)"
-                @dragend="dragItem">
+            <el-popover placement="right-end" :width="220" trigger="hover" v-for="item in imageList" :key="item.GUID">
+                <template #reference>
+                    <img class="item" :src="item.ImageUrl" @click="addItem(item)" @dragend="dragItem">
+                </template>
+                <img :src="item.ImageUrl" style="width: 200px;height:auto">
+                <div>{{ item.Title }}</div>
+            </el-popover>
+
         </div>
         <!-- <div class="page">
             <div class="content">
@@ -122,8 +128,8 @@ const addItem = (item) => {
                     MaximizePlugin.setMax('width')
                     MaximizePlugin.setMax('height')
                 }
-                image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX)/2
-                image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY)/2
+                image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX) / 2
+                image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY) / 2
                 canvasEditor.canvas.bringToFront(maskRect)
                 store.commit('setSelected', image)
                 canvasEditor.canvas.requestRenderAll();
@@ -208,6 +214,11 @@ const dragItem = (event) => {
         bottom: 29px;
         left: 20px;
 
+        .image-details {
+            width: 100px;
+            height: auto;
+        }
+
         .content {
             display: flex;
             align-items: center;
@@ -242,6 +253,7 @@ const dragItem = (event) => {
             border-radius: 5%;
             margin-bottom: 10px;
             cursor: pointer;
+
 
             &hover {
                 border: 1px solid #4E5969;

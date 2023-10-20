@@ -14,7 +14,10 @@
                 </CarouselItem>
             </Carousel>
             <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="load3d"></div>
-            <button class="preview" @click="preview">预览</button>
+            <button class="preview" @click="preview">
+                <commonIconfont type="fangda3" size="18"></commonIconfont>
+               <div> 预览</div>
+            </button>
         </div>
     </div>
     <div class="shadow"></div>
@@ -25,6 +28,7 @@ import { Carousel } from 'view-ui-plus'
 import LoadScene from '@/core/3D/loadScene.ts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import mitts from '@/utils/mitts.js';
+import commonIconfont from '@/components/fontClass/commonIconfont.vue'
 import { useStore } from 'vuex'
 const store = useStore()
 const load3DScene = new LoadScene()
@@ -151,6 +155,7 @@ onUnmounted(() => {
     .preview-3d {
         height: 200px;
         width: 200px;
+       
     }
 
     .preview {
@@ -166,7 +171,9 @@ onUnmounted(() => {
         font-size: 14px;
         color: #FFFFFF;
         cursor: pointer;
-
+        display:flex;
+        align-items:center;
+        justify-content: space-evenly;
     }
 
     .content {

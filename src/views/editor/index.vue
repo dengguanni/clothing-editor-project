@@ -44,32 +44,30 @@
           <div>
             <MenuItem :name="3" class="menu-item">
             <!-- <Icon type="md-image" size="30" /> -->
-            <common-icon :angle-key="'gallery'"></common-icon>
+            <commonIconfont type="tupian" :fill="state.menuActive == 3 ? '#3064F2' : '#4E5969'"></commonIconfont>
             <div>图库 </div>
             </MenuItem>
             <MenuItem :name="5" class="menu-item">
             <!-- <Icon type="md-book" size="30" /> -->
-            <common-icon :angle-key="'background-1'"></common-icon>
+            <commonIconfont type="background" :fill="state.menuActive == 5 ? '#3064F2' : '#4E5969'"></commonIconfont>
             <div>{{ $t('background') }}</div>
             </MenuItem>
             <MenuItem :name="2" class="menu-item">
             <!-- <Icon type="logo-angular" size="30" /> -->
-            <common-icon :angle-key="'text'"></common-icon>
+            <commonIconfont type="wenzi_huaban1" :fill="state.menuActive == 2 ? '#3064F2' : '#4E5969'"></commonIconfont>
             <div>{{ $t('elements') }}</div>
             </MenuItem>
             <MenuItem :name="6" class="menu-item">
-            <!-- <Icon type="ios-cloud-upload-outline" size="30" /> -->
-            <common-icon :angle-key="'upload'"></common-icon>
+            <commonIconfont type="weibiaoti1" :fill="state.menuActive == 6 ? '#3064F2' : '#4E5969'"></commonIconfont>
             <div>{{ $t('import_files') }}</div>
             </MenuItem>
             <!-- <MenuItem :name="1" class="menu-item">
                 <Icon type="md-book" size="24" />
                 <div>{{ $t('templates') }}</div>
               </MenuItem> -->
-
             <MenuItem :name="4" class="menu-item">
             <!-- <Icon type="md-reorder" size="30" /> -->
-            <common-icon :angle-key="'layer'"></common-icon>
+            <commonIconfont type="gistuceng" :fill="state.menuActive == 4 ? '#3064F2' : '#4E5969'"></commonIconfont>
             <div>{{ $t('layers') }}</div>
             </MenuItem>
           </div>
@@ -244,6 +242,7 @@ import LoadScene from '@/core/3D/loadScene.ts'
 
 // icon
 import commonIcon from '@/components/commonIcon.vue'
+import commonIconfont from '@/components/fontClass/commonIconfont.vue'
 import Editor, {
   DringPlugin,
   AlignGuidLinePlugin,

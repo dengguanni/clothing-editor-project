@@ -5,13 +5,18 @@
     <!-- 后退 -->
     <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
       <Button @click="canvasEditor.undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
-        <commonIcon angleKey="withdraw"></commonIcon>
+        <!-- <commonIcon angleKey="withdraw"></commonIcon> -->
+
+        <commonIconfont type="chehui" size="26" v-show="saveSteps.ID_Previous > 0"></commonIconfont>
+        <commonIconfont type="chehui-copy" size="26" v-show="saveSteps.ID_Previous < 1"></commonIconfont>
       </Button>
     </Tooltip>
     <!-- 重做 -->
     <Tooltip :content="$t('history.redo') + `(${saveSteps.ID_Next == -1 ? 0 : saveSteps.ID_Next})`">
       <Button @click="canvasEditor.redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
-        <commonIcon angleKey="redo"></commonIcon>
+        <!-- <commonIcon angleKey="redo"></commonIcon> -->
+        <commonIconfont type="zhongzuo" size="26" v-show="saveSteps.ID_Next > 0"></commonIconfont>
+        <commonIconfont type="zhongzuo-copy" size="26" v-show="saveSteps.ID_Next < 1"></commonIconfont>
         <!-- <commonIcon angleKey="prohibitRedo" v-show="saveSteps.ID_Next < 1"></commonIcon> -->
       </Button>
     </Tooltip>
@@ -46,6 +51,7 @@ import baseUrl from '@/config/constants/baseUrl';
 import { debounce } from 'lodash-es';
 import { useStore } from 'vuex'
 import historyAip from '@/api/history.ts'
+import commonIconfont from '@/components/fontClass/commonIconfont.vue'
 const store = useStore()
 const { canvasEditor, fabric } = useSelect();
 const { history, redoStack, undoStack } = reactive(canvasEditor.getHistory());

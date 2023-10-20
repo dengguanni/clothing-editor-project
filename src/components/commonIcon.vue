@@ -2,7 +2,6 @@
 <template>
     <div class="icon">
         <span v-html="svgList[props.angleKey]" ></span>
-
     </div>
 </template>
   
