@@ -108,7 +108,7 @@ class HistoryPlugin {
               this.canvas.bringToFront(mask)
               this.canvas.sendToBack(backgroundImage)
               this.canvas.requestRenderAll();
-              setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
+              // setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
             }
           }
         };
@@ -127,7 +127,7 @@ class HistoryPlugin {
           this.canvas.bringToFront(mask)
           this.canvas.sendToBack(backgroundImage)
           this.canvas.requestRenderAll();
-          setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
+          // setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
         }
       }
     }

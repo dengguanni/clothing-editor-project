@@ -5,13 +5,15 @@
 <template>
   <div class="save-box">
     <Button type="primary" @click="getData">
-      <commonIconfont></commonIconfont>
+      <!-- <commonIconfont type="gistuceng"></commonIconfont> -->
+      <commonIconfont type="wenjian"></commonIconfont>
       <Icon type="ios-arrow-down"></Icon>
     </Button>
     <Button type="primary" @click="setSaveData(true)">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
     </Button>
+    <!-- <commonIconfont type="jiesuo_o"></commonIconfont> -->
   </div>
 </template>
 

@@ -13,18 +13,19 @@
         </div>
         <div class="menu-box">
             <div style="display: flex;justify-content: space-evenly; width: 100%; ">
-                <Tooltip :content="item.label" v-for="(item, i ) in menuList3" :key="item" style="width: 25px;">
+                <Tooltip :content="item.label" v-for="(item, i ) in  menuList3 " :key="item" style="width: 25px;">
                     <!-- <el-button text='plain' type='' @mousedown="menu3Click(item.type)" :id="item.type"
                         style="border-radius: 50%; width: 25px;" :disabled="item.disabled">
                         <span v-html="item.svg" style="margin: 0px;"></span>
                     </el-button> -->
                     <el-button text='plain' type='' @mousedown="menu3Click(item.type)" :id="item.type"
                         style="border-radius: 50%; width: 25px;" :disabled="item.disabled">
-                        <span v-html="item.svg" style="margin: 0px;"></span>
+                        <span v-html="item.type == 'lock' ? (selected.isLock ? item.svg : item.svg1) : item.svg"
+                            style="margin: 0px;"></span>
                     </el-button>
                     <div v-show="item.type == 'copyTo' && state.copyTo" class="scale-menu">
                         <div class="item" id="scale-big" @click.stop="setCopyTo({ Title: 'all' })">所有片</div>
-                        <div class="item" id="scale-big" @click.stop="setCopyTo(item1)" v-for="item1 in cutParts"
+                        <div class="item" id="scale-big" @click.stop="setCopyTo(item1)" v-for=" item1  in  cutParts "
                             :key="item.Title">{{ item1.Title }}</div>
                     </div>
                     <div v-show="item.type == 'scale' && state.isScale" class="scale-menu">
@@ -191,7 +192,8 @@ const menuList3 = reactive([
         type: 'lock',
         label: '锁定/解锁',
         disabled: false,
-        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><defs><style>.a{fill:#fff;opacity:0;}.b,.c{fill:none;stroke:#4e5969;stroke-linejoin:round;stroke-width:1.5px;}.c{stroke-linecap:round;}</style></defs><g transform="translate(-3754 203)"><rect class="a" width="20" height="20" transform="translate(3754 -203)"/><g transform="translate(3750 -205)"><rect class="b" width="13.595" height="8.797" rx="2" transform="translate(7 11.216)"/><path class="c" d="M14,11.2V8a4.043,4.043,0,0,1,8-.8" transform="translate(-4.201)"/><path class="c" d="M24,30v2.4" transform="translate(-10.202 -15.604)"/></g></g></svg>'
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 15 15"><defs><style>.a,.b{fill:#4e5969;}.a{opacity:0;}.b,.c{stroke:#4e5969;}.b,.c,.d{stroke-linejoin:round;}.c,.d{fill:none;stroke-linecap:round;}.d{stroke:#fff;}</style></defs><g transform="translate(-10056 496)"><rect class="a" width="15" height="15" transform="translate(10056 -496)"/><g transform="translate(10052 -499)"><rect class="b" width="11" height="6" rx="2" transform="translate(6 10)"/><path class="c" d="M14,9.364V6.98a2.98,2.98,0,0,1,5.96,0V9.364" transform="translate(-5.616)"/><path class="d" d="M24,30v1.788" transform="translate(-12.636 -18.253)"/></g></g></svg>',
+        svg1: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><defs><style>.a{fill:#fff;opacity:0;}.b,.c{fill:none;stroke:#4e5969;stroke-linejoin:round;stroke-width:1.5px;}.c{stroke-linecap:round;}</style></defs><g transform="translate(-3754 203)"><rect class="a" width="20" height="20" transform="translate(3754 -203)"/><g transform="translate(3750 -205)"><rect class="b" width="13.595" height="8.797" rx="2" transform="translate(7 11.216)"/><path class="c" d="M14,11.2V8a4.043,4.043,0,0,1,8-.8" transform="translate(-4.201)"/><path class="c" d="M24,30v2.4" transform="translate(-10.202 -15.604)"/></g></g></svg>'
     },
     {
         type: 'delete',
@@ -233,6 +235,19 @@ const init = () => {
     if (activeObject) {
         type.value = activeObject.type;
         update?.proxy?.$forceUpdate();
+    }
+}
+const changeLockIcon = (item) => {
+    if (item.type == 'lock' || item.type == 'unlock') {
+        if (selected.value.isLock && item.type == 'lock') {
+            return true
+        } else if (!selected.value.isLock && item.type == 'unlock') {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        return true
     }
 }
 const setButtonActive = (arr, type) => {
@@ -461,7 +476,9 @@ const menu3Click = (type) => {
             break
         case 'lock':
             lock()
-            // state.isLock = !state.isLock
+            break
+        case 'unlock':
+            lock()
             break
         case 'scale':
             state.isScale = !state.isScale

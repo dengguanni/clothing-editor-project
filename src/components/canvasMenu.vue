@@ -86,7 +86,7 @@ watch(cutParts, (newVal, oldVal) => {
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
         setTimeout(() => {
-            setAllCuts(true, isSetSteps.value)
+            setAllCuts(true)
         }, 200);
     }
 }, { immediate: true, deep: true });
@@ -96,25 +96,26 @@ watch(sizeGUID, (newVal, oldVal) => {
     }
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
-    const fn = (isSetSteps) => {
+    const fn = () => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
         if (cutPartsType.value) {
-            setAllCuts(false, isSetSteps)
+            setAllCuts(false)
         }
     }
     canvasEditor.canvas.on('object:added', () => {
-        console.log('added', isSetSteps.value)
-        fn(isSetSteps.value)
+        console.log('added')
+        fn()
     })
     canvasEditor.canvas.on('object:modified', () => {
-        console.log('modified', isSetSteps.value)
-        fn(isSetSteps.value)
+        console.log('modified')
+        fn()
     })
     canvasEditor.canvas.on('selection:created', (val) => {
         console.log('selection:created', val.selected[0])
         store.commit('setSelected', {})
+        isSetSteps.value ? store.commit('setIsSetSteps', false) : ''
         if (val) store.commit('setSelected', val.selected[0])
 
     })
@@ -135,7 +136,7 @@ const watchCanvas = () => {
         fn(isSetSteps.value)
     })
 }
-const setAllCuts = debounce((isColorChange, isSetSteps) => {
+const setAllCuts = debounce((isColorChange) => {
     const objects = canvasEditor.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
     if (cutPartsType.value) {
         let maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
@@ -189,14 +190,13 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                         fn(objects, index + 1, p)
                     } else {
                         p.Images = ImagesList[p.Part_name].Images
-                        if (indexP && !cutParts.value[indexP + 1]) store.commit('setIsSetSteps', false)
-                        setCutAllParts(p, p.Part_name.Title, isSetSteps)
+                        setCutAllParts(p, p.Part_name.Title, indexP)
                     }
                 })
+
             } else {
                 p.Images = []
-                setCutAllParts(p, p.Part_name.Title, isSetSteps)
-                if (indexP && !cutParts.value[indexP + 1]) store.commit('setIsSetSteps', false)
+                setCutAllParts(p, p.Part_name.Title,indexP)
             }
         }
         if (!isColorChange) {
@@ -211,6 +211,8 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
             }
             fn(objects, 0, p)
         } else {
+            store.commit('setsSmallLoad3d', true)
+            console.log('setsSmallLoad3d', true)
             cutParts.value.forEach((element, indexP) => {
                 let p = {
                     SizeGUID: sizeGUID.value,
@@ -222,19 +224,32 @@ const setAllCuts = debounce((isColorChange, isSetSteps) => {
                     bgc_b: bgColor.value.B
                 }
                 fn(objects, 0, p, indexP)
+
             })
         }
     }
 }, 100)
-const setCutAllParts = (p, Title, isSetStep) => {
+const setCutAllParts = (p, Title, indexP = null) => {
     canvasEditor.fixedLayer()
     picture.setCutAllParts(p).then(res => {
         console.log('总的剪裁参数', p)
-        isSetStep ? '' : store.commit('setSave')
+        isSetSteps.value ? '' : store.commit('setSave')
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         URLbase64.value = url
-        load3DScene.setTexture(p.Part_name, url, () => { })
+        load3DScene.setTexture(p.Part_name, url, () => {
+            if (indexP) {
+                if (!cutParts.value[indexP + 1]) {
+                    store.commit('setsSmallLoad3d', false)
+                    // console.log('store.commit('', false)')
+                    console.log('false')
+                }
+            } else {
+                store.commit('setsSmallLoad3d', false)
+                // console.log('store.commit('', false)')
+                console.log('false2')
+            }
+        })
 
     })
 }
@@ -315,7 +330,6 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
                 setAllCuts(true)
-                store.commit('setIsSetSteps', false)
                 store.commit('setPageLoading', false)
             } else {
                 fn(index + 1)
@@ -382,8 +396,6 @@ const loadCanvasObject = () => {
                     canvasEditor.canvas.add(image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
-                    } else {
-                        store.commit('setIsSetSteps', false)
                     }
 
                 }
@@ -397,8 +409,6 @@ const loadCanvasObject = () => {
             addText(obj)
             if (canvasObjects.value[index + 1]) {
                 fn(canvasObjects.value[index + 1], index + 1)
-            } else {
-                store.commit('setIsSetSteps', false)
             }
         }
     }

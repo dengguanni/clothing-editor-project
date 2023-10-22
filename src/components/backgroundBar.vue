@@ -11,7 +11,6 @@
                 <img :src="item.ImageUrl" style="width: 200px;height:auto">
                 <div>{{ item.Title }}</div>
             </el-popover>
-
         </div>
         <!-- <div class="page">
             <div class="content">

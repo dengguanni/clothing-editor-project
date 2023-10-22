@@ -30,7 +30,7 @@ let croppedImage = ref()
 
 watch(croppedImage, (newVal, oldVal) => {
     if (newVal) {
-            console.log('croppedImage变了', newVal)
+        console.log('croppedImage变了', newVal)
     }
 }, { immediate: true, deep: true });
 const state = reactive({
@@ -103,8 +103,10 @@ const handelCutParts = (image) => {
             Canvas_width: workspace.width,
             Canvas_height: workspace.height,
             Image_fullName: image.FilePath + '/' + image.FileName,
-            Image_width: image.width * image.scaleX,
-            Image_height: image.height * image.scaleY,
+            Image_width: image.width,
+            Image_height: image.height,
+            Image_scaleX: image.scaleX,
+            Image_scaleY: image.scaleY,
             Image_left: image.left,
             Image_top: image.top,
             Image_angle: image.angle,
@@ -131,8 +133,10 @@ const handelCutParts = (image) => {
                     id: uuid(),
                     name: image.name,
                     width: image.width * image.scaleX,
-                    height: image.height * image.scaleY ,
+                    height: image.height * image.scaleY,
                     angle: image.angle,
+                    saveScaleX: image.scaleX,
+                    saveScaleY: image.scaleY,
                     top: image.top,
                     left: image.left,
                     angle: image.angle,
@@ -144,10 +148,12 @@ const handelCutParts = (image) => {
                 imgInstance.parentCroppingFileName = image.FileName
                 imgInstance.parentUrl = image.ImageUrl
                 imgInstance.ImageUrl = image.ImageUrl
+                console.log('imgInstance', imgInstance)
                 imgEl.onload = () => {
                     const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
                     canvasEditor.canvas.remove(oldObj)
-
+                    // imgInstance.scaleX = image.scaleX
+                    // imgInstance.scaleY = image.scaleY
                     canvasEditor.canvas.add(imgInstance);
                     canvasEditor.canvas.bringToFront(maskRect)
                     canvasEditor.canvas.renderAll();
@@ -166,7 +172,9 @@ const handelCutParts = (image) => {
 const restore = () => {
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-    console.log('activeObjects恢复',activeObjects)
+    const scaleX = activeObjects.scaleX
+    const scaleY = activeObjects.scaleY
+    console.log('activeObjects恢复', activeObjects.scaleX)
     if (activeObjects.parentCroppingFilePath) {
         const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
@@ -175,13 +183,14 @@ const restore = () => {
                 basicInheritAttribute.forEach(el => image.set(el, activeObjects[el]))
                 image.id = uuid()
                 image.name = activeObjects.name
-                image.scaleX = activeObjects.scaleX
-                image.scaleY = activeObjects.scaleY
+                image.height = activeObjects.height / activeObjects.saveScaleY
+                image.width = activeObjects.width / activeObjects.saveScaleX
+                image.scaleX = activeObjects.saveScaleX
+                image.scaleY = activeObjects.saveScaleY
                 image.top = activeObjects.top
                 image.left = activeObjects.left
                 image.angle = activeObjects.angle
                 image.FilePath = activeObjects.parentCroppingFilePath
-                console.log('activeObjects.parentCroppingFileName', activeObjects.parentCroppingFileName,'activeObjects', activeObjects)
                 image.FileName = activeObjects.parentCroppingFileName
                 image.oldFileName = activeObjects.parentCroppingFileName
                 image.oldFilePath = activeObjects.parentCroppingFilePath
@@ -193,13 +202,10 @@ const restore = () => {
                 image.parentUrl = null
                 image.visible = true
                 canvasEditor.canvas.add(image);
-                
-                console.log('恢复image', image)
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
                 croppedImage.value = info
-                console.log('croppedImage.value', croppedImage.value)
                 image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
                 image.Sharpen ? canvasEditor.setSharpening(true) : ''
                 canvasEditor.canvas.requestRenderAll();
@@ -226,7 +232,6 @@ const addItem = (item) => {
     // clipImage()
     const objects = canvasEditor.canvas.getObjects();
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
-    console.log('点击添加activeObjects', activeObjects)
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     if (activeObjects.parentUrl) {
         const imageURL = activeObjects.parentUrl;

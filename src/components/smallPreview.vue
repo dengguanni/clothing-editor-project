@@ -13,7 +13,7 @@
                     <img :src="item.src" style="height: 280px; width: 280px;" />
                 </CarouselItem>
             </Carousel>
-            <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="load3d"></div>
+            <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="smallLoad3d" ></div>
             <button class="preview" @click="preview">
                 <commonIconfont type="fangda3" size="18"></commonIconfont>
                <div> 预览</div>
@@ -36,15 +36,18 @@ const load3DScene = new LoadScene()
 const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
+const smallLoad3d = computed(() => {
+    return store.state.smallLoad3d
+})
 const screenshot = computed(() => {
     return store.state.screenshotList.small
 })
-
+// let loading = ref(true)
 let scene, renderer, camera
 const emit = defineEmits()
 let is3D = ref(true)
 let carousel = ref(0)
-const load3d = ref(true)
+// const smallLoad3d = ref(true)
 const loadScreenshotList = ref(true)
 
 const changeMode = (val) => {
@@ -60,10 +63,11 @@ const preview = () => {
 onMounted(() => {
     load3DScene.init(scene, camera, renderer, 'small-3d', () => {
         load3DScene.getScreenshotList('small')
-        load3d.value = false
+        store.commit('setsSmallLoad3d', false)
         loadScreenshotList.value = false
     })
-
+    
+   
 })
 onUnmounted(() => {
     load3DScene.destroyScene()
@@ -153,8 +157,8 @@ onUnmounted(() => {
     font-weight: 500;
 
     .preview-3d {
-        height: 200px;
-        width: 200px;
+        height: 300px;
+        width: 300px;
        
     }
 

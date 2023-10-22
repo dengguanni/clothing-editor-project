@@ -6,23 +6,23 @@
     <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
       <Button @click="canvasEditor.undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
         <!-- <commonIcon angleKey="withdraw"></commonIcon> -->
-
-        <commonIconfont type="chehui" size="26" v-show="saveSteps.ID_Previous > 0"></commonIconfont>
-        <commonIconfont type="chehui-copy" size="26" v-show="saveSteps.ID_Previous < 1"></commonIconfont>
+        <commonIconfont type="chehui" size="23" v-show="saveSteps.ID_Previous > 0"></commonIconfont>
+        <commonIconfont type="chehui-copy" size="23" v-show="saveSteps.ID_Previous < 1"></commonIconfont>
       </Button>
     </Tooltip>
     <!-- 重做 -->
     <Tooltip :content="$t('history.redo') + `(${saveSteps.ID_Next == -1 ? 0 : saveSteps.ID_Next})`">
       <Button @click="canvasEditor.redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
         <!-- <commonIcon angleKey="redo"></commonIcon> -->
-        <commonIconfont type="zhongzuo" size="26" v-show="saveSteps.ID_Next > 0"></commonIconfont>
-        <commonIconfont type="zhongzuo-copy" size="26" v-show="saveSteps.ID_Next < 1"></commonIconfont>
+        <commonIconfont type="zhongzuo" size="23" v-show="saveSteps.ID_Next > 0"></commonIconfont>
+        <commonIconfont type="zhongzuo-copy" size="23" v-show="saveSteps.ID_Next < 1"></commonIconfont>
         <!-- <commonIcon angleKey="prohibitRedo" v-show="saveSteps.ID_Next < 1"></commonIcon> -->
       </Button>
     </Tooltip>
     <Tooltip :content="'清空'">
       <Button @click="beforeClear" type="text" size="small" class="item">
-        <commonIcon angleKey="empty"></commonIcon>
+        <!-- <commonIcon angleKey="empty"></commonIcon> -->
+        <commonIconfont type="qingkongbiao" size="23"></commonIconfont>
       </Button>
     </Tooltip>
     <!-- <span class="time" v-if="history.length">
@@ -32,12 +32,16 @@
   <div class="reserve-line"></div>
   <Tooltip :content="'网格线'">
     <Button @click="setLine" type="text" size="small" class="item">
-      <commonIcon angleKey="gridLine"></commonIcon>
+      <!-- <commonIcon angleKey="gridLine"></commonIcon> -->
+      <commonIconfont type="wangge" size="23"></commonIconfont>
     </Button>
   </Tooltip>
   <Tooltip :content="'辅助线'">
     <Button @click="setAuxiliaryLine" type="text" size="small" class="item">
-      <commonIcon angleKey="auxiliarylLine"></commonIcon>
+      <!-- <commonIcon angleKey="auxiliarylLine"></commonIcon>icon- -->
+      <commonIconfont :type="lineActive ? 'fuzhuxianshuxingshuju-copy' : 'fuzhuxianshuxingshuju'" size="25"
+        @mouseenter="lineActive = true" @mouseleave="lineActive = false"></commonIconfont>
+      <!-- <commonIconfont type="fuzhuxianshuxingshuju-copy" size="25" ></commonIconfont> -->
     </Button>
   </Tooltip>
 </template>
@@ -72,9 +76,7 @@ const bgColor = computed(() => {
   return store.state.bgColor
 })
 const line = ref(false)
-// 后退
-
-
+let lineActive = ref(false)
 // 清空
 const beforeClear = () => {
   Modal.confirm({
@@ -186,8 +188,11 @@ span.active {
   height: 36px;
   width: 36px;
 
-  &hover {
-    background-color: #c1c1c1;
+  border-radius: 10%;
+  margin-right: 20px;
+
+  &:hover {
+    background-color: #F0F2F5;
   }
 
   // display: flex;
@@ -200,6 +205,7 @@ span.active {
   height: 30px;
   border: 1px solid #DCE1E9;
   display: inline-block;
+  margin-right: 20px;
 }
 </style>
 

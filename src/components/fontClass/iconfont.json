@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1304965",
+      "name": "Clear-1",
+      "font_class": "15qingkong-1",
+      "unicode": "e680",
+      "unicode_decimal": 59008
+    },
+    {
+      "icon_id": "15928051",
+      "name": "辅助线属性数据",
+      "font_class": "fuzhuxianshuxingshuju",
+      "unicode": "e76f",
+      "unicode_decimal": 59247
+    },
+    {
+      "icon_id": "17822206",
+      "name": "清空表",
+      "font_class": "qingkongbiao",
+      "unicode": "e6c3",
+      "unicode_decimal": 59075
+    },
+    {
+      "icon_id": "35987008",
+      "name": "网格",
+      "font_class": "wangge",
+      "unicode": "e760",
+      "unicode_decimal": 59232
+    },
+    {
+      "icon_id": "37767144",
+      "name": "辅助线属性数据",
+      "font_class": "fuzhuxianshuxingshuju-copy",
+      "unicode": "eb7f",
+      "unicode_decimal": 60287
+    },
+    {
       "icon_id": "1366",
       "name": "放大",
       "font_class": "fangda4",

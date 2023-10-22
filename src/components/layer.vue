@@ -21,7 +21,7 @@
             <div class="layer-box">
               <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
                 @click="select(item.id, item1)">
-                <div v-if="item.cutPartsType == item1.Title && item.isMask ==undefined">
+                <div v-if="item.cutPartsType == item1.Title && item.isMask == undefined">
                   <Tooltip :content="item.name || item.text || item.type" placement="left">
                     <div class="ellipsis">
                       <div style="display:flex;">
@@ -31,8 +31,10 @@
                       </div>
                       <div>
                         <Lock v-show="false" :isLock="state.isLock"></Lock>
-                        <span v-html="iconType('unlock')" style="margin: 0px 10px;" @click="doLock"></span>
-                        <span v-html="iconType('display')" style="margin: 0px 10px;" @click="doHide"></span>
+                        <span v-html="iconType(item.isLock ? 'lock' : 'unlock')" style="margin: 0px 10px;"
+                          @click="doLock"></span>
+                        <span v-html="iconType(item.customVisible ? 'display' : 'hide')" style="margin: 0px 10px;"
+                          @click="doHide"></span>
                       </div>
                     </div>
                   </Tooltip>
@@ -82,16 +84,20 @@ const lockAttrs = [
   'lockScalingY',
 ];
 const cutParts = computed(() => {
- return store.state.saveData.cutParts
+  return store.state.saveData.cutParts
 })
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
 })
-// let cutPartsType = ref('')
-
-onMounted(() => {
-
+const selected = computed(() => {
+  return store.state.selected
 })
+// watch(selected, (newVal, oldVal) => {
+//   if (newVal) {
+//     setSaveData()
+//   }
+// }, { immediate: true, deep: true })
+
 // 是否选中元素
 const isSelect = (item) => {
   return item.id === mixinState.mSelectId || mixinState.mSelectIds.includes(item.id);
@@ -125,29 +131,30 @@ const iconType = (type) => {
 };
 
 const doLock = debounce(() => {
-
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  if (activeObject.isLock == undefined || activeObject.isLock) {
-    activeObject.hasControls = false;
-    activeObject.selectable = false;
-    activeObject.isLock = false
-    activeObject.hoverCursor = 'default'
-    lockAttrs.forEach((key) => {
-      activeObject[key] = true;
-    });
-  } else if (activeObject.isLock === false) {
+  console.log('activeObject', activeObject.isLock)
+  if (activeObject.isLock) {
     activeObject.hasControls = true;
-    // 修改默认属性
+    activeObject.selectable = true;
+    activeObject.isLock = false
+    activeObject.hoverCursor = null
     lockAttrs.forEach((key) => {
       activeObject[key] = false;
     });
-    activeObject.selectable = true;
+  } else {
+    activeObject.hoverCursor = 'default'
+    activeObject.hasControls = false;
+    // 修改默认属性
+    lockAttrs.forEach((key) => {
+      activeObject[key] = true;
+    });
+    activeObject.selectable = false;
     activeObject.isLock = true
-    activeObject.hoverCursor = null
+
   }
   canvasEditor.canvas.renderAll();
   store.commit('setAllIsLock')
-}, 500)
+}, 200)
 const doHide = debounce(() => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject.visible = !activeObject.visible
@@ -173,7 +180,7 @@ const textType = (type, item) => {
 };
 // 选中元素
 const select = (id, obj) => {
-  console.log('id,', id, )
+  console.log('id,', id,)
   console.log(' obj', obj)
   if (obj) {
     store.commit('setCutPartsType', obj.Title)
@@ -211,6 +218,7 @@ const downTop = () => {
 };
 
 const getList = () => {
+
   // 不改原数组 反转
   list.value = [
     ...canvasEditor.canvas.getObjects().filter((item) => {
@@ -221,14 +229,16 @@ const getList = () => {
   ]
     .reverse()
     .map((item) => {
-      const { type, id, name, text, cutPartsType, isMask } = item;
+      const { type, id, name, text, cutPartsType, isMask, customVisible, isLock } = item;
       return {
         type,
         id,
         name,
         text,
         cutPartsType,
-        isMask
+        isMask,
+        customVisible,
+        isLock
       };
     });
 };

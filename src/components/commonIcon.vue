@@ -48,6 +48,8 @@ const svgList = reactive(
 <style scoped lang="less">
 .icon {
     display: inline-block;
+    height:26px;
+    width:26px;
 
 }
 

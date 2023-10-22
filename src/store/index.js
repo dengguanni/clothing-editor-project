@@ -48,7 +48,8 @@ const store = createStore({
       screenshotList: {
         big: [],
         small: []
-      }
+      },
+      smallLoad3d: true
     }
   },
   mutations: {
@@ -63,6 +64,9 @@ const store = createStore({
     },
     USERINFO(state, val) {
       state.USERINFO = val
+    },
+    setsSmallLoad3d(state, val) {
+      state.smallLoad3d = val
     },
     setScreenshotList(state, val) {
       state.screenshotList.big = val.big ? val.big : state.screenshotList.big

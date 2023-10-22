@@ -74,9 +74,10 @@ export const initializationAttribute = {
     filtersType: null,
     isBackground: false,
     tileParentId: null,
-    selectable:true,
+    selectable: true,
     parentCroppingFileName: null,
     parentCroppingFilePath: null,
     isMask: undefined,
     tileParentFileName: null,
+    customVisible: true
 }
