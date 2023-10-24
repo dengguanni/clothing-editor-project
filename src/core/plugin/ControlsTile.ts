@@ -1,11 +1,10 @@
-import { event } from '@/utils/event/notifier';
-import { ControlsTile } from '@/core/plugin/ControlsTile.ts';
 import { fabric } from 'fabric';
 import { v4 as uuid } from 'uuid';
 import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import baseUrl from '@/config/constants/baseUrl';
 import { Message } from 'view-ui-plus';
+import picture from '@/api/picture.ts'
 class ControlsTile {
     static lockObj = {
         'lockMovementX': false,
@@ -74,8 +73,6 @@ class ControlsTile {
     }
     static setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
         const activeObject = this.canvas.getActiveObjects()[0];
-        console.log('activeObject', activeObject)
-
         if (!val) {
             if (repeatType) {
                 if (activeObject.repeatType == repeatType) {
@@ -89,7 +86,9 @@ class ControlsTile {
         }
         activeObject.repeatType = repeatType
         ControlsTile.canvas.getObjects().forEach((el: any) => {
+            console.log('activeObject.id', activeObject.id)
             if (el.tileParentId == activeObject.id) {
+                console.log('删除', el.tileParentId)
                 ControlsTile.canvas.remove(el)
             }
         })
@@ -99,15 +98,18 @@ class ControlsTile {
                 Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
                 return
             }
-            arr.length > 0 ? this.setButtonActive(arr,activeObject.repeatType ) : ''
+            arr.length > 0 ? this.setButtonActive(arr, activeObject.repeatType) : ''
             if (activeObject.repeatType == 'basic') {
-                this.handelBasicRepeat()
+                this.handelBasicRepeat('基础平铺')
             } else if (activeObject.repeatType == 'mirror') {
-                ControlsTile.handelRepeatMirror()
+                // ControlsTile.handelRepeatMirror()
+                this.handelBasicRepeat('镜像平铺')
             } else if (activeObject.repeatType == 'transverse') {
-                ControlsTile.handelRepeatX()
+                // ControlsTile.handelRepeatX()
+                this.handelBasicRepeat('横向平铺')
             } else if (activeObject.repeatType == 'direction') {
-                ControlsTile.handelRepeatY()
+                // ControlsTile.handelRepeatY()
+                this.handelBasicRepeat('纵向平铺')
             }
             this.canvas.requestRenderAll();
         } else {
@@ -139,78 +141,104 @@ class ControlsTile {
         return { maxXcount, maxYcount }
     }
     // 基础平铺
-    static handelBasicRepeat() {
-        const self = this
+    static handelBasicRepeat(type) {
         const activeObject = this.canvas.getActiveObjects()[0];
-        activeObject.clone(cloned => {
-            const { maxXcount, maxYcount } = self.getMaxCount(cloned)
-            cloned.rotate(0)
-            const left = cloned.left - (cloned.width * cloned.scaleX)
-            const top = cloned.top - (cloned.height * cloned.scaleY)
-            cloned.set({
-                id: uuid(),
-                top: 0,
-                left: 0,
-                width: cloned.width,
-                height: cloned.height,
-                scaleX: cloned.scaleX,
-                scaleY: cloned.scaleY,
-            })
-            const patternSourceCanvas = new fabric.StaticCanvas();
-            patternSourceCanvas.add(cloned);
-            patternSourceCanvas.setDimensions({
-                width: cloned.getScaledWidth(),
-                height: cloned.getScaledHeight(),
-            });
-            patternSourceCanvas.renderAll();
-            const pattern = new fabric.Pattern({
-                source: patternSourceCanvas.getElement(),
-                repeat: 'repeat',
-                hasControls: false,
-                ...this.lockObj,
-
-            });
-            const rect = new fabric.Rect(
-                {
-                    width: cloned.width * cloned.scaleX * maxXcount,
-                    height: cloned.height * maxYcount * cloned.scaleY,
-                    fill: pattern,
-                    isRepeat: true,
-                    hasControls: false,
-                    ...this.lockObj,
-                    selectable: false,
-                    evented: false,
-                },
-            )
+        const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
+        activeObject.clone(c => {
+            c.rotate(0)
+            console.log('c.left',c.left)
+            console.log('activeObject',activeObject.left)
             const p = {
-                rect: rect,
-                imageLeft: left - (((maxXcount - 1) / 2) - 1) * activeObject.width * activeObject.scaleX,
-                imageTop: top - (((maxYcount - 1) / 2) - 1) * activeObject.height * activeObject.scaleY,
+                Type: type,
+                Canvas_width: Mask.width * Mask.scaleX,
+                Canvas_height: Mask.height * Mask.scaleY,
+                Image_fullName: activeObject.FilePath + '/' + activeObject.FileName,
+                Image_width: activeObject.width * activeObject.scaleX,
+                Image_height: activeObject.height * activeObject.scaleY,
+                Image_left: c.left - Mask.left,
+                Image_top: c.top - Mask.top,
+                Image_flipX: activeObject.flipX,
+                Image_flipY: activeObject.flipY,
+                Image_angle: activeObject.angle
             }
-            this.replaceImage(p.rect, p.imageLeft, p.imageTop)
+            console.log('平铺参数', p)
+            picture.setBasicRepeat(p).then(res => {
+                console.log('res', res)
+                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64) : ''
+            })
         })
+
+        // activeObject.clone(cloned => {
+        //     const { maxXcount, maxYcount } = self.getMaxCount(cloned)
+        //     cloned.rotate(0)
+        //     const left = cloned.left - (cloned.width * cloned.scaleX)
+        //     const top = cloned.top - (cloned.height * cloned.scaleY)
+        //     cloned.set({
+        //         id: uuid(),
+        //         top: 0,
+        //         left: 0,
+        //         width: cloned.width,
+        //         height: cloned.height,
+        //         scaleX: cloned.scaleX,
+        //         scaleY: cloned.scaleY,
+        //     })
+        //     const patternSourceCanvas = new fabric.StaticCanvas();
+        //     patternSourceCanvas.add(cloned);
+        //     patternSourceCanvas.setDimensions({
+        //         width: cloned.getScaledWidth(),
+        //         height: cloned.getScaledHeight(),
+        //     });
+        //     patternSourceCanvas.renderAll();
+        //     const pattern = new fabric.Pattern({
+        //         source: patternSourceCanvas.getElement(),
+        //         repeat: 'repeat',
+        //         hasControls: false,
+        //         ...this.lockObj,
+
+        //     });
+        //     const rect = new fabric.Rect(
+        //         {
+        //             width: cloned.width * cloned.scaleX * maxXcount,
+        //             height: cloned.height * maxYcount * cloned.scaleY,
+        //             fill: pattern,
+        //             isRepeat: true,
+        //             hasControls: false,
+        //             ...this.lockObj,
+        //             selectable: false,
+        //             evented: false,
+        //         },
+        //     )
+        //     const p = {
+        //         rect: rect,
+        //         imageLeft: left - (((maxXcount - 1) / 2) - 1) * activeObject.width * activeObject.scaleX,
+        //         imageTop: top - (((maxYcount - 1) / 2) - 1) * activeObject.height * activeObject.scaleY,
+        //     }
+        //     this.replaceImage(p.rect, p.imageLeft, p.imageTop)
+        // })
     }
     // 更新图片
-    static replaceImage = (rect: fabric.Rect, imageLeft: number, imageTop: number) => {
+    static replaceImage = (url) => {
         const FileName = guid() + '.png'
-        const url = rect.toDataURL({
-            width: rect.width,
-            height: rect.height,
-            angle: rect.angle,
-            scaleX: rect.scaleX,
-            scaleY: rect.scaleY,
-            multiplier: 1,
-        });
+        // const url = rect.toDataURL({
+        //     width: rect.width,
+        //     height: rect.height,
+        //     angle: rect.angle,
+        //     scaleX: rect.scaleX,
+        //     scaleY: rect.scaleY,
+        //     multiplier: 1,
+        // });
+        const URL = 'data:image/jpeg;base64,' + url
         let callback1 = () => {
             let z: number
             const activeObject = this.canvas.getActiveObjects()[0];
             const imageURL = baseUrl + 'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
+            const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     image.cutPartsType = activeObject.cutPartsType
                     image.set({
                         ...this.lockObj,
-                        // selectable: false,
+                        selectable: false,
                         // evented: false,
                         isRepeat: true,
                     })
@@ -220,10 +248,10 @@ class ControlsTile {
                     image.id = uuid()
                     image.FileName = FileName
                     image.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                    image.left = imageLeft
-                    image.top = imageTop
                     image.hoverCursor = null
-                    image.rotate(activeObject.angle)
+                    image.left = Mask.left
+                    image.top = Mask.top
+                    image.rotate(0)
                     this.canvas.add(image);
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
@@ -233,17 +261,18 @@ class ControlsTile {
                     objects.forEach((element, index) => {
                         if (element.id == activeObject.id) z = index
                     });
+                    console.log('image', image)
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
                 }
             };
             const properties = {
-                left: 100,
-                top: 100
+                left: 0,
+                top: 0
             };
             fabric.Image.fromURL(imageURL, callback, properties);
         }
-        setUserUploadFile(url, FileName, 'images_temp//', callback1)
+        setUserUploadFile(URL, FileName, 'images_temp//', callback1)
     }
     // 横向平铺
     static handelRepeatX = () => {

@@ -217,7 +217,7 @@ watch(selected, (newVal, oldVal) => {
         buttonLimitions(menuList3, newVal)
         buttonLimitions(filterList, newVal)
         buttonLimitions(menuList1, newVal)
-        setButtonActive(menuList1, null)
+        setButtonActive ? setButtonActive(menuList1, null) : ''
     }
 }, { immediate: true, deep: true });
 onMounted(() => {
@@ -373,7 +373,7 @@ const btnClick = (item) => {
         Message.error('添加清晰后不支持滤镜');
         return
     }
-    if (activeObject && activeObject.repeatType) {
+    if (activeObject && activeObject.repeatType && item == 'cropping') {
         Message.error('平铺后不支持裁剪，请移除平铺后再试试')
         return
     }

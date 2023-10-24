@@ -140,74 +140,11 @@ const setCheckBoxList = (arr, type) => {
     }
   }
 }
-// 锐化、清晰
-const setSharpening = (val) => {
-  const obj = canvasEditor.canvas.getActiveObjects()[0];
-  const goON = obj.filtersType ? (obj.filtersType == 'Sharpen' ? true : false) : true
-  if (goON) {
-    obj.Sharpen = obj.Sharpen ? false : true
-    function applyFilter(index, filter) {
-      obj.filters[index] = filter;
-      var timeStart = +new Date();
-      obj.applyFilters();
-      var timeEnd = +new Date();
-      var dimString = obj.width + ' x ' +
-        obj.height;
-      var $ = function (id) { return document.getElementById(id) };
-      canvasEditor.canvas.renderAll();
-    }
-    const f = fabric.Image.filters
-    applyFilter(12, obj.Sharpen && new f.Convolute({
-      matrix: [0, -1, 0,
-        -1, 5, -1,
-        0, -1, 0]
-    }));
-    const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-    const scaleX = activeObject.scaleX
-    const scaleY = activeObject.scaleY
-    activeObject.scaleX = 1
-    activeObject.scaleY = 1
-    const url = activeObject.toDataURL({
-      width: activeObject.width,
-      height: activeObject.height,
-      angle: activeObject.angle,
-      scaleX: activeObject.scaleX,
-      scaleY: activeObject.scaleY,
-      multiplier: 1,
-    });
-    activeObject.scaleX = scaleX
-    activeObject.scaleY = scaleY
-    if (val) {
-      replaceImage(url, 'Sharpen')
-    } else {
-      restoreImage()
-    }
-  } else {
-    Message.error('添加滤镜后不支持清晰化')
-  }
 
-}
 
 // 无参数滤镜修改状态
 const changeFilters = (type, value) => {
   canvasEditor.changeFilters(type, value, state.noParamsFilters)
-  // const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  // state.noParamsFilters[type] = value;
-  // if (value) {
-  //   const itemFilter = _getFilter(activeObject, type);
-  //   if (!itemFilter) {
-  //     if (activeObject.filtersType) {
-  //       restoreImage(() => {
-  //         _createFilter(activeObject, type);
-
-  //       })
-  //     } else {
-  //       _createFilter(activeObject, type);
-  //     }
-  //   }
-  // } else {
-  //   restoreImage()
-  // }
 };
 // 有参数与组合滤镜修改
 const changeFiltersByParams = (type) => {
@@ -265,6 +202,7 @@ const replaceImage = (url, type) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
   const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
+
   const FileName = guid() + '.png'
   let callback = () => {
     activeObject.setSrc(url, () => {
@@ -281,9 +219,12 @@ const replaceImage = (url, type) => {
       activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
       activeObject.set('oldFilePath', oldFilePath)
       activeObject.applyFilters()
+      console.log('activeObject,',activeObject)
       ControlsTile.setRepeat(activeObject.repeatType, true)
       store.commit('setAllCuts')
       setCheckBoxList(state.noParamsFilters, type)
+
+
       canvasEditor.canvas.renderAll();
     });
   }

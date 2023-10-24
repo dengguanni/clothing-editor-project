@@ -125,6 +125,12 @@ class FiltersPlugin {
         console.log('replaceImageactiveObject', activeObject)
         const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
         const oldFileName = activeObject.oldFileName ? activeObject.oldFileName : activeObject.FileName
+        // 如果有加平铺 先删除原来原图的平铺
+        this.canvas.getObjects().forEach((el) => {
+            if (el.tileParentId == activeObject.id) {
+                this.canvas.remove(el)
+            }
+        })
         if (!oldFileName) return
         const FileName = guid() + '.png'
         let callback = () => {

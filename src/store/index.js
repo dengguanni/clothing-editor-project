@@ -49,7 +49,8 @@ const store = createStore({
         big: [],
         small: []
       },
-      smallLoad3d: true
+      smallLoad3d: true,
+      objectAttr: 0
     }
   },
   mutations: {
@@ -67,6 +68,9 @@ const store = createStore({
     },
     setsSmallLoad3d(state, val) {
       state.smallLoad3d = val
+    },
+    setObjectAttr(state) {
+      state.objectAttr = state.objectAttr + 1
     },
     setScreenshotList(state, val) {
       state.screenshotList.big = val.big ? val.big : state.screenshotList.big

@@ -251,6 +251,7 @@ import { Spin } from 'view-ui-plus';
 import { ElColorPicker, ElSelect } from 'element-plus'
 import { useStore } from 'vuex'
 import { debounce } from 'lodash-es';
+import ControlsTile from '@/core/plugin/ControlsTile.ts'
 const store = useStore()
 const event = inject('event');
 const update = getCurrentInstance();
@@ -268,6 +269,15 @@ const selected = computed(() => {
 const handleLock = computed(() => {
   return store.state.handleLock
 });
+const objectAttr = computed(() => {
+  return store.state.objectAttr
+});
+watch(objectAttr, (newVal, oldVal) => {
+  if (newVal) {
+    const activeObject = canvasEditor.canvas.getActiveObject()
+    activeObject && getObjectAttr()
+  }
+}, { deep: true });
 watch(selected, (newVal, oldVal) => {
   if (newVal) {
     const activeObject = canvasEditor.canvas.getActiveObject()
@@ -435,11 +445,12 @@ const setAllCuts = debounce(() => {
     baseAttr.angle = 0
     activeObject.rotate(baseAttr.angle)
   }
-  if (activeObject.isRepeat) {
-    const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentId == activeObject.id)
-    obj.rotate(baseAttr.angle)
-    canvasEditor.canvas.renderAll();
-  }
+  ControlsTile.setRepeat(activeObject.repeatType, true)
+  // if (activeObject.isRepeat) {
+  //   const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentId == activeObject.id)
+  //   obj.rotate(baseAttr.angle)
+  //   canvasEditor.canvas.renderAll();
+  // }
   store.commit('setAllCuts')
 }, 400)
 const getObjectAttr = (e) => {
@@ -538,7 +549,6 @@ const changeCommon = (key, value) => {
     canvasEditor.canvas.renderAll();
     return;
   }
-
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
   setTimeout(() => {

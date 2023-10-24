@@ -232,7 +232,7 @@ const setAllCuts = debounce((isColorChange) => {
 const setCutAllParts = (p, Title, indexP = null) => {
     canvasEditor.fixedLayer()
     picture.setCutAllParts(p).then(res => {
-        console.log('总的剪裁参数', p)
+        // console.log('总的剪裁参数', p)
         isSetSteps.value ? '' : store.commit('setSave')
         const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64

@@ -27,6 +27,7 @@ import { useStore } from 'vuex'
 import crypto from '@/utils/crypto'
 import { allCustomAttribute } from '@/config/customAttributeFabricObj.ts'
 import commonIconfont from '@/components/fontClass/commonIconfont.vue'
+
 const store = useStore()
 const saveData = computed(() => {
   return store.state.saveData
@@ -66,7 +67,7 @@ const cbMap = {
 };
 let a = ref(0)
 const getData = () => {
-  console.log('getObjects', canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
+  // console.log('getObjects', canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
   // canvasEditor.test(1111)
   // saveSteps.value.ID
   // const p = {
@@ -76,11 +77,12 @@ const getData = () => {
   //   const data = res.Tag[0].Table[0].JsonValue
   //   console.log('拿回', JSON.parse(data))
   // })
+
 }
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
-  console.log('保存对象', objects)
+  // console.log('保存对象', objects)
   const objectsCopy = JSON.parse(JSON.stringify(objects))
   objectsCopy.forEach((element, index) => {
     allCustomAttribute.forEach(key => {
@@ -91,7 +93,7 @@ const setSaveData = debounce(function (showLoading = false) {
   store.commit('setCanvasObjects', objectsCopy)
   historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value) }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
-    console.log('保存结果', res)
+    // console.log('保存结果', res)
     showLoading ? ElMessage({
       showClose: true,
       message: '保存成功',

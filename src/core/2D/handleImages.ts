@@ -55,7 +55,7 @@ export const setAllCuts = (SizeGUID) => {
         }
 
     })
-    console.log('总的剪裁参数', p)
+    // console.log('总的剪裁参数', p)
     picture.setCutAllParts(p).then(res => {
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         LoadScene.setTexture(maskRect.cutPartsType, url, null)

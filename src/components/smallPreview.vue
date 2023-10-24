@@ -13,10 +13,10 @@
                     <img :src="item.src" style="height: 280px; width: 280px;" />
                 </CarouselItem>
             </Carousel>
-            <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="smallLoad3d" ></div>
+            <div v-show="is3D" class="preview-3d" id="small-3d" v-loading="smallLoad3d"></div>
             <button class="preview" @click="preview">
                 <commonIconfont type="fangda3" size="18"></commonIconfont>
-               <div> 预览</div>
+                <div> 预览</div>
             </button>
         </div>
     </div>
@@ -66,8 +66,8 @@ onMounted(() => {
         store.commit('setsSmallLoad3d', false)
         loadScreenshotList.value = false
     })
-    
-   
+
+
 })
 onUnmounted(() => {
     load3DScene.destroyScene()
@@ -159,7 +159,7 @@ onUnmounted(() => {
     .preview-3d {
         height: 300px;
         width: 300px;
-       
+
     }
 
     .preview {
@@ -175,8 +175,8 @@ onUnmounted(() => {
         font-size: 14px;
         color: #FFFFFF;
         cursor: pointer;
-        display:flex;
-        align-items:center;
+        display: flex;
+        align-items: center;
         justify-content: space-evenly;
     }
 

@@ -48,6 +48,11 @@ const setCutParts = function (params: any = '') {
 const setCutAllParts = function (params: any = '') {
     return http.post(`/Plugin_Text?ClassName=Plug_in_ofs.DrawTools.DrawPart`, params)
 }
+//web-画布-基础平铺
+// 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=32a53437-0b26-48ce-a767-8813d154d89a
+const setBasicRepeat = function (params: any = '') {
+    return http.get(`/Plugin_Text?ClassName=Plug_in_ofs.DrawTools.Tile`, params)
+}
 
 
 const getPicture = {
@@ -59,6 +64,7 @@ const getPicture = {
     delImagesCustom,
     getCutParts,
     setCutParts,
-    setCutAllParts
+    setCutAllParts,
+    setBasicRepeat
 }
 export default getPicture

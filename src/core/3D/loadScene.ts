@@ -4,6 +4,7 @@ import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { createMultiMaterialObject } from 'three/examples/jsm/utils/SceneUtils.js'
 import baseUrl from '@/config/constants/baseUrl';
 import { useStore } from 'vuex'
 class LoadScene {
@@ -24,17 +25,47 @@ class LoadScene {
         }
         const loader = new GLTFLoader();
         loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
+            const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
+            normalMap.wrapT = 100
+            normalMap.wrapS = 100
+            normalMap.repeat.set(700, 700)
             object.name = name
+            let group = new THREE.Group()
             object.scene.traverse(v => {
                 if (v.type == 'Mesh' && modelColor) {
                     const color = new THREE.Color(modelColor)
-                    v.material = new THREE.MeshLambertMaterial({
-                        map: v.material.map, //获取原来材质的颜色贴图属性值
-                        color: color, //读取原来材质的颜色
+                    const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
+                    normalMap.wrapT = 100
+                    normalMap.wrapS = 100
+                    normalMap.repeat.set(700, 700)
+                    const frontMaterial = new THREE.MeshLambertMaterial({
+                        map: v.material.map,
+                        color: color,
+                        side: THREE.FrontSide,
+                        transparent: false,
+                        displacementScale: 0.05,
+                        normalMap: normalMap,
+                        normalScale: new THREE.Vector2(3, 3),
                     })
+                    const backMaterial = new THREE.MeshLambertMaterial({
+                        map: v.material.map,
+                        color: 0xffffff,
+                        side: THREE.BackSide,
+                        transparent: false,
+                        displacementScale: 0.05,
+                        normalMap: normalMap,
+                        normalScale: new THREE.Vector2(3, 3),
+                    })
+                    const materials = [frontMaterial, backMaterial];
+                    const cube = createMultiMaterialObject(v.geometry, materials);
+                    cube.name = v.name ? v.name : ''
+                    group.add(cube)
                 }
             })
-            LoadScene.scene.add(object.scene);
+            group.name = name
+            LoadScene.scene.add(group);
+            console.log('group', group)
+            console.log('camera', LoadScene.camera)
         });
 
     }
@@ -44,10 +75,17 @@ class LoadScene {
             LoadScene.scene.traverse((child: any) => {
                 if (child.isMesh && child.name == name) {
                     const mapTexture = new THREE.TextureLoader().load(url)
+                    const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
                     mapTexture.encoding = THREE.sRGBEncoding
-                    mapTexture.repeat.set(1, 1)
+                    normalMap.wrapT = 10000
+                    normalMap.wrapS = 10000
                     child.material = new THREE.MeshLambertMaterial({
                         map: mapTexture,
+                        side: THREE.DoubleSide,
+                        transparent: false,
+                        displacementScale: 0.05,
+                        normalMap: normalMap,//凹凸贴图
+                        normalScale: new THREE.Vector2(3, 3),
                     })
                 }
             })
@@ -57,12 +95,22 @@ class LoadScene {
     setTexture = (name, url, callback) => {
         if (url) {
             LoadScene.scene.traverse((child: any) => {
-                if (child.isMesh && child.name == name) {
-                    const mapTexture = new THREE.TextureLoader().load(url)
+                if (child.name == name) {
+
+                    const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
+                    const mapTexture = new THREE.TextureLoader().load(url)  //普通贴图
                     mapTexture.encoding = THREE.sRGBEncoding
-                    mapTexture.repeat.set(1, 1)
-                    child.material = new THREE.MeshLambertMaterial({
+                    normalMap.wrapT = 100
+                    normalMap.wrapS = 100
+                    normalMap.repeat.set(700, 700)
+
+                    child.children[0].material = new THREE.MeshLambertMaterial({
                         map: mapTexture,
+                        side: THREE.FrontSide,
+                        transparent: false,
+                        displacementScale: 0.05,
+                        normalScale: new THREE.Vector2(3, 3),
+                        normalMap: normalMap,
                     })
                 }
             })
@@ -78,7 +126,7 @@ class LoadScene {
         LoadScene.renderer = renderer
         LoadScene.scene = new THREE.Scene();
         LoadScene.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 200);
-        LoadScene.camera.position.z = -3;
+        LoadScene.camera.position.set(-0.08928988914516146, -0.1569660082212971, -3.169317572406974);
         LoadScene.scene.add(LoadScene.camera);
         LoadScene.scene.background = new THREE.Color("#F5F5F5");
         const light1 = new THREE.DirectionalLight(0xffffff);
@@ -111,6 +159,7 @@ class LoadScene {
         // 设置渲染尺寸
         const height = id == 'big-3d' ? 600 : 280
         const width = id == 'big-3d' ? 600 : 280
+
         LoadScene.renderer.setSize(height, width);
         // 设置渲染的输出编码
         LoadScene.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -119,9 +168,14 @@ class LoadScene {
 
         // 创建轨道控制器
         LoadScene.control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
-        LoadScene.control.target.set(0, 0, 0);
-        // 设置阻尼
-        // 创建渲染函数
+        LoadScene.control.enablePan = true
+        LoadScene.control.hylMovePanY = false
+        LoadScene.control.hylMovePanX = true
+        LoadScene.control.target.set(-0.017017322512750035,
+            -0.13816378273860236, 0.01996416024727918);
+
+        LoadScene.control.enablePan = false
+        LoadScene.control.saveState()
         const render = () => {
             LoadScene.control.update();
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
@@ -157,15 +211,24 @@ class LoadScene {
         // LoadScene.camera.position.x = 0.06689093537133349
         // LoadScene.camera.position.y = -0.33589342830992186
         // LoadScene.camera.position.z = -3
-        // console.log('LoadScene.camera', LoadScene.camera.position)
+        // LoadScene.camera.position.set(3.6, 0.59, -3);
+        // LoadScene.camera.rotation.set(-2.9441970937399122, 1.2008649857906342, 3.141592653589793);
+        console.log('LoadScene.camera', LoadScene.camera)
+        console.log('LoadScene.control.target', LoadScene.control.target)
+        LoadScene.control.reset()
         LoadScene.scene.traverse((c: any) => {
             if (c.name == 'duanxiu') {
+
+                c.position.set(0, 0, 0)
+                c.rotation.set(0, 0, 0)
                 c.rotation.y = 0
                 setImage()
                 c.rotation.y = Math.PI / 2
                 setImage()
                 c.rotation.y = Math.PI
                 setImage()
+                c.position.set(0, 0, 0)
+                c.rotation.set(0, 0, 0)
                 c.rotation.y = 0
             }
 
