@@ -543,7 +543,7 @@ const changeCommon = (key, value) => {
   }
   // 旋转角度适配
   if (key === 'angle') {
-    console.log('key', key, value)
+   
     activeObject.rotate(value);
     value === 0 ? activeObject.angle = 0 : ''
     canvasEditor.canvas.renderAll();
@@ -551,6 +551,7 @@ const changeCommon = (key, value) => {
   }
   activeObject && activeObject.set(key, value);
   canvasEditor.canvas.renderAll();
+  console.log('key', key, value)
   setTimeout(() => {
     store.commit('setAllCuts')
   }, 300);

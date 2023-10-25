@@ -1,9 +1,12 @@
+import { setLocal } from '@/utils/local';
 import axios from 'axios' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
 let baseURL = 'http://8.140.206.30:8011';
 import crypto from '@/utils/crypto'
-import { constants } from 'zlib';
+import { createRouter, useRouter, useRoute } from 'vue-router';
+import { useStore } from 'vuex'
+const router = useRouter()
 // console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 
 // 这一步的目的是判断出当前是开发环境还是生成环境，方法不止一种，达到目的就行
@@ -12,6 +15,9 @@ import { constants } from 'zlib';
 // }else{
 //   baseURL=''
 // }
+const userinfo = window.location.search.replace('?code=', '')
+const USER_INFO = crypto.decrypt(userinfo)
+
 
 const config = {
     baseURL: baseURL,
@@ -38,6 +44,9 @@ _axios.interceptors.response.use((res) => {
     // if (res.data.code === 401) {
     //   console.log('无权限操作')
     // }
+    // const store = useStore()
+    // console.log(store, store)
+
     if (res.data.OK == 'False') {
         ElMessage({
             showClose: true,
@@ -63,11 +72,11 @@ _axios.interceptors.response.use((res) => {
 
 // 封装post,get方法
 // 按理来说应该也可以封装其他的方法
-let userInfo = localStorage.getItem("userInfo")
-userInfo = userInfo ? userInfo.replace(' ', '+') : ''
-const USER_INFO = crypto.decrypt(userInfo)
+
 const http = {
+
     get(url = '', params = {}) {
+
         return new Promise((resolve, reject) => {
             _axios({
                 url,
@@ -75,7 +84,7 @@ const http = {
                 headers: {
                     userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
                     userName: '',
-                    timestamp: USER_INFO ?  JSON.parse(USER_INFO).timestamp : ''
+                    timestamp: USER_INFO ? JSON.parse(USER_INFO).timestamp : ''
                 },
                 method: 'GET'
             }).then(res => {
@@ -94,7 +103,7 @@ const http = {
                 headers: {
                     userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
                     userName: '',
-                    timestamp: USER_INFO ?  JSON.parse(USER_INFO).timestamp : ''
+                    timestamp: USER_INFO ? JSON.parse(USER_INFO).timestamp : ''
                 },
                 method: 'POST'
             }).then(res => {

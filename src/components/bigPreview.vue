@@ -1,12 +1,10 @@
 <template>
-    <div class="big-preview" @click.stop>
+    <div class="big-preview" @click.stop v-loading="bigLoad3d">
         <div class="mode-selection">
             <button :class="is3D ? 'btn-active' : 'btn'" @click.native="changeMode(true)">3D</button>
             <button :class="!is3D ? 'btn-active' : 'btn'" @click.native="changeMode(false)">2D</button>
         </div>
-        <div class="box" v-show="is3D" id="big-3d">
-
-        </div>
+        <div class="box" v-show="is3D" id="big-3d" ></div>
         <div class="pre-2d" v-show="!is3D">
             <div class="box">
                 <img :src="imageActive" style="height: 600px; width: 600px;">
@@ -14,7 +12,7 @@
             <div class="right">
                 <div :class="directionSelection == item.id ? 'direction-active' : 'direction'"
                     v-for="(item, index ) in screenshotList" :key="item.id" @click="changeDirection(item)">
-                    <div v-if="directionSelection == item.id" class="active">效果图{{ index }}</div>
+                    <div v-if="directionSelection == item.id" class="active">效果图{{ index + 1 }}</div>
                     <img :src="item.src" style="width: 96px; height: 96px;">
                 </div>
             </div>
@@ -48,7 +46,9 @@ const screenshotList = computed(() => {
 const colorList = computed(() => {
     return store.state.saveData.commodityInfo.colorList
 })
-
+const bigLoad3d = computed(() => {
+    return store.state.bigLoad3d
+})
 const colorSelection = ref('')
 const load3DScene = new LoadScene()
 const props = defineProps({
@@ -63,6 +63,7 @@ const is3D = ref(false)
 let directionSelection = ref('')
 let imageActive = ref('')
 const list = reactive([0, 2, 34, 6, 9])
+
 watch(bgColor, (newVal, oldVal) => {
     if (newVal) {
         colorSelection.value = newVal.GUID
@@ -89,6 +90,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
     LoadScene.change3dBox('small-3d')
+    store.commit('setsPreviewTyped', 'small')
 })
 const changeDirection = (item) => {
 

@@ -128,11 +128,9 @@ watch(
     }
 );
 watch(sizeGUID, (newVal, oldVal) => {
-    console.log('sizeGUID', newVal)
     if (newVal) changeSize({ GUID: newVal })
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
-    console.log('bgColor',  newVal)
     if (newVal) colorSelected.value = newVal.GUID
 }, { immediate: true, deep: true });
 watch(

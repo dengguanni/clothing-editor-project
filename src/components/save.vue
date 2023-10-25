@@ -38,9 +38,7 @@ const saveSteps = computed(() => {
 const handelSave = computed(() => {
   return store.state.handelSave
 })
-const USERINFO = computed(() => {
-  return store.state.USERINFO
-})
+
 watch(handelSave, (newVal, oldVal) => {
   if (newVal) {
     setSaveData()

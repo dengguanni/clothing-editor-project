@@ -44,13 +44,14 @@ const store = createStore({
       pageLoading: false,
       isSetSteps: false,
       selected: '',
-      USERINFO: '',
       screenshotList: {
         big: [],
         small: []
       },
       smallLoad3d: true,
-      objectAttr: 0
+      bigLoad3d: false,
+      objectAttr: 0,
+      previewType: 'small'
     }
   },
   mutations: {
@@ -63,11 +64,17 @@ const store = createStore({
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
     },
-    USERINFO(state, val) {
-      state.USERINFO = val
+
+    setsLoad3d(state, val) {
+      if (state.previewType == 'small') {
+        state.smallLoad3d = val
+      } else {
+        state.bigLoad3d = val
+      }
+
     },
-    setsSmallLoad3d(state, val) {
-      state.smallLoad3d = val
+    setsPreviewTyped(state, val) {
+      state.previewType = val
     },
     setObjectAttr(state) {
       state.objectAttr = state.objectAttr + 1

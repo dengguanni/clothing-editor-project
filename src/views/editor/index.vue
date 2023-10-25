@@ -5,7 +5,8 @@
       :goodsId="goodsInfo.GUID"></productDetails>
     <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
   </Dialog>
-  <div class="home" v-loading="pageLoading">
+  <div class="home" v-loading="pageLoading" element-loading-background="rgba(122, 122, 122, 1)"
+    :element-loading-text="loadingContent.loadingText" :element-loading-spinner="loadingContent.spinner">
     <!-- <Layout> -->
     <!-- 头部区域 -->
     <Header v-if="state.isShowHeader">
@@ -306,9 +307,32 @@ const pageLoading = computed(() => {
   return store.state.pageLoading
 })
 
+let loadingContent = reactive({
+  loadingText: '',
+  spinner: ''
+})
+
+
 onMounted(() => {
-  window.localStorage.userInfo = route.query.key
   store.commit('setPageLoading', true)
+  const userinfo = window.location.search.replace('?code=', '')
+  const USER_INFO = crypto.decrypt(userinfo)
+  const timestamp = Date.parse(new Date());
+
+  if (USER_INFO && JSON.parse(USER_INFO).userId) {
+    if (timestamp > (Number(JSON.parse(USER_INFO).timestamp) + 86400000)) {
+      loadingContent.loadingText = '您的许可期限已超时'
+      loadingContent.spinner = '1'
+    } else {
+      init()
+    }
+  } else {
+    loadingContent.loadingText = '暂无权限'
+    loadingContent.spinner = '1'
+  }
+
+});
+const init = () => {
   // 初始化fabric
   const canvas = new fabric.Canvas('canvas', {
     fireRightClick: true, // 启用右键，button的数字为3
@@ -344,7 +368,7 @@ onMounted(() => {
   state.show = true;
   state.isShowHeader = true;
   getSaveData()
-});
+}
 
 // 获取字体数据 新增字体样式使用
 // getFontJson() {

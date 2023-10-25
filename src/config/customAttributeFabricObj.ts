@@ -79,5 +79,6 @@ export const initializationAttribute = {
     parentCroppingFilePath: null,
     isMask: undefined,
     tileParentFileName: null,
-    customVisible: true
+    customVisible: true,
+    isBackgroundRepeat: false
 }

@@ -6,7 +6,7 @@
  * @Description: 缩放元素
 -->
 <template>
-  <div class="box">
+  <div class="box" v-if="false">
     <ButtonGroup>
       <Button @click="big">
         <svg

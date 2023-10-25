@@ -9,7 +9,7 @@
             </div>
             <Carousel v-model="carousel" :radius-dot="true" loop dots="outside" :height="280" arrow="always" v-if="!is3D">
                 <CarouselItem v-for="(item, index ) in screenshot" :key="item.id" style="height: 280px; width: 280px;"
-                    v-loading="loadScreenshotList">
+                    v-loading="loadScreenshotList" element-loading-background="rgba(122, 122, 122, 1)">
                     <img :src="item.src" style="height: 280px; width: 280px;" />
                 </CarouselItem>
             </Carousel>
@@ -58,12 +58,13 @@ const changeMode = (val) => {
 }
 const preview = () => {
     emit('preview', is3D.value)
+    store.commit('setsPreviewTyped', 'big')
 }
 
 onMounted(() => {
     load3DScene.init(scene, camera, renderer, 'small-3d', () => {
         load3DScene.getScreenshotList('small')
-        store.commit('setsSmallLoad3d', false)
+        store.commit('setsLoad3d', false)
         loadScreenshotList.value = false
     })
 

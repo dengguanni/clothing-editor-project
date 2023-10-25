@@ -211,8 +211,8 @@ const setAllCuts = debounce((isColorChange) => {
             }
             fn(objects, 0, p)
         } else {
-            store.commit('setsSmallLoad3d', true)
-            console.log('setsSmallLoad3d', true)
+            store.commit('setsLoad3d', true)
+            console.log('setsLoad3d', true)
             cutParts.value.forEach((element, indexP) => {
                 let p = {
                     SizeGUID: sizeGUID.value,
@@ -240,12 +240,12 @@ const setCutAllParts = (p, Title, indexP = null) => {
         load3DScene.setTexture(p.Part_name, url, () => {
             if (indexP) {
                 if (!cutParts.value[indexP + 1]) {
-                    store.commit('setsSmallLoad3d', false)
+                    store.commit('setsLoad3d', false)
                     // console.log('store.commit('', false)')
                     console.log('false')
                 }
             } else {
-                store.commit('setsSmallLoad3d', false)
+                store.commit('setsLoad3d', false)
                 // console.log('store.commit('', false)')
                 console.log('false2')
             }

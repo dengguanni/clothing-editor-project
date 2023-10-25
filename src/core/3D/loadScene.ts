@@ -64,8 +64,6 @@ class LoadScene {
             })
             group.name = name
             LoadScene.scene.add(group);
-            console.log('group', group)
-            console.log('camera', LoadScene.camera)
         });
 
     }
@@ -207,18 +205,10 @@ class LoadScene {
             }
             LoadScene.screenshotList.push(obj)
         }
-        // LoadScene.camera.position.set({ x: 3.6739403974420594, y: 1.8369701987210297, z: -3 })
-        // LoadScene.camera.position.x = 0.06689093537133349
-        // LoadScene.camera.position.y = -0.33589342830992186
-        // LoadScene.camera.position.z = -3
-        // LoadScene.camera.position.set(3.6, 0.59, -3);
-        // LoadScene.camera.rotation.set(-2.9441970937399122, 1.2008649857906342, 3.141592653589793);
-        console.log('LoadScene.camera', LoadScene.camera)
-        console.log('LoadScene.control.target', LoadScene.control.target)
+
         LoadScene.control.reset()
         LoadScene.scene.traverse((c: any) => {
             if (c.name == 'duanxiu') {
-
                 c.position.set(0, 0, 0)
                 c.rotation.set(0, 0, 0)
                 c.rotation.y = 0

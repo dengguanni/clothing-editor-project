@@ -24,9 +24,11 @@ class LayerPlugin {
     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
     const line = this.canvas.getObjects().find((item) => item.id == 'grid');
     const workspace = this.canvas.getObjects().find((item) => item.id == 'workspace');
+    const backgroundRepeat = this.canvas.getObjects().find((item) => item.isBackgroundRepeat);
     mask ? this.canvas.bringToFront(mask) : ''
     line ? this.canvas.bringToFront(line) : ''
     backgroundImage ? this.canvas.sendToBack(backgroundImage) : ''
+    backgroundRepeat ? this.canvas.sendToBack(backgroundRepeat) : ''
     workspace ? this.canvas.sendToBack(workspace) : ''
     this.canvas.renderAll();
   }
