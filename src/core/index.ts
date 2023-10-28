@@ -21,6 +21,8 @@ import RulerPlugin from './plugin/RulerPlugin';
 import FiltersPlugin from './plugin/FiltersPlugin';
 // import MaterialPlugin from './plugin/MaterialPlugin';
 import ControlsTile from './plugin/ControlsTile'
+import CutPartsPlugin from './plugin/CutPartsPlugin'
+
 
 import TestPlugin from './plugin/TestPlugin';
 
@@ -46,6 +48,7 @@ export {
   // MaterialPlugin,
   ControlsTile,
   TestPlugin,
-  FiltersPlugin
+  FiltersPlugin,
+  CutPartsPlugin
 };
 export default Editor;

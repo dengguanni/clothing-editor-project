@@ -36,8 +36,8 @@
           <div class="flex-item">
             <span class="label">间距</span>
             <div class="content slider-box">
-              <Slider v-model="fontAttr.charSpacing" :max="4" :step=0.1
-                @on-input="(value) => changeCommon('char_spacing', value)" @mouseup="store.commit('setAllCuts')"
+              <Slider v-model="fontAttr.charSpacing" :max="100" :step=1
+                @on-input="(value) => sliderChangeCommon('charSpacing', value)" @mouseup="store.commit('setAllCuts')"
                 :disabled="disabled"></Slider>
             </div>
           </div>
@@ -57,7 +57,7 @@
             <span class="label">行高</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.lineHeight" :max="4" :step=0.1 :disabled="disabled"
-                @on-input="(value) => changeCommon('lineHeight', value)" @mouseup="store.commit('setAllCuts')"></Slider>
+                @on-input="(value) => sliderChangeCommon('lineHeight', value)" @mouseup="store.commit('setAllCuts')"></Slider>
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@
             <span class="label">描边</span>
             <div class="content slider-box">
               <Slider v-model="baseAttr.strokeWidth" :max="10" :step=1
-                @on-input="(value) => changeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"
+                @on-input="(value) => sliderChangeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"
                 :disabled="disabled"></Slider>
             </div>
           </div>
@@ -557,6 +557,13 @@ const changeCommon = (key, value) => {
   }, 300);
 };
 
+const sliderChangeCommon = (key, value) => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  // if(key == 'charSpacing'){
+  //   // activeObject.setCharSpacing(value)
+  // }
+  activeObject && activeObject.set(key, value);
+}
 // 边框设置
 const borderSet = (key) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];

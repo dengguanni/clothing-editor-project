@@ -2,20 +2,18 @@
 
 import picture from '@/api/picture'
 import { ElMessage } from 'element-plus';
-import guid from '@/utils/guiId.ts'
 import useSelect from '@/hooks/select';
 import LoadScene from '@/core/3D/loadScene.ts'
-import GoodsInfo from '@/core/objects/goods/goodsInfo'
-const { fabric, mixinState, canvasEditor } = useSelect();
-const load3DScene = new LoadScene()
+const {  canvasEditor } = useSelect();
 // 获取历史记录
-export const getImagesCustom = async (imageList: any, Page_Index: number | String = 0, callback) => {
+export const getImagesCustom = async (userID: any,imageList: any, Page_Index: number | String = 0, callback) => {
     const p = {
         Page_Index: Page_Index,
-        Page_RowCount: 18
+        Page_RowCount: 18,
+        userID: userID
     }
     picture.getImagesCustom(p).then(res => {
-        imageList.value = [...res.Tag[0].Table]
+        res.Tag.length > 0 ?  imageList.value = [...res.Tag[0].Table] : ''
         callback ? callback() : ''
     })
 }

@@ -11,7 +11,7 @@
                 </div>
                 <div class="text-1">{{ item.Title }} </div>
             </div>
-            <img :src="URLbase64" style="width: 200px; height: auto; border: 1px solid black;">
+            <!-- <img :src="URLbase64" style="width: 200px; height: auto; border: 1px solid black;"> -->
         </div>
     </div>
 </template>
@@ -24,8 +24,6 @@ const { fabric, mixinState, canvasEditor } = useSelect();
 import LoadScene from '@/core/3D/loadScene.ts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import picture from '@/api/picture'
-import mitts from '@/utils/mitts'
-import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
 import { useStore } from 'vuex'
@@ -42,6 +40,7 @@ const props = defineProps({
 })
 const URLbase64 = ref('')
 const active = ref('')
+const isLoadAll = ref(false)
 const cutParts = computed(() => {
     return store.state.cutParts
 })
@@ -66,10 +65,13 @@ const handelAllCuts = computed(() => {
 const goodsId = computed(() => {
     return store.state.saveData.commodityInfo.GUID
 })
+const modelInfo = computed(() => {
+    return store.state.saveData.modelInfo
+})
 
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
-        setAllCuts(false)
+        canvasEditor.setAllCuts(false)
     }
 }, { immediate: true, deep: true });
 watch(cutPartsType, (newVal, oldVal) => {
@@ -80,14 +82,14 @@ watch(cutPartsType, (newVal, oldVal) => {
 watch(cutParts, (newVal, oldVal) => {
     if (newVal.length > 0) {
         loadCuts()
+        console.log('cutParts', cutParts)
         changeSelection()
     }
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
-        setTimeout(() => {
-            setAllCuts(true)
-        }, 200);
+        console.log('bgColor', bgColor)
+        canvasEditor.isLoadAll ? canvasEditor.setAllCuts(true) : ''
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
@@ -101,7 +103,7 @@ const watchCanvas = () => {
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
         if (cutPartsType.value) {
-            setAllCuts(false)
+            canvasEditor.setAllCuts(false)
         }
     }
     canvasEditor.canvas.on('object:added', () => {
@@ -136,157 +138,47 @@ const watchCanvas = () => {
         fn(isSetSteps.value)
     })
 }
-const setAllCuts = debounce((isColorChange) => {
-    const objects = canvasEditor.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
-    if (cutPartsType.value) {
-        let maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        let ImagesList = {}
-        cutParts.value.forEach(el => {
-            ImagesList[el.Title] = {}
-            ImagesList[el.Title].Images = []
-        })
-        isSetSteps ? '' : objects.forEach(el => {
-            if (el.type == 'text' && el.cutPartsType == cutPartsType.value) {
-                const FileName = guid() + '.png'
-                console.log('FileName', FileName)
-                el.clone(clone => {
-                    clone.rotate(0);
-                    clone.set({
-                        angle: 0
-                    })
-                    const url = clone.toDataURL({
-                        width: clone.width,
-                        height: clone.height,
-                        scaleX: clone.scaleX,
-                        scaleY: clone.scaleY,
-                        multiplier: 1,
-                    })
-                    el.FileName = FileName
-                    el.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                    setUserUploadFile(url, FileName, 'images_temp/', null)
-                })
-            }
-        });
-
-        const fn = (objects, index, p, indexP = null) => {
-            if (objects.length > 0) {
-                objects[index].clone(cloned => {
-                    cloned.rotate(0)
-                    maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-                    const obj = {
-                        Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
-                        Image_width: (objects[index].width * objects[index].scaleX).toFixed(5) + '',
-                        Image_height: (objects[index].height * objects[index].scaleY).toFixed(5) + '',
-                        Image_left: (cloned.left - maskRect.left).toFixed(5) + '',
-                        Image_top: (cloned.top - maskRect.top).toFixed(5) + '',
-                        Image_angle: objects[index].angle.toFixed(5) + '',
-                        Image_flipX: objects[index].flipX,
-                        Image_flipY: objects[index].flipY,
-                        Image_visible: objects[index].cutPartsType == p.Part_name
-                    }
-                    if (objects[index].customVisible === false) obj.Image_visible = false
-                    ImagesList[p.Part_name].Images.push(obj)
-                    if (objects[index + 1]) {
-                        fn(objects, index + 1, p)
-                    } else {
-                        p.Images = ImagesList[p.Part_name].Images
-                        setCutAllParts(p, p.Part_name.Title, indexP)
-                    }
-                })
-
-            } else {
-                p.Images = []
-                setCutAllParts(p, p.Part_name.Title,indexP)
-            }
-        }
-        if (!isColorChange) {
-            let p = {
-                SizeGUID: sizeGUID.value,
-                Canvas_zoom: '0.07',
-                Part_name: cutPartsType.value,
-                Images: [],
-                bgc_r: bgColor.value.R,
-                bgc_g: bgColor.value.G,
-                bgc_b: bgColor.value.B
-            }
-            fn(objects, 0, p)
-        } else {
-            store.commit('setsLoad3d', true)
-            console.log('setsLoad3d', true)
-            cutParts.value.forEach((element, indexP) => {
-                let p = {
-                    SizeGUID: sizeGUID.value,
-                    Canvas_zoom: '0.07',
-                    Part_name: element.Title,
-                    Images: [],
-                    bgc_r: bgColor.value.R,
-                    bgc_g: bgColor.value.G,
-                    bgc_b: bgColor.value.B
-                }
-                fn(objects, 0, p, indexP)
-
-            })
-        }
-    }
-}, 100)
-const setCutAllParts = (p, Title, indexP = null) => {
-    canvasEditor.fixedLayer()
-    picture.setCutAllParts(p).then(res => {
-        // console.log('总的剪裁参数', p)
-        isSetSteps.value ? '' : store.commit('setSave')
-        const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-        const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-        URLbase64.value = url
-        load3DScene.setTexture(p.Part_name, url, () => {
-            if (indexP) {
-                if (!cutParts.value[indexP + 1]) {
-                    store.commit('setsLoad3d', false)
-                    // console.log('store.commit('', false)')
-                    console.log('false')
-                }
-            } else {
-                store.commit('setsLoad3d', false)
-                // console.log('store.commit('', false)')
-                console.log('false2')
-            }
-        })
-
-    })
-}
 
 const init = (newVal) => {
-    let arr = []
-    picture.getCutParts({ SizeGUID: newVal }).then(res => {
-        if (res.Tag[0]) {
-            const modelInfo = {
-                modelName: res.Tag[0].modelName,
-                modelUrl: res.Tag[0].modelUrl,
-                modelUrl_Path: res.Tag[0].modelUrl_Path,
-            }
-            store.commit('setModelInfo', modelInfo)
-            res.Tag[0].Table.forEach(el => {
-                arr.push({
-                    Title: el.Title,
-                    ImageUrl: el.ImageUrl,
-                    ImageUrl_Path: el.ImageUrl_Path
+    if (cutParts.value.length == 0) {
+        let arr = []
+        picture.getCutParts({ SizeGUID: newVal }).then(res => {
+            if (res.Tag[0]) {
+                const modelInfo = {
+                    modelName: res.Tag[0].modelName,
+                    modelUrl: res.Tag[0].modelUrl,
+                    modelUrl_Path: res.Tag[0].modelUrl_Path,
+                }
+                store.commit('setModelInfo', modelInfo)
+                res.Tag[0].Table.forEach(el => {
+                    arr.push({
+                        Title: el.Title,
+                        ImageUrl: el.ImageUrl,
+                        ImageUrl_Path: el.ImageUrl_Path
+                    })
                 })
-            })
-            GoodsInfo.SizeGUID = newVal
-            const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-            LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
-        }
-        store.commit('setCutParts', arr)
+                GoodsInfo.SizeGUID = newVal
+                const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
+                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
+            }
+            store.commit('setCutParts', arr)
+            store.commit('setCutPartsType', cutParts.value[0].Title)
+            canvasEditor.setAllCuts(true)
+        })
+    } else {
         store.commit('setCutPartsType', cutParts.value[0].Title)
-        loadCanvasObject()
-        setAllCuts(true)
-        watchCanvas()
-    })
+    }
+    if (modelInfo.value.modelUrl) {
+        const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
+        LoadScene.loadModel(modelInfo.value.modelUrl, modelInfo.value.modelName, color)
+    }
 
 }
 // 加载裁片
 const loadCuts = debounce(() => {
     console.log('loadCuts加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
+    if (objects.length == 0) store.commit('setPageLoading', false)
     store.commit('setIsSetSteps', true)
     objects.forEach(el => {
         canvasEditor.canvas.remove(el)
@@ -329,8 +221,7 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.add(maskRect);
             canvasEditor.canvas.requestRenderAll();
             if (cutParts.value[index + 1] == undefined) {
-                setAllCuts(true)
-                store.commit('setPageLoading', false)
+                loadCanvasObject()
             } else {
                 fn(index + 1)
             }
@@ -366,18 +257,16 @@ const changeSelection = () => {
                     canvasEditor.canvas.renderAll()
                     canvasEditor.canvas.requestRenderAll();
                 });
-                // canvasEditor.canvas.requestRenderAll();
-                // canvasEditor.canvas.remove(el)
+
             }
         }
     })
-    // setAllCuts(true)
+    canvasEditor.fixedLayer()
 }
 // 刷新加载对象
 const loadCanvasObject = () => {
     console.log('刷新加载对象')
     store.commit('setIsSetSteps', true)
-    console.log('setIsSetSteps', true)
     const fn = (obj, index) => {
         if (obj.type == 'image') {
             const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
@@ -392,12 +281,13 @@ const loadCanvasObject = () => {
                         image.visible = false
                     }
                     if (image.customVisible === false) image.visible = false
-                    image.sendBackwards()
                     canvasEditor.canvas.add(image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
+                    } else {
+                        canvasEditor.setAllCuts(true)
+                        watchCanvas()
                     }
-
                 }
             };
             const properties = {
@@ -409,15 +299,18 @@ const loadCanvasObject = () => {
             addText(obj)
             if (canvasObjects.value[index + 1]) {
                 fn(canvasObjects.value[index + 1], index + 1)
+            } else {
+                canvasEditor.setAllCuts(true)
+                watchCanvas()
             }
         }
     }
     if (canvasObjects.value[0]) fn(canvasObjects.value[0], 0)
-    const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-    const backgroundImage = canvasEditor.canvas.getObjects().find((item) => item.isBackground)
-    canvasEditor.canvas.bringToFront(mask)
-    canvasEditor.canvas.sendToBack(backgroundImage)
     canvasEditor.canvas.requestRenderAll();
+    if (!canvasObjects.value[0]) {
+        store.commit('setPageLoading', false)
+        watchCanvas()
+    }
 }
 const addText = (option) => {
     const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)

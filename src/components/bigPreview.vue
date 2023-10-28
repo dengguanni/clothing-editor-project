@@ -122,6 +122,7 @@ const changeColor = (item) => {
 }
 const changeMode = (val) => {
     is3D.value = val
+    store.commit('setIs3dPreview',is3D.value )
     if (!is3D.value) load3DScene.getScreenshotList('big')
 }
 </script>

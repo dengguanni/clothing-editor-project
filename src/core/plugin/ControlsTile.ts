@@ -131,6 +131,7 @@ class ControlsTile {
                 Image_flipY: activeObject.flipY,
                 Image_angle: activeObject.angle
             }
+            console.log('activeObject.scaleX', activeObject.scaleX)
             console.log('平铺参数', p)
             picture.setBasicRepeat(p).then(res => {
                 console.log('res', res)

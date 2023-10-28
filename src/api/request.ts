@@ -16,7 +16,7 @@ const router = useRouter()
 //   baseURL=''
 // }
 const userinfo = window.location.search.replace('?code=', '')
-const USER_INFO = crypto.decrypt(userinfo)
+const USER_INFO = crypto.decrypt(userinfo.replace('#', ''))
 
 
 const config = {
@@ -31,11 +31,20 @@ _axios.interceptors.request.use(
     config => {
         // 如果有需要在这里开启请求时的loading动画效果
         // config.headers.Authorization = getToken  //添加token,需要结合自己的实际情况添加，
+        // config.params.userID = USER_INFO ? JSON.parse(USER_INFO).userId : ''
+        let Data = ''
+        if (config.params) {
+            // config.params.userID = JSON.parse(USER_INFO).userId
+        } else {
+            // console.log('config.data', config.data)
+            // config.data ? Data = (config.data).userID : ''
+            // config.data = JSON.stringify(Data)
+        }
         return config
     },
     err => Promise.reject(err)
 )
-
+// params.userID = USER_INFO ? JSON.parse(USER_INFO).userId : ''
 // /* 请求之后的操作 */
 _axios.interceptors.response.use((res) => {
     // 在这里关闭请求时的loading动画效果
@@ -44,8 +53,7 @@ _axios.interceptors.response.use((res) => {
     // if (res.data.code === 401) {
     //   console.log('无权限操作')
     // }
-    // const store = useStore()
-    // console.log(store, store)
+
 
     if (res.data.OK == 'False') {
         ElMessage({
@@ -82,9 +90,7 @@ const http = {
                 url,
                 params,
                 headers: {
-                    userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
-                    userName: '',
-                    timestamp: USER_INFO ? JSON.parse(USER_INFO).timestamp : ''
+                    'SwisinToken': USER_INFO ? JSON.parse(USER_INFO).userId : '',
                 },
                 method: 'GET'
             }).then(res => {
@@ -101,9 +107,7 @@ const http = {
                 url,
                 data: params,
                 headers: {
-                    userId: USER_INFO ? JSON.parse(USER_INFO).userId : '',
-                    userName: '',
-                    timestamp: USER_INFO ? JSON.parse(USER_INFO).timestamp : ''
+                    'SwisinToken': USER_INFO ? JSON.parse(USER_INFO).userId : '',
                 },
                 method: 'POST'
             }).then(res => {

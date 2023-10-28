@@ -144,6 +144,7 @@ const handelCutParts = (image) => {
                 imgInstance.cutPartsType = image.cutPartsType
                 imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
                 imgInstance.FileName = FileName
+                imgInstance.filtersType = image.filtersType
                 imgInstance.parentCroppingFilePath = image.FilePath
                 imgInstance.parentCroppingFileName = image.FileName
                 imgInstance.parentUrl = image.ImageUrl

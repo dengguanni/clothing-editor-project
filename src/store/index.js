@@ -50,8 +50,10 @@ const store = createStore({
       },
       smallLoad3d: true,
       bigLoad3d: false,
+      is3dPreview: true,
       objectAttr: 0,
-      previewType: 'small'
+      previewType: 'small',
+      userID: ''
     }
   },
   mutations: {
@@ -72,6 +74,12 @@ const store = createStore({
         state.bigLoad3d = val
       }
 
+    },
+    setUserID(state, val) {
+      state.userID = val
+    },
+    setIs3dPreview(state, val) {
+      state.is3dPreview = val
     },
     setsPreviewTyped(state, val) {
       state.previewType = val

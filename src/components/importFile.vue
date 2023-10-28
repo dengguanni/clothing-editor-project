@@ -68,6 +68,9 @@ const state = reactive({
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
 })
+const userID = computed(() => {
+  return store.state.userID
+})
 let showDelIcon = ref('')
 const pageIndex = ref(0)
 onMounted(() => {
@@ -75,16 +78,16 @@ onMounted(() => {
     replaceImage(val, fileHeaderPath)
   })
   document.getElementById("myInput").addEventListener("change", getFile, true)
-  getImagesCustom(imageList, pageIndex.value)
+  getImagesCustom(userID.value,imageList, pageIndex.value)
 
 })
 const changePage = (val) => {
   if (val) {
     pageIndex.value = pageIndex.value + 1
-    getImagesCustom(imageList, pageIndex.value)
+    getImagesCustom(userID.value,imageList, pageIndex.value)
   } else {
     pageIndex.value = pageIndex.value - 1
-    getImagesCustom(imageList, pageIndex.value)
+    getImagesCustom(userID.value,imageList, pageIndex.value)
   }
 
 }
@@ -142,9 +145,9 @@ const replaceImage = (str, fileHeaderPath) => {
       };
       fabric.Image.fromURL(imageURL, callback, properties);
     })
-    picture.setImagesCustom({ FileName }).then(e => {
+    picture.setImagesCustom({ FileName, userID: userID.value }).then(e => {
       if (e.OK == 'True') {
-        getImagesCustom(imageList, pageIndex.value, callback2)
+        getImagesCustom(userID.value,imageList, pageIndex.value, callback2)
       }
     })
     ElMessage({
@@ -187,12 +190,12 @@ const getFile = (file) => {
         } = event.target;
         const FileName = guid() + '.png'
         setUserUploadFile(result, FileName, 'images_custom\\', () => {
-          picture.setImagesCustom({ FileName }).then(e => {
+          picture.setImagesCustom({ FileName, userID: userID.value }).then(e => {
             if (e.OK == 'True') {
               if (files[index + 1]) {
                 fn(index + 1)
               } else {
-                getImagesCustom(imageList, pageIndex.value)
+                getImagesCustom(userID.value,imageList, pageIndex.value)
                 ElMessage({
                   showClose: true,
                   message: '上传成功',

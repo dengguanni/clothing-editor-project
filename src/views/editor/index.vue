@@ -264,7 +264,8 @@ import Editor, {
   FlipPlugin,
   RulerPlugin,
   TestPlugin,
-  FiltersPlugin
+  FiltersPlugin,
+  CutPartsPlugin
   // MaterialPlugin,
 } from '@/core';
 let selectedProduct = ref(0)
@@ -306,6 +307,10 @@ const goodsGUID = computed(() => {
 const pageLoading = computed(() => {
   return store.state.pageLoading
 })
+const userID = computed(() => {
+  return store.state.userID
+})
+
 
 let loadingContent = reactive({
   loadingText: '',
@@ -316,10 +321,10 @@ let loadingContent = reactive({
 onMounted(() => {
   store.commit('setPageLoading', true)
   const userinfo = window.location.search.replace('?code=', '')
-  const USER_INFO = crypto.decrypt(userinfo)
+  const USER_INFO = crypto.decrypt(userinfo.replace('#', ''))
   const timestamp = Date.parse(new Date());
-
   if (USER_INFO && JSON.parse(USER_INFO).userId) {
+    store.commit('setUserID', JSON.parse(USER_INFO).userId)
     if (timestamp > (Number(JSON.parse(USER_INFO).timestamp) + 86400000)) {
       loadingContent.loadingText = '您的许可期限已超时'
       loadingContent.spinner = '1'
@@ -363,6 +368,8 @@ const init = () => {
   canvasEditor.use(RulerPlugin);
   canvasEditor.use(TestPlugin);
   canvasEditor.use(FiltersPlugin);
+  canvasEditor.use(CutPartsPlugin);
+  
   // canvasEditor.use(MaterialPlugin);
   event.init(canvas);
   state.show = true;
@@ -387,20 +394,30 @@ const init = () => {
 const getSaveData = () => {
   store.commit('setIsSetSteps', true)
   const p = {
-    ID: ''
+    ID: '',
+    userID: userID.value
   }
+
   historyAip.getHistory(p).then(res => {
-    const data = res.Tag[0].Table[0].JsonValue
-    const dataJson = JSON.parse(data)
-    if (dataJson.commodityInfo.GUID) {
-      sendGoodsId(dataJson.commodityInfo)
+    console.log(p, res)
+    if (res.Tag.length > 0) {
+      const data = res.Tag[0].Table[0].JsonValue
+      const dataJson = JSON.parse(data)
+      if (dataJson.commodityInfo.GUID) {
+        sendGoodsId(dataJson.commodityInfo)
+      }
+      console.log('dataJson', dataJson)
+      store.commit('setSaveData', dataJson)
+      dataJson.commodityInfo.sizeGUID ? store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID) : store.commit('setPageLoading', false)
+      dataJson.commodityInfo.cutParts ? store.commit('setCutParts', dataJson.commodityInfo.cutParts) : store.commit('setPageLoading', false)
+      dataJson.commodityInfo.cutParts[0]?.Title ? store.commit('setCutPartsType', dataJson.commodityInfo.cutParts[0].Title) : store.commit('setPageLoading', false)
+      dataJson.commodityInfo.colorList ? store.commit('setBgColorList', dataJson.commodityInfo.colorList) : store.commit('setPageLoading', false)
+      dataJson.commodityInfo.bgColor ? store.commit('setBgColor', dataJson.commodityInfo.bgColor) : store.commit('setPageLoading', false)
+      console.log('更新裁片2')
+    } else {
+      store.commit('setPageLoading', false)
     }
-    store.commit('setSaveData', dataJson)
-    store.commit('setCutPartsType', dataJson.commodityInfo.cutParts[0].Title)
-    store.commit('setCutParts', dataJson.commodityInfo.cutParts)
-    store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID)
-    store.commit('setBgColor', dataJson.commodityInfo.bgColor)
-    store.commit('setBgColorList', dataJson.commodityInfo.colorList)
+
   })
 }
 

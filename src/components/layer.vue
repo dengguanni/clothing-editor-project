@@ -21,7 +21,7 @@
             <div class="layer-box">
               <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
                 @click="select(item.id, item1)">
-                <div v-if="item.cutPartsType == item1.Title && item.isMask == undefined">
+                <div v-if="item.cutPartsType == item1.Title && item.isMask == undefined && item.customVisible!==undefined">
                   <Tooltip :content="item.name || item.text || item.type" placement="left">
                     <div class="ellipsis">
                       <div style="display:flex;">
@@ -84,7 +84,7 @@ const lockAttrs = [
   'lockScalingY',
 ];
 const cutParts = computed(() => {
-  return store.state.saveData.cutParts
+  return store.state.cutParts
 })
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
@@ -241,6 +241,7 @@ const getList = () => {
         isLock
       };
     });
+    console.log('list.value',list.value)
 };
 
 onMounted(() => {

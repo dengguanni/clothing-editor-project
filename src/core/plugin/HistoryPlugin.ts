@@ -31,6 +31,9 @@ class HistoryPlugin {
   saveSteps = computed(() => {
     return this.store.state.saveSteps
   })
+  userID = computed(() => {
+    return this.store.state.userID
+})
   _init() {
     this.history = useRefHistory(ref(), {
       capacity: 50,
@@ -143,6 +146,7 @@ class HistoryPlugin {
         ID: res.Tag[0].Table[0].ID,
         ID_Next: res.Tag[0].Table[0].ID_Next,
         ID_Previous: res.Tag[0].Table[0].ID_Previous,
+        userID: this.userID.value
       }
       this.store.commit('setSaveSteps', steps)
       const data = res.Tag[0].Table[0].JsonValue

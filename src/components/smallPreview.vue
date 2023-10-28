@@ -52,13 +52,15 @@ const loadScreenshotList = ref(true)
 
 const changeMode = (val) => {
     is3D.value = val
+    store.commit('setIs3dPreview', is3D.value)
     if (!is3D.value) {
         load3DScene.getScreenshotList('small')
     }
 }
 const preview = () => {
-    emit('preview', is3D.value)
     store.commit('setsPreviewTyped', 'big')
+    store.commit('setIs3dPreview', false)
+    emit('preview', is3D.value)
 }
 
 onMounted(() => {

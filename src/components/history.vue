@@ -81,16 +81,15 @@ let lineActive = ref(false)
 const beforeClear = () => {
   Modal.confirm({
     title: '提示',
-    content: `<p>确认清空此画布吗？</p>`,
+    content: `<p>是否清空当前画布内容？</p>`,
     okText: '确认',
     cancelText: '取消',
     onOk: () => clear(),
   });
 };
 const clear = () => {
-  console.log('canvasEditor.canvas.getObjects()', canvasEditor.canvas.getObjects())
   canvasEditor.canvas.getObjects().forEach(el => {
-    if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined) {
+    if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined && el.cutPartsType == cutPartsType.value) {
       canvasEditor.canvas.remove(el)
     }
   })

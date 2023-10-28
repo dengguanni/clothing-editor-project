@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createMultiMaterialObject } from 'three/examples/jsm/utils/SceneUtils.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import baseUrl from '@/config/constants/baseUrl';
 import { useStore } from 'vuex'
 class LoadScene {
@@ -15,6 +16,9 @@ class LoadScene {
     static renderer: any
     static control: any
     static screenshotList: Array<any> = []
+    is3dPreview = computed(() => {
+        return this.store.state.is3dPreview
+    })
     static loadModel(url: string, name: string, modelColor: any = null) {
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
@@ -23,8 +27,10 @@ class LoadScene {
                 }
             })
         }
+        console.log('加载模型')
         const loader = new GLTFLoader();
-        loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb', object => {
+        const timestamp = Date.parse(new Date());
+        loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb?t=' + timestamp, object => {
             const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
             normalMap.wrapT = 100
             normalMap.wrapS = 100
@@ -41,7 +47,7 @@ class LoadScene {
                     const frontMaterial = new THREE.MeshLambertMaterial({
                         map: v.material.map,
                         color: color,
-                        side: THREE.FrontSide,
+                        side: THREE.DoubleSide,
                         transparent: false,
                         displacementScale: 0.05,
                         normalMap: normalMap,
@@ -51,7 +57,8 @@ class LoadScene {
                         map: v.material.map,
                         color: 0xffffff,
                         side: THREE.BackSide,
-                        transparent: false,
+                        transparent: true,
+                        opacity: 0.9,
                         displacementScale: 0.05,
                         normalMap: normalMap,
                         normalScale: new THREE.Vector2(3, 3),
@@ -64,44 +71,44 @@ class LoadScene {
             })
             group.name = name
             LoadScene.scene.add(group);
+            console.log('oadScene.scene', LoadScene.scene)
+            // object.scene.traverse(v => {
+            //     if (v.type == 'Mesh') {
+            //         const material = new THREE.MeshLambertMaterial({
+            //             map: v.material.map,
+            //             color: '0x3eee',
+
+            //         })
+            //         v.material = material
+            //     }
+            // })
+
+            // LoadScene.scene.add(object.scene);
         });
+        // const dracoLoader = new DRACOLoader();
+        // //解压模型的位置信息
+        // dracoLoader.setDecoderPath(baseUrl + 'public/static/');
+        // dracoLoader.setDecoderConfig({ type: 'js' });
+        // dracoLoader.preload();
+        // loader.setDRACOLoader(dracoLoader);
+        // loader.load('yifu1_draco', function (glb) {
+        //     LoadScene.scene.add(glb);
+        //  })
+
 
     }
 
-    static setTexture = (name, url, callback) => {
-        if (url) {
-            LoadScene.scene.traverse((child: any) => {
-                if (child.isMesh && child.name == name) {
-                    const mapTexture = new THREE.TextureLoader().load(url)
-                    const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
-                    mapTexture.encoding = THREE.sRGBEncoding
-                    normalMap.wrapT = 10000
-                    normalMap.wrapS = 10000
-                    child.material = new THREE.MeshLambertMaterial({
-                        map: mapTexture,
-                        side: THREE.DoubleSide,
-                        transparent: false,
-                        displacementScale: 0.05,
-                        normalMap: normalMap,//凹凸贴图
-                        normalScale: new THREE.Vector2(3, 3),
-                    })
-                }
-            })
-        }
-        callback ? callback() : ''
-    }
+
     setTexture = (name, url, callback) => {
         if (url) {
             LoadScene.scene.traverse((child: any) => {
                 if (child.name == name) {
-
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
                     const mapTexture = new THREE.TextureLoader().load(url)  //普通贴图
                     mapTexture.encoding = THREE.sRGBEncoding
                     normalMap.wrapT = 100
                     normalMap.wrapS = 100
                     normalMap.repeat.set(700, 700)
-
                     child.children[0].material = new THREE.MeshLambertMaterial({
                         map: mapTexture,
                         side: THREE.FrontSide,
@@ -205,8 +212,7 @@ class LoadScene {
             }
             LoadScene.screenshotList.push(obj)
         }
-
-        LoadScene.control.reset()
+        this.is3dPreview.value ? '' : LoadScene.control.reset()
         LoadScene.scene.traverse((c: any) => {
             if (c.name == 'duanxiu') {
                 c.position.set(0, 0, 0)
