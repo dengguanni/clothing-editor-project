@@ -5,7 +5,6 @@
 import { fabric } from 'fabric';
 import Editor from '../core';
 import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import { useStore } from 'vuex'
 import guid from '@/utils/guiId.ts'
@@ -61,7 +60,7 @@ class FiltersPlugin {
             activeObject.set('FilePath', activeObject.oldFilePath);
             activeObject.set('oldFilePath', null)
             activeObject.applyFilters()
-            ControlsTile.setRepeat(activeObject.repeatType, true)
+            this.editor.setRepeat(activeObject.repeatType, true)
             this.canvas.renderAll();
             noParamsFilters ? this.setCheckBoxList(noParamsFilters, null) : ''
             this.store.commit('setAllCuts')
@@ -148,7 +147,7 @@ class FiltersPlugin {
                 activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
                 activeObject.set('oldFilePath', oldFilePath)
                 activeObject.applyFilters()
-                ControlsTile.setRepeat(activeObject.repeatType, true)
+                this.editor.setRepeat(activeObject.repeatType, true)
                 this.store.commit('setAllCuts')
                 noParamsFilters ? this.setCheckBoxList(noParamsFilters, type) : ''
                 this.canvas.renderAll();

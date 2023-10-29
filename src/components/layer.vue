@@ -180,8 +180,6 @@ const textType = (type, item) => {
 };
 // 选中元素
 const select = (id, obj) => {
-  console.log('id,', id,)
-  console.log(' obj', obj)
   if (obj) {
     store.commit('setCutPartsType', obj.Title)
     const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
@@ -241,7 +239,6 @@ const getList = () => {
         isLock
       };
     });
-    console.log('list.value',list.value)
 };
 
 onMounted(() => {

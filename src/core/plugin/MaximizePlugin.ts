@@ -1,7 +1,7 @@
 import { Canvas } from 'fabric/fabric-impl';
 
 // 最大化
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
+// import this.canvasEditor from '@/core/plugin/this.canvasEditor.ts'
 class MaximizePlugin {
     static canvasEditor: any
     static activeObject: any
@@ -19,7 +19,7 @@ class MaximizePlugin {
         } else {
             this.widthMaximization()
         }
-        ControlsTile.setRepeat(this.activeObject.repeatType, true)
+        this.canvasEditor.setRepeat(this.activeObject.repeatType, true)
         this.canvasEditor.canvas.requestRenderAll();
 
     }

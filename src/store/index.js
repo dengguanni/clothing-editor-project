@@ -53,7 +53,8 @@ const store = createStore({
       is3dPreview: true,
       objectAttr: 0,
       previewType: 'small',
-      userID: ''
+      userID: '',
+      isRepeating: false
     }
   },
   mutations: {
@@ -66,7 +67,9 @@ const store = createStore({
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1
     },
-
+    setIsRepeating(state, val) {
+      state.isRepeating = val
+    },
     setsLoad3d(state, val) {
       if (state.previewType == 'small') {
         state.smallLoad3d = val

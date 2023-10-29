@@ -445,7 +445,7 @@ const setAllCuts = debounce(() => {
     baseAttr.angle = 0
     activeObject.rotate(baseAttr.angle)
   }
-  ControlsTile.setRepeat(activeObject.repeatType, true)
+  canvasEditor.setRepeat(activeObject.repeatType, true)
   // if (activeObject.isRepeat) {
   //   const obj = canvasEditor.canvas.getObjects().find(el => el.tileParentId == activeObject.id)
   //   obj.rotate(baseAttr.angle)

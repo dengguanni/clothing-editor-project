@@ -11,7 +11,6 @@ import Editor from '../core';
 type IEditor = Editor;
 import { v4 as uuid } from 'uuid';
 import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import { useStore } from 'vuex'
 import guid from '@/utils/guiId';
 import { Message } from 'view-ui-plus';
@@ -98,7 +97,7 @@ class CopyPlugin {
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
-      ControlsTile.setRepeat(repeatType, true)
+      this.editor.setRepeat(repeatType, true)
     });
   }
 
@@ -151,7 +150,7 @@ class CopyPlugin {
           })
           this.canvas.add(c)
           this.canvas.setActiveObject(c)
-          ControlsTile.setRepeat(c.repeatType, true)
+          this.editor.setRepeat(c.repeatType, true)
         })
 
       }

@@ -113,12 +113,10 @@ const addItem = (item) => {
                 image.ImageUrl = item.ImageUrl
                 image.FileName = item.FileName
                 image.FilePath = item.FilePath
-
-                image.isLock = false
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(image);
-
+                console.log('maskRect', maskRect)
                 if (props.isBg) {
                     if (currentBackground) canvasEditor.canvas.remove(currentBackground)
                     image.isBackground = true
@@ -129,6 +127,7 @@ const addItem = (item) => {
                 }
                 image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX) / 2
                 image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY) / 2
+                console.log('添加后image', image)
                 canvasEditor.canvas.bringToFront(maskRect)
                 store.commit('setSelected', image)
                 canvasEditor.canvas.requestRenderAll();

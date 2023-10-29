@@ -140,14 +140,16 @@ class HistoryPlugin {
     this.store.commit('setIsSetSteps', true)
     const p = {
       ID: isNext ? this.saveSteps.value.ID - 1 : Number(this.saveSteps.value.ID) + 1,
+      userID: this.userID.value
     }
+    
     historyAip.getHistory(p).then(res => {
       const steps = {
         ID: res.Tag[0].Table[0].ID,
         ID_Next: res.Tag[0].Table[0].ID_Next,
         ID_Previous: res.Tag[0].Table[0].ID_Previous,
-        userID: this.userID.value
       }
+      console.log(this.userID)
       this.store.commit('setSaveSteps', steps)
       const data = res.Tag[0].Table[0].JsonValue
       const objects = this.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))

@@ -68,6 +68,9 @@ const goodsId = computed(() => {
 const modelInfo = computed(() => {
     return store.state.saveData.modelInfo
 })
+const setIsRepeating = computed(() => {
+    return store.state.setIsRepeating
+})
 
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
@@ -102,7 +105,7 @@ const watchCanvas = () => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
-        if (cutPartsType.value) {
+        if (cutPartsType.value  && !setIsRepeating.value) {
             canvasEditor.setAllCuts(false)
         }
     }

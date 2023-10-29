@@ -225,7 +225,8 @@ onMounted(() => {
     event.on('selectOne', init);
     MouseEventEventListener.setMouseupFn = () => { }
     ControlsTile.canvas = canvasEditor.canvas
-    ControlsTile.setCanvasObserve(canvasEditor.canvas)
+    // ControlsTile.setCanvasObserve(canvasEditor.canvas)
+    canvasEditor.setCanvasObserve(canvasEditor.canvas)
     MouseEventEventListener.rmMouseup()
     event.off('selectOne', init);
 
@@ -332,7 +333,7 @@ const setCopyTo = (item) => {
             canvasEditor.canvas.add(c)
         })
     }
-    // ControlsTile.setRepeat(repeatType, true)
+    // canvasEditor.setRepeat(repeatType, true)
     canvasEditor.canvas.renderAll();
     state.copyTo = false
 
@@ -342,7 +343,8 @@ const menuList1Click = (type) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     switch (type) {
         case 'basic':
-            ControlsTile.setRepeat('basic', false, menuList1)
+            // canvasEditor.setRepeat('basic', false, menuList1)
+            canvasEditor.setRepeat('basic', false, menuList1)
             break;
         case 'cropping':
             //   state.isShowCropping = true
@@ -350,13 +352,13 @@ const menuList1Click = (type) => {
         case 'clearness':
             break;
         case 'mirror':
-            ControlsTile.setRepeat('mirror', false, menuList1)
+            canvasEditor.setRepeat('mirror', false, menuList1)
             break;
         case 'transverse':
-            ControlsTile.setRepeat('transverse', false, menuList1)
+            canvasEditor.setRepeat('transverse', false, menuList1)
             break;
         case 'direction':
-            ControlsTile.setRepeat('direction', false, menuList1)
+            canvasEditor.setRepeat('direction', false, menuList1)
             break;
         default:
     }
@@ -422,7 +424,7 @@ const scaleSmall = debounce((obj) => {
     const top = (oldH - newH) / 2
     activeObject.left = activeObject.left + left
     activeObject.top = activeObject.top + top
-    ControlsTile.setRepeat(activeObject.repeatType, true)
+    canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
 
@@ -441,7 +443,7 @@ const scaleBig = debounce((obj) => {
     const top = (newH - oldH) / 2
     activeObject.left = activeObject.left - left
     activeObject.top = activeObject.top - top
-    ControlsTile.setRepeat(activeObject.repeatType, true)
+    canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     store.commit('setAllCuts')
 }, 300);

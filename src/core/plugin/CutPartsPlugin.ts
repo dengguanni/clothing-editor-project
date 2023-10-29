@@ -12,7 +12,7 @@ class CutPartsPlugin {
     public editor: IEditor;
     static pluginName = 'CutPartsPlugin';
     static apis = ['setAllCuts', 'isLoadAll'];
-    public hotkeys: string[] = ['backspace'];
+    public hotkeys: string[] = [];
     constructor(canvas: fabric.Canvas, editor: IEditor) {
         this.canvas = canvas;
         this.editor = editor;
@@ -42,10 +42,14 @@ class CutPartsPlugin {
     sizeGUID = computed(() => {
         return this.store.state.sizeGUID
     })
+    isRepeating = computed(() => {
+        return this.store.state.isRepeating
+    })
+    
     setAllCuts(isColorChange: Boolean) {
+        if(this.isRepeating.value) return
         const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
         if (this.cutPartsType.value) {
-            let maskRect = this.canvas.getObjects().find((item) => item.isMask);
             let ImagesList: any = {}
             this.cutParts.value.forEach(el => {
                 ImagesList[el.Title] = {}
@@ -75,14 +79,17 @@ class CutPartsPlugin {
 
             const fn = (objects, index, p, maskRect, indexP = null) => {
                 if (objects.length > 0) {
+                    console.log()
                     objects[index].clone(cloned => {
                         cloned.rotate(0)
+                        const top = objects[index].angle == 0 ? objects[index].top - maskRect.top : cloned.top - maskRect.top
+                        const left = objects[index].angle == 0 ? objects[index].left - maskRect.left : cloned.left - maskRect.left
                         const obj = {
                             Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
                             Image_width: (objects[index].width * objects[index].scaleX).toFixed(5) + '',
                             Image_height: (objects[index].height * objects[index].scaleY).toFixed(5) + '',
-                            Image_left: (cloned.left - maskRect.left).toFixed(5) + '',
-                            Image_top: (cloned.top - maskRect.top).toFixed(5) + '',
+                            Image_left: (left).toFixed(5) + '',
+                            Image_top: (top).toFixed(5) + '',
                             Image_angle: objects[index].angle.toFixed(5) + '',
                             Image_flipX: objects[index].flipX,
                             Image_flipY: objects[index].flipY,
@@ -105,6 +112,7 @@ class CutPartsPlugin {
             }
             if (!isColorChange) {
                 const maskRect = this.canvas.getObjects().find((item) => item.isMask);
+
                 let p = {
                     SizeGUID: this.sizeGUID.value,
                     Canvas_zoom: '0.07',
@@ -138,8 +146,9 @@ class CutPartsPlugin {
         this.editor.fixedLayer()
         picture.setCutAllParts(p).then(res => {
             console.log('总的剪裁参数', p, res)
+            console.log( '保存',!this.isSetSteps.value)
             this.isSetSteps.value ? '' : this.store.commit('setSave')
-            const color = 'rgb(' + this.bgColor.value.R + ',' + this.bgColor.value.G + ',' + this.bgColor.value.B + ')'
+            // const color = 'rgb(' + this.bgColor.value.R + ',' + this.bgColor.value.G + ',' + this.bgColor.value.B + ')'
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
             this.load3DScene.setTexture(p.Part_name, url, () => {
                 if (indexP) {

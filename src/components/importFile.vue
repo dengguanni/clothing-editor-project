@@ -133,7 +133,7 @@ const replaceImage = (str, fileHeaderPath) => {
           canvasEditor.canvas.remove(oldActiveObject)
           const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
           canvasEditor.canvas.setActiveObject(info);
-          ControlsTile.setRepeat(image.repeatType, true)
+          canvasEditor.setRepeat(image.repeatType, true)
           image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
           image.Sharpen ? canvasEditor.setSharpening(true) : ''
           canvasEditor.canvas.requestRenderAll();

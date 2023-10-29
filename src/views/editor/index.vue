@@ -265,7 +265,8 @@ import Editor, {
   RulerPlugin,
   TestPlugin,
   FiltersPlugin,
-  CutPartsPlugin
+  CutPartsPlugin,
+  ControlsRepeat
   // MaterialPlugin,
 } from '@/core';
 let selectedProduct = ref(0)
@@ -369,7 +370,7 @@ const init = () => {
   canvasEditor.use(TestPlugin);
   canvasEditor.use(FiltersPlugin);
   canvasEditor.use(CutPartsPlugin);
-  
+  canvasEditor.use(ControlsRepeat);
   // canvasEditor.use(MaterialPlugin);
   event.init(canvas);
   state.show = true;

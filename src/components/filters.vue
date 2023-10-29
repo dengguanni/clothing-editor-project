@@ -220,7 +220,7 @@ const replaceImage = (url, type) => {
       activeObject.set('oldFilePath', oldFilePath)
       activeObject.applyFilters()
       console.log('activeObject,',activeObject)
-      ControlsTile.setRepeat(activeObject.repeatType, true)
+      canvasEditor.setRepeat(activeObject.repeatType, true)
       store.commit('setAllCuts')
       setCheckBoxList(state.noParamsFilters, type)
 
@@ -248,7 +248,7 @@ const restoreImage = (callback = null) => {
     activeObject.set('FilePath', activeObject.oldFilePath);
     activeObject.set('oldFilePath', null)
     activeObject.applyFilters()
-    ControlsTile.setRepeat(activeObject.repeatType, true)
+    canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll();
     setCheckBoxList(state.noParamsFilters, null)
     store.commit('setAllCuts')

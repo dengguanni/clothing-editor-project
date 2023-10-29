@@ -22,6 +22,7 @@ import FiltersPlugin from './plugin/FiltersPlugin';
 // import MaterialPlugin from './plugin/MaterialPlugin';
 import ControlsTile from './plugin/ControlsTile'
 import CutPartsPlugin from './plugin/CutPartsPlugin'
+import ControlsRepeat from './plugin/ControlsRepeat'
 
 
 import TestPlugin from './plugin/TestPlugin';
@@ -49,6 +50,7 @@ export {
   ControlsTile,
   TestPlugin,
   FiltersPlugin,
-  CutPartsPlugin
+  CutPartsPlugin,
+  ControlsRepeat
 };
 export default Editor;

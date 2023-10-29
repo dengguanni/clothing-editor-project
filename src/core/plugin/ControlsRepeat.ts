@@ -6,8 +6,18 @@ import baseUrl from '@/config/constants/baseUrl';
 import { Message } from 'view-ui-plus';
 import picture from '@/api/picture.ts'
 import { useStore } from 'vuex'
-const store = useStore()
-class ControlsTile {
+
+import Editor from '../core';
+type IEditor = Editor;
+
+class ControlsRepeat {
+    public canvas: fabric.Canvas;
+    public editor: IEditor;
+    public defautOption = {};
+    static pluginName = 'ControlsRepeat';
+    static events = [];
+    static apis = ['setRepeat','setCanvasObserve'];
+    public hotkeys: string[] = [''];
     static lockObj = {
         'lockMovementX': false,
         'lockMovementY': false,
@@ -16,31 +26,19 @@ class ControlsTile {
         'lockScalingY': false,
         selectable: false
     }
-    
-    static repeatType = ''
-    static canvas: any
-    static stateRepeat: any = {
-        basic: false,
-        mirror: false,
-        transverse: false,
-        direction: false
+    constructor(canvas: fabric.Canvas, editor: IEditor) {
+        this.canvas = canvas;
+        this.editor = editor;
     }
-    static activeObject: any
-    static activeInfo = {
-        angle: 0,
-        width: 0,
-        height: 0,
-        scaleX: 0,
-        scaleY: 0
-    }
-    static groupRepeat: any
-    static setCanvasObserve() {
+    store = useStore()
+    setCanvasObserve() {
+        const self = this
         this.canvas.on('object:modified', function () {
-            const activeObject = ControlsTile.canvas.getActiveObjects()[0];
-            ControlsTile.setRepeat(activeObject.repeatType, true)
+            const activeObject = self.canvas.getActiveObjects()[0];
+            self.setRepeat(activeObject.repeatType, true)
         })
     }
-    static setButtonActive = (arr, type) => {
+    setButtonActive = (arr, type) => {
         const obj = this.canvas.getActiveObjects()[0]
         if (type) {
             if (obj.repeatType) {
@@ -73,8 +71,7 @@ class ControlsTile {
             });
         }
     }
-    static setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
-
+    setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
         const activeObject = this.canvas.getActiveObjects()[0];
         if (!val) {
             if (repeatType) {
@@ -110,10 +107,10 @@ class ControlsTile {
         }
     }
 
-    static handelRepeat(type) {
+    handelRepeat(type) {
         // this.store.commit('setsLoad3d', false)
         // const store = useStore()
-        // store.commit('setIsRepeating', true)
+        this.store.commit('setIsRepeating', true)
         const activeObject = this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
         activeObject.clone(c => {
@@ -140,7 +137,7 @@ class ControlsTile {
         })
     }
     // 更新图片
-    static replaceImage = (url) => {
+    replaceImage = (url) => {
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
         let callback1 = () => {
@@ -150,9 +147,9 @@ class ControlsTile {
             const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
-                    ControlsTile.canvas.getObjects().forEach((el: any) => {
+                    this.canvas.getObjects().forEach((el: any) => {
                         if (el.tileParentId == activeObject.id) {
-                            ControlsTile.canvas.remove(el)
+                            this.canvas.remove(el)
                         }
                     })
 
@@ -174,6 +171,7 @@ class ControlsTile {
                     image.left = Mask.left
                     image.top = Mask.top
                     image.rotate(0)
+                    this.store.commit('setIsRepeating', false)
                     this.canvas.add(image);
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
@@ -186,7 +184,7 @@ class ControlsTile {
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
                     // const store = useStore()
-                    // store.commit('setIsRepeating', false)
+                   
                 }
             };
             const properties = {
@@ -197,6 +195,14 @@ class ControlsTile {
         }
         setUserUploadFile(URL, FileName, 'images_temp//', callback1)
     }
+    destroy() {
+        console.log('pluginDestroy');
+    }
 
+    // 快捷键扩展回调
+    hotkeyEvent(eventName: string, e: any) {
+
+    }
 }
-export default ControlsTile
+
+export default ControlsRepeat;
