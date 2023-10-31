@@ -66,7 +66,7 @@ const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
 const cutParts = computed(() => {
-    return store.state.saveData.cutParts
+    return store.state.cutParts
 })
 let mSelectMode = computed(() => {
     mixinState.mSelectMode

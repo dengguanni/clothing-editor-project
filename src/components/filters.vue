@@ -273,15 +273,15 @@ const goBack = () => {
 
 // 设置滤镜值
 function _changeAttr(type, key, value) {
-  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  const itemFilter = _getFilter(activeObject, type);
-  if (itemFilter) {
-    itemFilter[key] = value;
-  } else {
-    const imgFilter = _createFilter(activeObject, type);
-    imgFilter[key] = value;
-  }
-  activeObject.applyFilters();
+  // const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  // const itemFilter = _getFilter(activeObject, type);
+  // if (itemFilter) {
+  //   itemFilter[key] = value;
+  // } else {
+  //   const imgFilter = _createFilter(activeObject, type);
+  //   imgFilter[key] = value;
+  // }
+  // activeObject.applyFilters();
 }
 
 function _changeAttrByHandler(moduleInfo) {
@@ -342,21 +342,21 @@ function _createFilter(sourceImg, type, options = null) {
  * @private
  */
 function _getFilter(sourceImg, type) {
-  let imgFilter = null;
-  if (sourceImg) {
-    const fabricType = _getFabricFilterType(type);
-    const { length } = sourceImg.filters;
-    let item, i;
+  // let imgFilter = null;
+  // if (sourceImg) {
+  //   const fabricType = _getFabricFilterType(type);
+  //   const { length } = sourceImg.filters;
+  //   let item, i;
 
-    for (i = 0; i < length; i += 1) {
-      item = sourceImg.filters[i];
-      if (item.type === fabricType) {
-        imgFilter = item;
-        break;
-      }
-    }
-  }
-  return imgFilter;
+  //   for (i = 0; i < length; i += 1) {
+  //     item = sourceImg.filters[i];
+  //     if (item.type === fabricType) {
+  //       imgFilter = item;
+  //       break;
+  //     }
+  //   }
+  // }
+  // return imgFilter;
 }
 /**
  * Remove applied filter instance

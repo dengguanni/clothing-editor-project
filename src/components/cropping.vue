@@ -4,7 +4,6 @@
             <div @click="goBack">返回</div>
             <div @click="restore">恢复</div>
         </div>
-        <!-- <div @click="text" style="height: 100px; width: 100px; background-color: aqua;"> 剪切</div> -->
         <div class="filter-box">
             <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value)>
                 <img :src="value.src" />
@@ -24,10 +23,15 @@ import guid from '@/utils/guiId.ts'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
 import baseUrl from '@/config/constants/baseUrl'
 import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'
+import { useStore } from 'vuex'
+
+const store = useStore()
 const emit = defineEmits()
 const { fabric, mixinState, canvasEditor } = useSelect();
 let croppedImage = ref()
-
+const cutPartsType = computed(() => {
+    return store.state.cutPartsType
+})
 watch(croppedImage, (newVal, oldVal) => {
     if (newVal) {
         console.log('croppedImage变了', newVal)
@@ -71,34 +75,35 @@ const imageList = reactive([
 ])
 onMounted(() => {
     canvasEditor.canvas.on('mouse:up', function (options) {
+        console.log('点击', state.hasCropping)
         if (state.hasCropping) {
-            // canvasEditor.canvas.overlayColor = null
             const mask = canvasEditor.canvas.getActiveObjects()[0]
-            if (mask) {
-                console.log('croppedImage.value', croppedImage.value)
-                handelCutParts(croppedImage.value)
-                const objects = canvasEditor.canvas.getObjects();
-                canvasEditor.canvas.remove(croppedImage.value)
-                croppedImage.value.visible = false
-                croppedImage.value = null
-                objects.map((item) => {
-                    if (item.hasCropping) {
-                        canvasEditor.canvas.remove(item)
-                        canvasEditor.upTop()
-                    }
-                })
-            }
-            state.hasCropping = false
+            // if (mask) {
+            handelCutParts(croppedImage.value)
+            // const objects = canvasEditor.canvas.getObjects();
+            // const cutMask = objects.find(item => item.hasCropping)
+            // canvasEditor.canvas.remove(croppedImage.value)
+            // canvasEditor.canvas.remove(cutMask)
+            // croppedImage.value = null
+            // objects.map((item) => {
+            //     if (item.hasCropping) {
+            //         canvasEditor.canvas.remove(item)
+            //         canvasEditor.upTop()
+            //     }
+            // })
+            // }
+            // state.hasCropping = false
         }
 
     })
 })
+// 裁剪
 const handelCutParts = (image) => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-    const mask = canvasEditor.canvas.getActiveObjects()[0]
-    console.log('image.FileName', image.FileName)
-    if (mask) {
+    const objects = canvasEditor.canvas.getObjects();
+    const cutMask = objects.find(item => item.hasCropping)
+    if (cutMask) {
         const p = {
             Canvas_width: workspace.width,
             Canvas_height: workspace.height,
@@ -110,12 +115,12 @@ const handelCutParts = (image) => {
             Image_left: image.left,
             Image_top: image.top,
             Image_angle: image.angle,
-            Mask_name: mask.name,
-            Mask_width: mask.width * mask.scaleX,
-            Mask_height: mask.height * mask.scaleY,
-            Mask_left: mask.left,
-            Mask_top: mask.top,
-            Mask_angle: mask.angle,
+            Mask_name: cutMask.name,
+            Mask_width: cutMask.width * cutMask.scaleX,
+            Mask_height: cutMask.height * cutMask.scaleY,
+            Mask_left: cutMask.left,
+            Mask_top: cutMask.top,
+            Mask_angle: cutMask.angle,
             Image_flipX: image.flipX,
             Image_flipY: image.flipY,
             Image_visible: image.visible
@@ -141,20 +146,24 @@ const handelCutParts = (image) => {
                     left: image.left,
                     angle: image.angle,
                 })
-                imgInstance.cutPartsType = image.cutPartsType
+                imgInstance.name = FileName
+                imgInstance.cutPartsType = cutPartsType.value
                 imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
                 imgInstance.FileName = FileName
                 imgInstance.filtersType = image.filtersType
                 imgInstance.parentCroppingFilePath = image.FilePath
                 imgInstance.parentCroppingFileName = image.FileName
                 imgInstance.parentUrl = image.ImageUrl
+                imgInstance.visible = true
                 imgInstance.ImageUrl = image.ImageUrl
+                imgInstance.customVisible = true
                 console.log('imgInstance', imgInstance)
                 imgEl.onload = () => {
                     const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
                     canvasEditor.canvas.remove(oldObj)
                     // imgInstance.scaleX = image.scaleX
                     // imgInstance.scaleY = image.scaleY
+                    store.commit('setDisableClipping', false)
                     canvasEditor.canvas.add(imgInstance);
                     canvasEditor.canvas.bringToFront(maskRect)
                     canvasEditor.canvas.renderAll();
@@ -162,6 +171,12 @@ const handelCutParts = (image) => {
 
                 }
 
+
+
+                canvasEditor.canvas.remove(croppedImage.value)
+                canvasEditor.canvas.remove(cutMask)
+                croppedImage.value = null
+                state.hasCropping = false
             }
             setUserUploadFile('data:image/jpeg;base64,' + res.Tag[0].base64, FileName, 'images_temp//', callback)
 
@@ -171,11 +186,12 @@ const handelCutParts = (image) => {
 
 }
 const restore = () => {
+    store.commit('setDisableClipping', true)
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const scaleX = activeObjects.scaleX
     const scaleY = activeObjects.scaleY
-    console.log('activeObjects恢复', activeObjects.scaleX)
+
     if (activeObjects.parentCroppingFilePath) {
         const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
@@ -201,7 +217,7 @@ const restore = () => {
                 image.Sharpen = activeObjects.Sharpen
                 image.isBackground = activeObjects.isBackground
                 image.parentUrl = null
-                image.visible = true
+                store.commit('setDisableClipping', false)
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(info);
@@ -210,7 +226,6 @@ const restore = () => {
                 image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
                 image.Sharpen ? canvasEditor.setSharpening(true) : ''
                 canvasEditor.canvas.requestRenderAll();
-
             }
         };
         const properties = {
@@ -227,18 +242,15 @@ const restore = () => {
     }
 }
 const addItem = (item) => {
-    // const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-    // canvasEditor.canvas.setOverlayColor({ source: 'src/assets/png/01.png', repeat: 'no-repeat' }, canvasEditor.canvas.renderAll.bind(canvasEditor.canvas), { width: 100, height: 100 })
-    // state.hasCropping = true
-    // clipImage()
+    store.commit('setDisableClipping', true)
     const objects = canvasEditor.canvas.getObjects();
     const activeObjects = canvasEditor.canvas.getActiveObjects()[0]
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-    if (activeObjects.parentUrl) {
+    if (activeObjects.parentUrl) {  //  二次剪裁
         const imageURL = activeObjects.parentUrl;
         let callback = (image, isError) => {
             if (!isError) {
-                canvasEditor.canvas.remove(activeObjects)
+                console.log('初次剪裁结果', activeObjects)
                 image.id = uuid()
                 image.name = activeObjects.name
                 image.scaleX = activeObjects.scaleX
@@ -246,16 +258,19 @@ const addItem = (item) => {
                 image.top = activeObjects.top
                 image.left = activeObjects.left
                 image.angle = activeObjects.angle
-                image.FilePath = activeObjects.FilePath
+                image.FileName = activeObjects.parentCroppingFileName
+                image.FilePath = activeObjects.parentCroppingFilePath
                 image.ImageUrl = activeObjects.ImageUrl
-                image.visible = true
+                // image.visible = true
                 croppedImage.value = image
+                canvasEditor.canvas.remove(activeObjects)
                 canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.discardActiveObject();
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
                 canvasEditor.canvas.requestRenderAll();
+                console.log('二次剪裁原图', image)
             }
         };
         const properties = {
@@ -273,7 +288,7 @@ const addItem = (item) => {
         }
     })
     const imageURL = item.src;
-    let callback = (image, isError) => {
+    let callback = (image, isError) => {  //添加裁片
         if (!isError) {
             image.hasCropping = true
             image.id = uuid()
@@ -291,6 +306,7 @@ const addItem = (item) => {
             canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.requestRenderAll();
             state.hasCropping = true
+
         }
     };
     const properties = {
@@ -299,84 +315,12 @@ const addItem = (item) => {
     };
     // 添加裁片蒙版
     fabric.Image.fromURL(imageURL, callback, properties);
+    state.hasCropping = true
     // const mask = canvasEditor.canvas.getActiveObjects()[0]
 
 }
 
-const text = () => {
-    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-    mixinState.isClipping = false
-    activeObject.clipClone.visible = false
-    canvasEditor.canvas.remove(mixinState.clipActiveObj);
-}
-const clipImage = () => {
-    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-    if (activeObject.type === 'image') {
-        let clipBox = new fabric.Rect({
-            left: activeObject.left,
-            top: activeObject.top,
-            width: activeObject.width - 20,
-            height: activeObject.height - 20,
-            stroke: '#F5A623',
-            strokeWidth: 1,
-            fill: 'rgba(1,1,1,0.5)',
-            objectCaching: false,
-            scaleX: activeObject.scaleX,
-            scaleY: activeObject.scaleY,
-            selectionBackgroundColor: 'rgba(255, 255, 255, 0.5)',
-            padding: 0,
-            angle: activeObject.angle
-        });
-        mixinState.clipBox = clipBox
-        mixinState.clipActiveObj = activeObject;
-        // 区分是svg的img还是普通img
-        let url = 'http://127.0.0.1:3000/src/assets/png/01.png'
 
-        fabric.util.loadImage(url, function (img) {
-            clipBox.fill = new fabric.Pattern({
-                source: img,
-                repeat: 'no-repeat',
-                offsetX: 0,
-                offsetY: 0,
-                height: 100,
-                width: 100
-            });
-            canvasEditor.canvas.add(clipBox);
-            activeObject.set({
-                selectable: false,
-                hoverCursor: 'default',
-                event: false,
-                hasControls: false,
-                perPixelTargetFind: false,
-            })
-            activeObject.clone(function (clonedObj) {
-                canvasEditor.canvas.discardActiveObject();
-                clonedObj.set({
-                    left: clonedObj.left,
-                    top: clonedObj.top,
-                    evented: false,
-                    opacity: 0.8
-                });
-                clipBox.clipClone = clonedObj;
-                canvasEditor.canvas.add(clonedObj);
-
-            });
-            activeObject.visible = false;
-            canvasEditor.canvas.renderAll();
-            setTimeout(() => {
-                canvasEditor.canvas.setActiveObject(mixinState.clipBox);
-                canvasEditor.canvas.renderAll();
-            }, 400)
-        })
-
-    } else {
-        activeObject.clipClone.visible = true;
-        canvasEditor.canvas.renderAll();
-    }
-
-
-
-}
 // 插入图片文件
 const insertImgFile = (file) => {
     if (!file) throw new Error('file is undefined');

@@ -21,6 +21,12 @@ class HistoryPlugin {
   static apis = ['undo', 'redo', 'getHistory'];
   static events = ['historyInitSuccess'];
   public hotkeys: string[] = ['ctrl+z'];
+  static repeatList = {
+    basic: '基础平铺',
+    mirror: '镜像平铺',
+    transverse: '横向平铺',
+    direction: '纵向平铺'
+  }
   history: any;
   constructor(canvas: fabric.Canvas, editor: IEditor) {
     this.canvas = canvas;
@@ -33,7 +39,7 @@ class HistoryPlugin {
   })
   userID = computed(() => {
     return this.store.state.userID
-})
+  })
   _init() {
     this.history = useRefHistory(ref(), {
       capacity: 50,
@@ -86,6 +92,7 @@ class HistoryPlugin {
     this.canvas.add(text)
   }
   loadObject(canvasObjects) {
+
     this.store.commit('setIsSetSteps', true)
     const mask = this.canvas.getObjects().find((item) => item.isMask)
     const fn = (obj, index) => {
@@ -96,6 +103,7 @@ class HistoryPlugin {
             for (var key in obj) {
               image[key] = obj[key]
             }
+            image.repeatType && this.editor.handelRepeat(HistoryPlugin.repeatList[image.repeatType], image)
             if (obj.cutPartsType == mask.cutPartsType) {
               image.visible = true
             } else {
@@ -103,6 +111,7 @@ class HistoryPlugin {
             }
             if (image.customVisible === false) image.visible = false
             image.sendBackwards()
+            console.log('image', image)
             this.canvas.add(image)
             if (canvasObjects[index + 1]) {
               fn(canvasObjects[index + 1], index + 1)
@@ -111,9 +120,12 @@ class HistoryPlugin {
               this.canvas.bringToFront(mask)
               this.canvas.sendToBack(backgroundImage)
               this.canvas.requestRenderAll();
+              this.store.commit('setDisableClipping', false)
+              this.editor.setAllCuts(true)
               // setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
             }
           }
+          console.log('isError', isError)
         };
         const properties = {
           left: 100,
@@ -130,6 +142,8 @@ class HistoryPlugin {
           this.canvas.bringToFront(mask)
           this.canvas.sendToBack(backgroundImage)
           this.canvas.requestRenderAll();
+          this.store.commit('setDisableClipping', false)
+          this.editor.setAllCuts(true)
           // setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
         }
       }
@@ -138,29 +152,35 @@ class HistoryPlugin {
   }
   loadCanvasObject(isNext) {
     this.store.commit('setIsSetSteps', true)
+    this.store.commit('setDisableClipping', true)
     const p = {
       ID: isNext ? this.saveSteps.value.ID - 1 : Number(this.saveSteps.value.ID) + 1,
       userID: this.userID.value
     }
-    
     historyAip.getHistory(p).then(res => {
-      const steps = {
-        ID: res.Tag[0].Table[0].ID,
-        ID_Next: res.Tag[0].Table[0].ID_Next,
-        ID_Previous: res.Tag[0].Table[0].ID_Previous,
-      }
-      console.log(this.userID)
-      this.store.commit('setSaveSteps', steps)
-      const data = res.Tag[0].Table[0].JsonValue
-      const objects = this.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
-      objects.forEach(element => {
-        this.canvas.remove(element)
-      });
-      const objectsData = JSON.parse(data)
+      console.log('p', p, 'getHistory', res)
+      if (res.Tag[0]?.Table) {
+        const steps = {
+          ID: res.Tag[0].Table[0].ID,
+          ID_Next: res.Tag[0].Table[0].ID_Next,
+          ID_Previous: res.Tag[0].Table[0].ID_Previous,
+        }
+        this.store.commit('setSaveSteps', steps)
+        const data = res.Tag[0].Table[0].JsonValue
+        const objects = this.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+        objects.forEach(element => {
+          this.canvas.remove(element)
+        });
+        const objectsData = JSON.parse(data)
 
-      this.store.commit('setSaveData', JSON.parse(data))
-      this.loadObject(JSON.parse(data).canvasObjects)
-      this.store.commit('setBgColor', objectsData.commodityInfo.bgColor)
+        this.store.commit('setSaveData', JSON.parse(data))
+        this.loadObject(JSON.parse(data).canvasObjects)
+        this.store.commit('setBgColor', objectsData.commodityInfo.bgColor)
+      } else{
+        this.store.commit('setIsSetSteps', false)
+        this.store.commit('setDisableClipping', false)
+      }
+
     })
   }
 

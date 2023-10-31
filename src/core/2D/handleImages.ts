@@ -4,16 +4,16 @@ import picture from '@/api/picture'
 import { ElMessage } from 'element-plus';
 import useSelect from '@/hooks/select';
 import LoadScene from '@/core/3D/loadScene.ts'
-const {  canvasEditor } = useSelect();
+const { canvasEditor } = useSelect();
 // 获取历史记录
-export const getImagesCustom = async (userID: any,imageList: any, Page_Index: number | String = 0, callback) => {
+export const getImagesCustom = async (userID: any, imageList: any, Page_Index: number | String = 0, callback) => {
     const p = {
         Page_Index: Page_Index,
         Page_RowCount: 18,
         userID: userID
     }
     picture.getImagesCustom(p).then(res => {
-        res.Tag.length > 0 ?  imageList.value = [...res.Tag[0].Table] : ''
+        res.Tag.length > 0 ? imageList.value = [...res.Tag[0].Table] : ''
         callback ? callback() : ''
     })
 }
@@ -57,7 +57,7 @@ export const setAllCuts = (SizeGUID) => {
     picture.setCutAllParts(p).then(res => {
         const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
         LoadScene.setTexture(maskRect.cutPartsType, url, null)
-            })
+    })
 }
 const imageSize = (base64Str) => {
     const indexBase64 = base64Str.indexOf('base64,') == -1 ? base64Str : base64Str.indexOf('base64,');
@@ -70,6 +70,7 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
     const result = str.substring(str.indexOf(',') + 1,)
     const splitBase64Str = splitBase64(result, 1048596)
     const FilePath = fileFirstName + FileName.substring(0, 1)
+    console.log('splitBase64Str.length', splitBase64Str.length)
     if (splitBase64Str.length > 30 && fileFirstName == 'images_custom\\') {
         ElMessage({
             showClose: true,
@@ -79,7 +80,9 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
         return
     } else {
         // 不分包
+      
         if (splitBase64Str.length == 1) {
+            
             const p = {
                 FileName: FileName,
                 FilePath: FilePath,
@@ -95,10 +98,12 @@ export const setUserUploadFile = (str, FileName, fileFirstName, callback) => {
                 console.log(err)
             })
         } else {
+           
             // const FilePath = fileFirstName + FileName.substring(0, 1)
             let index = 0
             const fn = () => {
                 const size = splitBase64Str[index]
+              
                 const p = {
                     FileName: FileName,
                     FilePath: FilePath,

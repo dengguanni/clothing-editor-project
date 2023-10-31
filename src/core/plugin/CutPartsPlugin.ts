@@ -11,13 +11,23 @@ class CutPartsPlugin {
     public canvas: fabric.Canvas;
     public editor: IEditor;
     static pluginName = 'CutPartsPlugin';
-    static apis = ['setAllCuts', 'isLoadAll'];
+    static apis = ['setAllCuts', 'getIsLoadAll'];
     public hotkeys: string[] = [];
     constructor(canvas: fabric.Canvas, editor: IEditor) {
         this.canvas = canvas;
         this.editor = editor;
     }
+    static repeatList = {
+        basic: '基础平铺',
+        mirror: '镜像平铺',
+        transverse: '横向平铺',
+        direction: '纵向平铺'
+    }
+    static num = 2
     isLoadAll = false
+    getIsLoadAll(){
+        return this.isLoadAll
+    }
     store = useStore()
     load3DScene = new LoadScene()
     cutParts = computed(() => {
@@ -42,13 +52,17 @@ class CutPartsPlugin {
     sizeGUID = computed(() => {
         return this.store.state.sizeGUID
     })
-    isRepeating = computed(() => {
-        return this.store.state.isRepeating
+    disableClipping = computed(() => {
+        return this.store.state.disableClipping
     })
-    
+
     setAllCuts(isColorChange: Boolean) {
-        if(this.isRepeating.value) return
-        const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid')
+        console.log('setAllCuts')
+        CutPartsPlugin.num = 1
+        if (this.disableClipping.value) return
+        this.editor.fixedLayer()
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
+        const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId)
         if (this.cutPartsType.value) {
             let ImagesList: any = {}
             this.cutParts.value.forEach(el => {
@@ -79,7 +93,6 @@ class CutPartsPlugin {
 
             const fn = (objects, index, p, maskRect, indexP = null) => {
                 if (objects.length > 0) {
-                    console.log()
                     objects[index].clone(cloned => {
                         cloned.rotate(0)
                         const top = objects[index].angle == 0 ? objects[index].top - maskRect.top : cloned.top - maskRect.top
@@ -93,12 +106,13 @@ class CutPartsPlugin {
                             Image_angle: objects[index].angle.toFixed(5) + '',
                             Image_flipX: objects[index].flipX,
                             Image_flipY: objects[index].flipY,
-                            Image_visible: objects[index].cutPartsType == p.Part_name
+                            Image_visible: objects[index].cutPartsType == p.Part_name,
+                            Image_TileType: objects[index].repeatType ? CutPartsPlugin.repeatList[objects[index].repeatType] : ''
                         }
                         if (objects[index].customVisible === false) obj.Image_visible = false
                         ImagesList[p.Part_name].Images.push(obj)
                         if (objects[index + 1]) {
-                            fn(objects, index + 1, p, maskRect)
+                            fn(objects, index + 1, p, maskRect, indexP)
                         } else {
                             p.Images = ImagesList[p.Part_name].Images
                             this.setCutAllParts(p, p.Part_name.Title, indexP)
@@ -110,9 +124,9 @@ class CutPartsPlugin {
                     this.setCutAllParts(p, p.Part_name.Title, indexP)
                 }
             }
+            console.log('isColorChange', isColorChange)
             if (!isColorChange) {
                 const maskRect = this.canvas.getObjects().find((item) => item.isMask);
-
                 let p = {
                     SizeGUID: this.sizeGUID.value,
                     Canvas_zoom: '0.07',
@@ -142,21 +156,26 @@ class CutPartsPlugin {
             }
         }
     }
+
     setCutAllParts(p, Title, indexP = null) {
         this.editor.fixedLayer()
         picture.setCutAllParts(p).then(res => {
             console.log('总的剪裁参数', p, res)
-            console.log( '保存',!this.isSetSteps.value)
-            this.isSetSteps.value ? '' : this.store.commit('setSave')
-            // const color = 'rgb(' + this.bgColor.value.R + ',' + this.bgColor.value.G + ',' + this.bgColor.value.B + ')'
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
             this.load3DScene.setTexture(p.Part_name, url, () => {
-                if (indexP) {
-                    if (!this.cutParts.value[indexP + 1]) {
+                if (indexP !== null) {
+                    if (this.cutParts.value.length == CutPartsPlugin.num) {
+                        console.log('保存', !this.isSetSteps.value)
                         this.store.commit('setsLoad3d', false)
+                        this.isSetSteps.value ? '' : this.store.commit('setSave')
+                        this.store.commit('setIsSetSteps', false)
                     }
+                    CutPartsPlugin.num++
                 } else {
+                    console.log('保存', !this.isSetSteps.value)
+                    this.isSetSteps.value ? '' : this.store.commit('setSave')
                     this.store.commit('setsLoad3d', false)
+                    this.store.commit('setIsSetSteps', false)
                 }
             })
         })

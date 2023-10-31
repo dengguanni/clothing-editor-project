@@ -94,6 +94,7 @@ class CopyPlugin {
         isRepeat: isRepeat
       });
       canvas.discardActiveObject();
+      console.log('cloned', cloned)
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
@@ -120,6 +121,7 @@ class CopyPlugin {
       this.cache.FileName = activeObject.FileName
       this.cache.FilePath = activeObject.FilePath
       this.cache.repeatType = activeObject.repeatType
+      this.cache.filters = []
       basicInheritAttribute.forEach(el => {
         this.cache[el] = activeObject[el]
       })
@@ -132,7 +134,6 @@ class CopyPlugin {
           Message.error('粘贴失败，一个裁片只能有一张背景图，请粘贴至别的裁片试试')
           return
         }
-        console.log('this.cache粘贴', this.cache, this.cutPartsType.value)
         this.cache.clone(c => {
           const grid = this.cutPartsType.value == this.cache.cutPartsType ? 10 : 0
           basicInheritAttribute.forEach(el => {
@@ -146,9 +147,11 @@ class CopyPlugin {
             left: this.cache.left + grid,
             top: this.cache.top + grid,
             visible: true,
-            repeatType: this.cache.repeatType
+            repeatType: this.cache.repeatType,
+            filters: []
           })
           this.canvas.add(c)
+          this.editor.fixedLayer()
           this.canvas.setActiveObject(c)
           this.editor.setRepeat(c.repeatType, true)
         })

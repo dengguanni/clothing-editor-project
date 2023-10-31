@@ -111,7 +111,6 @@ const replaceImage = (str, fileHeaderPath) => {
       const imageURL = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/' + FileName
       let callback = (image, isError) => {
         if (!isError) {
-          console.log('image', image.width)
           console.log(JSON.stringify(image.width))
           const width = image.width
           const height = image.height

@@ -16,7 +16,7 @@ class ControlsRepeat {
     public defautOption = {};
     static pluginName = 'ControlsRepeat';
     static events = [];
-    static apis = ['setRepeat','setCanvasObserve'];
+    static apis = ['setRepeat', 'setCanvasObserve', 'handelRepeat'];
     public hotkeys: string[] = [''];
     static lockObj = {
         'lockMovementX': false,
@@ -104,17 +104,30 @@ class ControlsRepeat {
             this.canvas.requestRenderAll();
         } else {
             activeObject.repeatType = null
+            this.canvas.getObjects().forEach((el: any) => {
+                if (el.tileParentId == activeObject.id) {
+                    this.canvas.remove(el)
+                }
+            })
+            console.log('平铺setAllCuts')
+            // this.editor.setAllCuts()
         }
     }
 
-    handelRepeat(type) {
+    handelRepeat(type, obj = null) {
+        console.log('平铺')
+
         // this.store.commit('setsLoad3d', false)
         // const store = useStore()
-        this.store.commit('setIsRepeating', true)
-        const activeObject = this.canvas.getActiveObjects()[0];
+        // //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
+        this.store.commit('setDisableClipping', true)
+        const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
+        console.log('activeObject', activeObject.left - Mask.left)
+        
         activeObject.clone(c => {
             c.rotate(0)
+            console.log('clone', c.left - Mask.left)
             const p = {
                 Type: type,
                 Canvas_width: Mask.width * Mask.scaleX,
@@ -128,27 +141,30 @@ class ControlsRepeat {
                 Image_flipY: activeObject.flipY,
                 Image_angle: activeObject.angle
             }
-            console.log('activeObject.scaleX', activeObject.scaleX)
             console.log('平铺参数', p)
+            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '拿到平铺参数')
+            
             picture.setBasicRepeat(p).then(res => {
+                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
                 console.log('res', res)
-                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64) : ''
+                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject) : ''
             })
         })
     }
     // 更新图片
-    replaceImage = (url) => {
+    replaceImage = (url, obj = null) => {
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
         let callback1 = () => {
             let z: number
-            const activeObject = this.canvas.getActiveObjects()[0];
+            const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
             const imageURL = baseUrl + 'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
             const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     this.canvas.getObjects().forEach((el: any) => {
-                        if (el.tileParentId == activeObject.id) {
+                        if (el.tileParentId == activeObject.id ) {
                             this.canvas.remove(el)
                         }
                     })
@@ -165,14 +181,17 @@ class ControlsRepeat {
                     image.tileParentId = activeObject.id
                     image.cutPartsType = activeObject.cutPartsType
                     image.id = uuid()
-                    image.FileName = FileName
-                    image.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                    // image.FileName = FileName
+                    // image.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     image.hoverCursor = null
                     image.left = Mask.left
                     image.top = Mask.top
                     image.rotate(0)
-                    this.store.commit('setIsRepeating', false)
+                   
+                    //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
                     this.canvas.add(image);
+                    this.store.commit('setDisableClipping', false)
+                    this.editor.setAllCuts()
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
                     this.canvas.bringToFront(mask)
@@ -184,16 +203,17 @@ class ControlsRepeat {
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
                     // const store = useStore()
-                   
+
                 }
             };
             const properties = {
                 left: 0,
                 top: 0
             };
-            fabric.Image.fromURL(imageURL, callback, properties);
+            fabric.Image.fromURL(URL, callback, properties);
         }
-        setUserUploadFile(URL, FileName, 'images_temp//', callback1)
+        callback1()
+        // setUserUploadFile(URL, FileName, 'images_temp//', callback1)
     }
     destroy() {
         console.log('pluginDestroy');

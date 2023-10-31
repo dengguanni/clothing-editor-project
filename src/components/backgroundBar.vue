@@ -113,22 +113,24 @@ const addItem = (item) => {
                 image.ImageUrl = item.ImageUrl
                 image.FileName = item.FileName
                 image.FilePath = item.FilePath
-                canvasEditor.canvas.add(image);
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(image);
-                console.log('maskRect', maskRect)
                 if (props.isBg) {
+                   store.commit('setDisableClipping', true)
                     if (currentBackground) canvasEditor.canvas.remove(currentBackground)
                     image.isBackground = true
                     canvasEditor.canvas.sendToBack(info)
                     canvasEditor.canvas.sendToBack(workspace)
                     MaximizePlugin.setMax('width')
                     MaximizePlugin.setMax('height')
+                    store.commit('setDisableClipping', false)
                 }
                 image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX) / 2
                 image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY) / 2
-                console.log('添加后image', image)
-                canvasEditor.canvas.bringToFront(maskRect)
+                canvasEditor.canvas.add(image);
+                canvasEditor.fixedLayer()
+                // console.log('添加后image', image)
+                // canvasEditor.canvas.bringToFront(maskRect)
                 store.commit('setSelected', image)
                 canvasEditor.canvas.requestRenderAll();
             }

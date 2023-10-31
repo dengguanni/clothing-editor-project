@@ -29,7 +29,10 @@ export const allCustomAttribute = [
     'Sharpen',
     'parentCroppingFileName',
     'parentCroppingFilePath',
-    'filtersType'
+    'filtersType',
+    'saveScaleX',
+    'saveScaleY',
+    'hasCropping'
 ]
 // 继承属性
 export const basicInheritAttribute = [

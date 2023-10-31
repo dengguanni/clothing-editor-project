@@ -38,6 +38,12 @@ const props = defineProps({
         }
     }
 })
+const repeatList = {
+    basic: '基础平铺',
+    mirror: '镜像平铺',
+    transverse: '横向平铺',
+    direction: '纵向平铺'
+}
 const URLbase64 = ref('')
 const active = ref('')
 const isLoadAll = ref(false)
@@ -68,13 +74,17 @@ const goodsId = computed(() => {
 const modelInfo = computed(() => {
     return store.state.saveData.modelInfo
 })
-const setIsRepeating = computed(() => {
-    return store.state.setIsRepeating
+const disableClipping = computed(() => {
+    return store.state.disableClipping
 })
-
 watch(handelAllCuts, (newVal, oldVal) => {
     if (newVal) {
         canvasEditor.setAllCuts(false)
+    }
+}, { immediate: true, deep: true });
+watch(isSetSteps, (newVal, oldVal) => {
+    if (newVal) {
+        console.log('.isSetSteps', newVal)
     }
 }, { immediate: true, deep: true });
 watch(cutPartsType, (newVal, oldVal) => {
@@ -92,7 +102,8 @@ watch(cutParts, (newVal, oldVal) => {
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
         console.log('bgColor', bgColor)
-        canvasEditor.isLoadAll ? canvasEditor.setAllCuts(true) : ''
+        console.log('canvasEditor.getIsLoadAll', canvasEditor.getIsLoadAll())
+        canvasEditor.getIsLoadAll() ? canvasEditor.setAllCuts(true) : ''
     }
 }, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
@@ -105,7 +116,7 @@ const watchCanvas = () => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
-        if (cutPartsType.value  && !setIsRepeating.value) {
+        if (cutPartsType.value && !disableClipping.value) {
             canvasEditor.setAllCuts(false)
         }
     }
@@ -179,7 +190,6 @@ const init = (newVal) => {
 }
 // 加载裁片
 const loadCuts = debounce(() => {
-    console.log('loadCuts加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
     if (objects.length == 0) store.commit('setPageLoading', false)
     store.commit('setIsSetSteps', true)
@@ -268,7 +278,7 @@ const changeSelection = () => {
 }
 // 刷新加载对象
 const loadCanvasObject = () => {
-    console.log('刷新加载对象')
+    // console.log('刷新加载对象',canvasObjects.value)
     store.commit('setIsSetSteps', true)
     const fn = (obj, index) => {
         if (obj.type == 'image') {
@@ -283,8 +293,11 @@ const loadCanvasObject = () => {
                     } else {
                         image.visible = false
                     }
+
                     if (image.customVisible === false) image.visible = false
                     canvasEditor.canvas.add(image)
+                    console.log(image)
+                    image.repeatType && canvasEditor.handelRepeat(repeatList[image.repeatType], image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {

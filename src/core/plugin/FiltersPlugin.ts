@@ -32,7 +32,7 @@ class FiltersPlugin {
                 if (activeObject.filtersType) {
                     this.restoreImage(() => {
                         this._createFilter(activeObject, type, null, noParamsFilters);
-                    }, noParamsFilters)
+                    }, noParamsFilters, true)
                 } else {
                     this._createFilter(activeObject, type, null, noParamsFilters);
                 }
@@ -41,14 +41,13 @@ class FiltersPlugin {
             this.restoreImage(null, noParamsFilters)
         }
     };
-    restoreImage(callback: any, noParamsFilters) {
+    restoreImage(callback: any, noParamsFilters, hasF = false) {
         const activeObject = this.canvas.getActiveObjects()[0]
-        console.log('activeObject.oldFileName', activeObject.oldFileName, 'activeObject.oldFilePath', activeObject.oldFilePath)
         if (!activeObject.oldFileName) return
         const url = baseUrl + 'UserUploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
         activeObject.setSrc(url, () => {
             activeObject.set('name', activeObject.Title);
-            activeObject.set('id', uuid());
+            activeObject.set('id',activeObject.id);
             activeObject.set('filters', []);
             activeObject.set('filtersType', null);
             activeObject.set('width', activeObject.width);
@@ -60,14 +59,18 @@ class FiltersPlugin {
             activeObject.set('FilePath', activeObject.oldFilePath);
             activeObject.set('oldFilePath', null)
             activeObject.applyFilters()
-            this.editor.setRepeat(activeObject.repeatType, true)
+            if(!hasF ) {
+                activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.store.commit('setAllCuts')
+            } 
+            // !hasF && this.editor.setRepeat(activeObject.repeatType, true)
             this.canvas.renderAll();
             noParamsFilters ? this.setCheckBoxList(noParamsFilters, null) : ''
-            this.store.commit('setAllCuts')
+            // !hasF && this.store.commit('setAllCuts')
             callback ? callback() : ''
         });
     }
     _createFilter(sourceImg, type, options = null, noParamsFilters) {
+        this.store.commit('setDisableClipping', true)
         let filterObj;
         const fabricType = this._getFabricFilterType(type);
         const ImageFilter = fabric.Image.filters[fabricType];
@@ -120,6 +123,7 @@ class FiltersPlugin {
         return type.charAt(0).toUpperCase() + type.slice(1);
     }
     replaceImage(url, type, noParamsFilters) {
+
         const activeObject = this.canvas.getActiveObjects()[0]
         console.log('replaceImageactiveObject', activeObject)
         const oldFilePath = activeObject.oldFilePath ? activeObject.oldFilePath : activeObject.FilePath
@@ -127,6 +131,7 @@ class FiltersPlugin {
         // 如果有加平铺 先删除原来原图的平铺
         this.canvas.getObjects().forEach((el) => {
             if (el.tileParentId == activeObject.id) {
+                console.log('删除原来的平铺')
                 this.canvas.remove(el)
             }
         })
@@ -138,7 +143,7 @@ class FiltersPlugin {
                     activeObject.set(element, activeObject[element])
                 });
                 activeObject.set('name', activeObject.name);
-                activeObject.set('id', uuid());
+                activeObject.set('id',activeObject.id);
                 activeObject.set('width', activeObject.width);
                 activeObject.set('filters', []);
                 activeObject.set('filtersType', type);
@@ -147,8 +152,11 @@ class FiltersPlugin {
                 activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
                 activeObject.set('oldFilePath', oldFilePath)
                 activeObject.applyFilters()
-                this.editor.setRepeat(activeObject.repeatType, true)
-                this.store.commit('setAllCuts')
+                this.store.commit('setDisableClipping', false)
+                console.log('滤镜setDisableClipping', false)
+                activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.editor.setAllCuts()
+                // this.editor.setRepeat(activeObject.repeatType, true)
+                // this.store.commit('setAllCuts')
                 noParamsFilters ? this.setCheckBoxList(noParamsFilters, type) : ''
                 this.canvas.renderAll();
             });

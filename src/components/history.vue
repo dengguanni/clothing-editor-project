@@ -88,11 +88,14 @@ const beforeClear = () => {
   });
 };
 const clear = () => {
+  store.commit('setDisableClipping', true)
   canvasEditor.canvas.getObjects().forEach(el => {
     if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined && el.cutPartsType == cutPartsType.value) {
       canvasEditor.canvas.remove(el)
     }
   })
+ store.commit('setDisableClipping', false)
+ canvasEditor.setAllCuts()
 }
 const setAuxiliaryLine = () => {
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
@@ -102,6 +105,7 @@ const setAuxiliaryLine = () => {
   }
 }
 const setLine = debounce(() => {
+  store.commit('setDisableClipping', true)
   line.value = !line.value
   const imageURL = 'http://8.140.206.30:8099/ImageSource/Other/Grid.png'
   if (!line.value) {
@@ -134,6 +138,7 @@ const setLine = debounce(() => {
         line.bringToFront()
         workspace.sendToBack()
         canvasEditor.canvas.requestRenderAll();
+        store.commit('setDisableClipping', false)
       }
     };
     const properties = {

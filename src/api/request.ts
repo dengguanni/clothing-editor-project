@@ -2,7 +2,7 @@ import { setLocal } from '@/utils/local';
 import axios from 'axios' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
-let baseURL = 'http://8.140.206.30:8099';
+let baseURL = 'http://8.140.206.30:8011';
 import crypto from '@/utils/crypto'
 import { createRouter, useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex'

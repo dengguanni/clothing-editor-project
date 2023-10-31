@@ -4,11 +4,9 @@
 
 <template>
   <div class="save-box">
-    <!-- <Button type="primary" @click="getData"> -->
-      <!-- <commonIconfont type="gistuceng"></commonIconfont> -->
-      <!-- <commonIconfont type="wenjian"></commonIconfont>
-      <Icon type="ios-arrow-down"></Icon>
-    </Button> -->
+    <Button type="primary" @click="getData">
+      <commonIconfont type="gistuceng"></commonIconfont>
+    </Button>
     <Button type="primary" @click="setSaveData(true)">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
@@ -27,6 +25,7 @@ import { useStore } from 'vuex'
 import crypto from '@/utils/crypto'
 import { allCustomAttribute } from '@/config/customAttributeFabricObj.ts'
 import commonIconfont from '@/components/fontClass/commonIconfont.vue'
+import * as THREE from 'three';
 
 const store = useStore()
 const saveData = computed(() => {
@@ -68,21 +67,23 @@ const cbMap = {
 };
 let a = ref(0)
 const getData = () => {
+  const frustum = new THREE.Frustum();
+  console.log(frustum.setFromProjectionMatrix())
   // console.log('getObjects', canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
   // canvasEditor.test(1111)
   // saveSteps.value.ID
-  const p = {
-    ID: ''
-  }
-  historyAip.getHistory(p).then(res => {
-    const data = res.Tag[0].Table[0].JsonValue
-    console.log('拿回', JSON.parse(data))
-  })
+  // const p = {
+  //   ID: ''
+  // }
+  // historyAip.getHistory(p).then(res => {
+  //   const data = res.Tag[0].Table[0].JsonValue
+  //   console.log('拿回', JSON.parse(data))
+  // })
 
 }
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
   // console.log('保存对象', objects)
   const objectsCopy = JSON.parse(JSON.stringify(objects))
   objectsCopy.forEach((element, index) => {

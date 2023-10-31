@@ -113,7 +113,7 @@ class ControlsTile {
     static handelRepeat(type) {
         // this.store.commit('setsLoad3d', false)
         // const store = useStore()
-        // store.commit('setIsRepeating', true)
+        // store.commit('setDisableClipping', true)
         const activeObject = this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
         activeObject.clone(c => {
@@ -186,7 +186,7 @@ class ControlsTile {
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
                     // const store = useStore()
-                    // store.commit('setIsRepeating', false)
+                    // store.commit('setDisableClipping', false)
                 }
             };
             const properties = {

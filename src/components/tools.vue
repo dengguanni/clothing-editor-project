@@ -218,6 +218,8 @@ const addText = (option) => {
   const left = mask.left + (mask.width * mask.scaleX)/2 - (text.width / 2)
   text.top = top
   text.left = left
+  text.customVisible = true
+  
   canvasEditor.canvas.add(text);
   canvasEditor.canvas.setActiveObject(text);
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]

@@ -230,7 +230,7 @@
     v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
     <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
     <Col span="12">
-    <Slider v-model="baseAttr.angle" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
+    <Slider v-model="baseAttr.angle" :min="-180" :max="180" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
       :disabled="disabled">
     </Slider>
     </Col>
