@@ -4,9 +4,9 @@
 
 <template>
   <div class="save-box">
-    <Button type="primary" @click="getData">
+    <!-- <Button type="primary" @click="getData">
       <commonIconfont type="gistuceng"></commonIconfont>
-    </Button>
+    </Button> -->
     <Button type="primary" @click="setSaveData(true)">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->

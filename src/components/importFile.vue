@@ -78,18 +78,16 @@ onMounted(() => {
     replaceImage(val, fileHeaderPath)
   })
   document.getElementById("myInput").addEventListener("change", getFile, true)
-  getImagesCustom(userID.value,imageList, pageIndex.value)
-
+  getImagesCustom(userID.value, imageList, pageIndex.value)
 })
 const changePage = (val) => {
   if (val) {
     pageIndex.value = pageIndex.value + 1
-    getImagesCustom(userID.value,imageList, pageIndex.value)
+    getImagesCustom(userID.value, imageList, pageIndex.value)
   } else {
     pageIndex.value = pageIndex.value - 1
-    getImagesCustom(userID.value,imageList, pageIndex.value)
+    getImagesCustom(userID.value, imageList, pageIndex.value)
   }
-
 }
 const closeIcon = (item) => {
   showDelIcon.value = ''
@@ -101,7 +99,13 @@ const showIcon = (item) => {
 }
 // 替换图片
 const replaceImage = (str, fileHeaderPath) => {
+  console.log('replaceImage', )
+  store.commit('setDisableClipping', true)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  let layer 
+  canvasEditor.canvas.getObjects().forEach((item,index) =>{
+    if(activeObject.id == item.id) layer = index
+  })
   const FileName = guid() + '.png'
   const oldFileName = activeObject.FileName
   const callback = () => {
@@ -111,7 +115,6 @@ const replaceImage = (str, fileHeaderPath) => {
       const imageURL = baseUrl + 'UserUploadFile/images_custom/' + FileName.substring(0, 1) + '/' + FileName
       let callback = (image, isError) => {
         if (!isError) {
-          console.log(JSON.stringify(image.width))
           const width = image.width
           const height = image.height
           const oldActiveObject = canvasEditor.canvas.getObjects().find((item) => item.FileName === oldFileName);
@@ -129,13 +132,20 @@ const replaceImage = (str, fileHeaderPath) => {
           image.oldFileName = FileName
           image.filters = []
           canvasEditor.canvas.add(image);
+         
+          canvasEditor.fixedLayer()
           canvasEditor.canvas.remove(oldActiveObject)
+          image.moveTo(layer)
+          console.log('layer', layer)
           const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
           canvasEditor.canvas.setActiveObject(info);
-          canvasEditor.setRepeat(image.repeatType, true)
-          image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : ''
-          image.Sharpen ? canvasEditor.setSharpening(true) : ''
+          image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : store.commit('setDisableClipping', false)
+          image.repeatType ? canvasEditor.setRepeat(image.repeatType, true) : store.commit('setDisableClipping', false)
+          image.Sharpen ? canvasEditor.setSharpening(true) : store.commit('setDisableClipping', false)
+          store.commit('setDisableClipping', false)
+          canvasEditor.setAllCuts()
           canvasEditor.canvas.requestRenderAll();
+
         }
       };
       const properties = {
@@ -146,7 +156,7 @@ const replaceImage = (str, fileHeaderPath) => {
     })
     picture.setImagesCustom({ FileName, userID: userID.value }).then(e => {
       if (e.OK == 'True') {
-        getImagesCustom(userID.value,imageList, pageIndex.value, callback2)
+        getImagesCustom(userID.value, imageList, pageIndex.value, callback2)
       }
     })
     ElMessage({
@@ -194,7 +204,7 @@ const getFile = (file) => {
               if (files[index + 1]) {
                 fn(index + 1)
               } else {
-                getImagesCustom(userID.value,imageList, pageIndex.value)
+                getImagesCustom(userID.value, imageList, pageIndex.value)
                 ElMessage({
                   showClose: true,
                   message: '上传成功',

@@ -23,9 +23,6 @@ const store = createStore({
         // 画布内容
         canvasObjects: [],
         // 裁片类型
-
-        // 裁片
-
       },
       bgColor: '',
       sizeGUID: '',
@@ -54,7 +51,8 @@ const store = createStore({
       objectAttr: 0,
       previewType: 'small',
       userID: '',
-      disableClipping: false
+      disableClipping: false,
+      isShowCuts: true
     }
   },
   mutations: {
@@ -63,6 +61,9 @@ const store = createStore({
       state.saveData.commodityInfo.ImageUrl = val.ImageUrl ? val.ImageUrl : state.saveData.commodityInfo.ImageUrl
       state.saveData.commodityInfo.Title = val.Title ? val.Title : state.saveData.commodityInfo.Title
       state.saveData.commodityInfo.colorId = val.Title ? val.Title : state.saveData.commodityInfo.colorId
+    },
+    setIsShowCuts(state) {
+      state.isShowCuts = state.isShowCuts = !state.isShowCuts
     },
     setAllCuts(state) {
       state.handelAllCuts = state.handelAllCuts + 1

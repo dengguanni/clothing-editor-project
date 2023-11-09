@@ -47,7 +47,7 @@ class FiltersPlugin {
         const url = baseUrl + 'UserUploadFile/' + activeObject.oldFilePath + '/' + activeObject.oldFileName
         activeObject.setSrc(url, () => {
             activeObject.set('name', activeObject.Title);
-            activeObject.set('id',activeObject.id);
+            activeObject.set('id', activeObject.id);
             activeObject.set('filters', []);
             activeObject.set('filtersType', null);
             activeObject.set('width', activeObject.width);
@@ -59,9 +59,9 @@ class FiltersPlugin {
             activeObject.set('FilePath', activeObject.oldFilePath);
             activeObject.set('oldFilePath', null)
             activeObject.applyFilters()
-            if(!hasF ) {
+            if (!hasF) {
                 activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.store.commit('setAllCuts')
-            } 
+            }
             // !hasF && this.editor.setRepeat(activeObject.repeatType, true)
             this.canvas.renderAll();
             noParamsFilters ? this.setCheckBoxList(noParamsFilters, null) : ''
@@ -86,18 +86,22 @@ class FiltersPlugin {
         // 变base64
         const scaleX = activeObject.scaleX
         const scaleY = activeObject.scaleY
+        const angle = activeObject.angle
+        activeObject.rotate(0)
         activeObject.scaleX = 1
         activeObject.scaleY = 1
+        activeObject.angle = 0
         const url = activeObject.toDataURL({
             width: activeObject.width,
             height: activeObject.height,
-            angle: activeObject.angle,
+            angle: 0,
             scaleX: activeObject.scaleX,
             scaleY: activeObject.scaleY,
             multiplier: 1,
         });
         activeObject.scaleX = scaleX
         activeObject.scaleY = scaleY
+        activeObject.rotate(angle)
         this.canvas.requestRenderAll();
         this.replaceImage(url, type, noParamsFilters)
         return filterObj;
@@ -143,7 +147,7 @@ class FiltersPlugin {
                     activeObject.set(element, activeObject[element])
                 });
                 activeObject.set('name', activeObject.name);
-                activeObject.set('id',activeObject.id);
+                activeObject.set('id', activeObject.id);
                 activeObject.set('width', activeObject.width);
                 activeObject.set('filters', []);
                 activeObject.set('filtersType', type);
@@ -151,7 +155,11 @@ class FiltersPlugin {
                 activeObject.set('oldFileName', oldFileName);
                 activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
                 activeObject.set('oldFilePath', oldFilePath)
+                console.log('activeObject angle', activeObject.angle)
+                // const angle = activeObject.angle
+                // activeObject.rotate(0)
                 activeObject.applyFilters()
+                // activeObject.rotate(angle)
                 this.store.commit('setDisableClipping', false)
                 console.log('滤镜setDisableClipping', false)
                 activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.editor.setAllCuts()

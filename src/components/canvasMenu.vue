@@ -50,6 +50,9 @@ const isLoadAll = ref(false)
 const cutParts = computed(() => {
     return store.state.cutParts
 })
+const isShowCuts = computed(() => {
+    return store.state.isShowCuts
+})
 const isSetSteps = computed(() => {
     return store.state.isSetSteps
 })
@@ -82,11 +85,7 @@ watch(handelAllCuts, (newVal, oldVal) => {
         canvasEditor.setAllCuts(false)
     }
 }, { immediate: true, deep: true });
-watch(isSetSteps, (newVal, oldVal) => {
-    if (newVal) {
-        console.log('.isSetSteps', newVal)
-    }
-}, { immediate: true, deep: true });
+
 watch(cutPartsType, (newVal, oldVal) => {
     if (newVal) {
         changeSelection()
@@ -101,8 +100,6 @@ watch(cutParts, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal.GUID) {
-        console.log('bgColor', bgColor)
-        console.log('canvasEditor.getIsLoadAll', canvasEditor.getIsLoadAll())
         canvasEditor.getIsLoadAll() ? canvasEditor.setAllCuts(true) : ''
     }
 }, { immediate: true, deep: true });
@@ -261,12 +258,15 @@ const changeSelection = () => {
                 el.visible = false
             }
             if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
+              
+                console.log('isShowCuts.value', isShowCuts.value)
                 el.visible = true
                 el.isMask = true
                 maskRect = el
                 maskRect.clone((cloned) => {
                     const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                     canvasEditor.canvas.clipPath = cloned;
+                      isShowCuts.value ? el.visible = true : el.visible = false
                     canvasEditor.canvas.renderAll()
                     canvasEditor.canvas.requestRenderAll();
                 });
@@ -325,6 +325,7 @@ const loadCanvasObject = () => {
     canvasEditor.canvas.requestRenderAll();
     if (!canvasObjects.value[0]) {
         store.commit('setPageLoading', false)
+        canvasEditor.setAllCuts(true)
         watchCanvas()
     }
 }

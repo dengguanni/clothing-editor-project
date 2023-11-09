@@ -95,6 +95,7 @@ class HistoryPlugin {
 
     this.store.commit('setIsSetSteps', true)
     const mask = this.canvas.getObjects().find((item) => item.isMask)
+    console.log('canvasObjects', canvasObjects)
     const fn = (obj, index) => {
       if (obj.type == 'image') {
         const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
@@ -148,7 +149,13 @@ class HistoryPlugin {
         }
       }
     }
-    if (canvasObjects[0]) fn(canvasObjects[0], 0)
+    if( canvasObjects[0]){
+      fn(canvasObjects[0], 0)
+    } else {
+      this.store.commit('setDisableClipping', false)
+      this.editor.setAllCuts(true)
+    }
+   
   }
   loadCanvasObject(isNext) {
     this.store.commit('setIsSetSteps', true)
@@ -159,7 +166,7 @@ class HistoryPlugin {
     }
     historyAip.getHistory(p).then(res => {
       console.log('p', p, 'getHistory', res)
-      if (res.Tag[0]?.Table) {
+      if (res.Tag[0]) {
         const steps = {
           ID: res.Tag[0].Table[0].ID,
           ID_Next: res.Tag[0].Table[0].ID_Next,

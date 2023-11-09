@@ -223,8 +223,6 @@ const replaceImage = (url, type) => {
       canvasEditor.setRepeat(activeObject.repeatType, true)
       store.commit('setAllCuts')
       setCheckBoxList(state.noParamsFilters, type)
-
-
       canvasEditor.canvas.renderAll();
     });
   }

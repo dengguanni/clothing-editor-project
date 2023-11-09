@@ -69,11 +69,9 @@ const lockAttrs = [
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
 })
+
 const saveSteps = computed(() => {
   return store.state.saveSteps
-})
-const bgColor = computed(() => {
-  return store.state.bgColor
 })
 const line = ref(false)
 let lineActive = ref(false)
@@ -101,6 +99,7 @@ const setAuxiliaryLine = () => {
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
   if (maskRect) {
     maskRect.visible = !maskRect.visible
+    store.commit('setIsShowCuts', false)
     canvasEditor.canvas.renderAll();
   }
 }

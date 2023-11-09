@@ -25,7 +25,7 @@ class CutPartsPlugin {
     }
     static num = 2
     isLoadAll = false
-    getIsLoadAll(){
+    getIsLoadAll() {
         return this.isLoadAll
     }
     store = useStore()
@@ -57,7 +57,6 @@ class CutPartsPlugin {
     })
 
     setAllCuts(isColorChange: Boolean) {
-        console.log('setAllCuts')
         CutPartsPlugin.num = 1
         if (this.disableClipping.value) return
         this.editor.fixedLayer()

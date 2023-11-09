@@ -74,28 +74,56 @@ const imageList = reactive([
     }
 ])
 onMounted(() => {
-    canvasEditor.canvas.on('mouse:up', function (options) {
-        console.log('点击', state.hasCropping)
-        if (state.hasCropping) {
-            const mask = canvasEditor.canvas.getActiveObjects()[0]
-            // if (mask) {
-            handelCutParts(croppedImage.value)
-            // const objects = canvasEditor.canvas.getObjects();
-            // const cutMask = objects.find(item => item.hasCropping)
-            // canvasEditor.canvas.remove(croppedImage.value)
-            // canvasEditor.canvas.remove(cutMask)
-            // croppedImage.value = null
-            // objects.map((item) => {
-            //     if (item.hasCropping) {
-            //         canvasEditor.canvas.remove(item)
-            //         canvasEditor.upTop()
-            //     }
-            // })
-            // }
-            // state.hasCropping = false
-        }
+    canvasEditor.canvas.on('object:moving', function (options) {
+        if (state.hasCropping && options?.deselected?.length !== 0) {
+            const croppedImageH = croppedImage.value.height * croppedImage.value.scaleY
+            const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+            const maskH = mask.height * mask.scaleY
+            const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
+            const maskW = mask.width * mask.scaleX
+            if (croppedImageH >= maskH) {
+                if (options.target.top > croppedImage.value.top + croppedImageH - maskH) {
+                    mask.top = croppedImage.value.top + croppedImageH - maskH
+                }
+                if (options.target.top < croppedImage.value.top) {
+                    mask.top = croppedImage.value.top
+                }
+                if (options.target.left > croppedImage.value.left + croppedImageW - maskW) {
+                    mask.left = croppedImage.value.left + croppedImageW - maskW
+                }
+                if (options.target.left < croppedImage.value.left) {
+                    mask.left = croppedImage.value.left
+                }
+            } else {
+                if (options.target.top > croppedImage.value.top) {
+                    mask.top = croppedImage.value.top
+                }
+                if (options.target.top < croppedImage.value.top - (maskH - croppedImageH)) {
+                    mask.top = croppedImage.value.top - (maskH - croppedImageH)
+                }
+                if (options.target.left > croppedImage.value.left) {
+                    mask.left = croppedImage.value.left
+                }
+                if (options.target.left < croppedImage.value.left - (maskW - croppedImageW)) {
+                    mask.left = croppedImage.value.left - (maskW - croppedImageW)
+                }
+            }
 
+        }
     })
+    canvasEditor.canvas.on('object:removed', function (options) {
+        if (options.target.hasCropping) state.hasCropping = false
+    })
+    canvasEditor.canvas.on('selection:cleared', function (options) {
+        const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+        if (state.hasCropping && options.deselected) {
+            options.deselected[0].id == mask.id && handelCutParts(croppedImage.value)
+        }
+    })
+})
+onUnmounted(() => {
+    const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+    canvasEditor.canvas.remove(mask)
 })
 // 裁剪
 const handelCutParts = (image) => {
@@ -170,9 +198,6 @@ const handelCutParts = (image) => {
                     imgEl.remove();
 
                 }
-
-
-
                 canvasEditor.canvas.remove(croppedImage.value)
                 canvasEditor.canvas.remove(cutMask)
                 croppedImage.value = null
@@ -256,7 +281,7 @@ const addItem = (item) => {
                 image.scaleX = activeObjects.scaleX
                 image.scaleY = activeObjects.scaleY
                 image.top = activeObjects.top
-                image.left = activeObjects.left
+                image.left = activeObjects.left - activeObjects.width * activeObjects.scaleX / 2
                 image.angle = activeObjects.angle
                 image.FileName = activeObjects.parentCroppingFileName
                 image.FilePath = activeObjects.parentCroppingFilePath
@@ -289,6 +314,8 @@ const addItem = (item) => {
     })
     const imageURL = item.src;
     let callback = (image, isError) => {  //添加裁片
+
+
         if (!isError) {
             image.hasCropping = true
             image.id = uuid()
@@ -297,8 +324,10 @@ const addItem = (item) => {
             image.scaleX = scale
             image.scaleY = scale
             image.top = croppedImage.value.top
-            image.left = croppedImage.value.left
             image.angle = croppedImage.value.angle
+            const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
+            const imageW = image.width * image.scaleX
+            image.left = croppedImageW >imageW ?  croppedImage.value.left+(croppedImageW/2) -(imageW/2) : croppedImage.value.left-(croppedImageW/2)-(imageW/2) 
             canvasEditor.canvas.add(image);
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
             canvasEditor.canvas.discardActiveObject();
@@ -306,6 +335,7 @@ const addItem = (item) => {
             canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.requestRenderAll();
             state.hasCropping = true
+
 
         }
     };

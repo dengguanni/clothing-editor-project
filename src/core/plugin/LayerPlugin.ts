@@ -30,13 +30,21 @@ class LayerPlugin {
     backgroundImage ? this.canvas.sendToBack(backgroundImage) : ''
     backgroundRepeat ? this.canvas.sendToBack(backgroundRepeat) : ''
     workspace ? this.canvas.sendToBack(workspace) : ''
-    this.canvas.renderAll();
   }
   up() {
     const actives = this.canvas.getActiveObjects();
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
-      activeObject && activeObject.bringForward();
+      if (activeObject) {
+        console.log('上移', activeObject)
+        if (activeObject.repeatType) {
+          this.canvas.getObjects().forEach(element => {
+            if (element.tileParentId == activeObject.id)
+              element.bringForward()
+          });
+        }
+        activeObject.bringForward();
+      }
       this.fixedLayer()
     }
   }
@@ -45,7 +53,15 @@ class LayerPlugin {
     const actives = this.canvas.getActiveObjects();
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
-      activeObject && activeObject.bringToFront();
+      if (activeObject) {
+        if (activeObject.repeatType) {
+          this.canvas.getObjects().forEach(element => {
+            if (element.tileParentId == activeObject.id)
+              element.bringToFront()
+          });
+        }
+        activeObject.bringToFront();
+      }
       this.fixedLayer()
     }
   }
@@ -54,7 +70,15 @@ class LayerPlugin {
     const actives = this.canvas.getActiveObjects();
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
-      activeObject && activeObject.sendBackwards();
+      if (activeObject) {
+        if (activeObject.repeatType) {
+          this.canvas.getObjects().forEach(element => {
+            if (element.tileParentId == activeObject.id)
+              element.sendBackwards()
+          });
+        }
+        activeObject.sendBackwards();
+      }
       this.fixedLayer()
     }
   }
@@ -63,7 +87,15 @@ class LayerPlugin {
     const actives = this.canvas.getActiveObjects();
     if (actives && actives.length === 1) {
       const activeObject = this.canvas.getActiveObjects()[0];
-      activeObject && activeObject.sendToBack();
+      if (activeObject) {
+        if (activeObject.repeatType) {
+          this.canvas.getObjects().forEach(element => {
+            if (element.tileParentId == activeObject.id)
+              element.sendToBack()
+          });
+        }
+        activeObject.sendToBack();
+      }
       this.fixedLayer()
       this.canvas.renderAll();
     }
