@@ -139,12 +139,12 @@ let menuList1 = reactive([
         disabled: false,
         isSelected: true
     },
-    {
-        type: 'matting',
-        label: '抠图',
-        disabled: false,
-        isSelected: false
-    }
+    // {
+    //     type: 'matting',
+    //     label: '抠头',
+    //     disabled: false,
+    //     isSelected: false
+    // }
 ])
 let filterList = reactive([
     {

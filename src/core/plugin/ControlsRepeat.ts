@@ -115,19 +115,14 @@ class ControlsRepeat {
     }
 
     handelRepeat(type, obj = null) {
-        console.log('平铺')
-
-        // this.store.commit('setsLoad3d', false)
-        // const store = useStore()
-        // //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
+        this.editor.setAllCuts()
         this.store.commit('setDisableClipping', true)
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
         const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
         console.log('activeObject', activeObject.left - Mask.left)
-        
         activeObject.clone(c => {
             c.rotate(0)
-            console.log('clone', c.left - Mask.left)
             const p = {
                 Type: type,
                 Canvas_width: Mask.width * Mask.scaleX,
@@ -141,18 +136,18 @@ class ControlsRepeat {
                 Image_flipY: activeObject.flipY,
                 Image_angle: activeObject.angle
             }
-            console.log('平铺参数', p)
-            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '拿到平铺参数')
-            
+            // console.log('平铺参数', p)
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
+  
             picture.setBasicRepeat(p).then(res => {
-                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
-                console.log('res', res)
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
                 res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject) : ''
             })
         })
     }
     // 更新图片
     replaceImage = (url, obj = null) => {
+        
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
@@ -179,6 +174,7 @@ class ControlsRepeat {
                     activeObject.isBackground ? image.isBackgroundRepeat = true : image.isBackgroundRepeat = false
                     image.tileParentFileName = activeObject.FileName
                     image.tileParentId = activeObject.id
+                    image.visible = activeObject.visible
                     image.cutPartsType = activeObject.cutPartsType
                     image.id = uuid()
                     // image.FileName = FileName
@@ -190,8 +186,8 @@ class ControlsRepeat {
                    
                     //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
                     this.canvas.add(image);
-                    this.store.commit('setDisableClipping', false)
-                    this.editor.setAllCuts()
+                   
+                    // this.editor.setAllCuts()
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
                     this.canvas.bringToFront(mask)
@@ -202,8 +198,7 @@ class ControlsRepeat {
                     });
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
-                    // const store = useStore()
-
+                    this.store.commit('setDisableClipping', false)
                 }
             };
             const properties = {

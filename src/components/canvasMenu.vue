@@ -110,6 +110,7 @@ watch(sizeGUID, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
     const fn = () => {
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '监听到操作')
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
@@ -130,7 +131,6 @@ const watchCanvas = () => {
         store.commit('setSelected', {})
         isSetSteps.value ? store.commit('setIsSetSteps', false) : ''
         if (val) store.commit('setSelected', val.selected[0])
-
     })
     canvasEditor.canvas.on('before:transform', (val) => {
         if (val.transform.target.tileParentId) {
@@ -288,16 +288,15 @@ const loadCanvasObject = () => {
                     for (var key in obj) {
                         image[key] = obj[key]
                     }
+                    
                     if (obj.cutPartsType == cutPartsType.value) {
                         image.visible = true
                     } else {
                         image.visible = false
                     }
-
+                    image.repeatType && canvasEditor.handelRepeat(repeatList[image.repeatType], image)
                     if (image.customVisible === false) image.visible = false
                     canvasEditor.canvas.add(image)
-                    console.log(image)
-                    image.repeatType && canvasEditor.handelRepeat(repeatList[image.repeatType], image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {

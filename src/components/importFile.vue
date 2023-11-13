@@ -99,12 +99,12 @@ const showIcon = (item) => {
 }
 // 替换图片
 const replaceImage = (str, fileHeaderPath) => {
-  console.log('replaceImage', )
+  console.log('replaceImage',)
   store.commit('setDisableClipping', true)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-  let layer 
-  canvasEditor.canvas.getObjects().forEach((item,index) =>{
-    if(activeObject.id == item.id) layer = index
+  let layer
+  canvasEditor.canvas.getObjects().forEach((item, index) => {
+    if (activeObject.id == item.id) layer = index
   })
   const FileName = guid() + '.png'
   const oldFileName = activeObject.FileName
@@ -132,7 +132,7 @@ const replaceImage = (str, fileHeaderPath) => {
           image.oldFileName = FileName
           image.filters = []
           canvasEditor.canvas.add(image);
-         
+
           canvasEditor.fixedLayer()
           canvasEditor.canvas.remove(oldActiveObject)
           image.moveTo(layer)
@@ -189,35 +189,40 @@ const getFile = (file) => {
     files
   } = file.target;
   if (files.length <= 0) return;
+  console.log('file.target', file.target)
   const fileReader = new FileReader();
+
   const fn = (index) => {
-    fileReader.readAsDataURL(files[index]);
-    fileReader.onload = (event) => {
-      try {
-        const {
-          result
-        } = event.target;
-        const FileName = guid() + '.png'
-        setUserUploadFile(result, FileName, 'images_custom\\', () => {
-          picture.setImagesCustom({ FileName, userID: userID.value }).then(e => {
-            if (e.OK == 'True') {
-              if (files[index + 1]) {
-                fn(index + 1)
-              } else {
-                getImagesCustom(userID.value, imageList, pageIndex.value)
-                ElMessage({
-                  showClose: true,
-                  message: '上传成功',
-                  type: 'success',
-                })
-              }
-            }
-          })
-        })
-      } catch (e) {
-        console.log(e);
-      }
-    };
+    const FileName = guid() + '.png'
+    setUserUploadFile(null, FileName, 'images_custom\\', () => {
+      picture.setImagesCustom({ FileName, userID: userID.value }).then(e => {
+        if (e.OK == 'True') {
+          if (files[index + 1]) {
+            fn(index + 1)
+          } else {
+            getImagesCustom(userID.value, imageList, pageIndex.value)
+            ElMessage({
+              showClose: true,
+              message: '上传成功',
+              type: 'success',
+            })
+          }
+        }
+      })
+    }, files[index])
+    // fileReader.readAsDataURL(files[index]);
+    // console.log(files)
+    // fileReader.onload = (event) => {
+    //   try {
+    //     const {
+    //       result
+    //     } = event.target;
+    //     console.log('event.target', event.target)
+
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // };
   }
   fn(0)
 }

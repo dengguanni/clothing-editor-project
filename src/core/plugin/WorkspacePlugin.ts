@@ -139,6 +139,7 @@ class WorkspacePlugin {
   }
 
   setZoomAuto(scale: number, cb?: (left?: number, top?: number) => void) {
+    console.log('this.workspace', this.workspace)
     const { workspaceEl } = this;
     const width = workspaceEl.offsetWidth;
     const height = workspaceEl.offsetHeight;
@@ -148,12 +149,14 @@ class WorkspacePlugin {
     this.canvas.setViewportTransform(fabric.iMatrix.concat());
     this.canvas.zoomToPoint(new fabric.Point(center.left, center.top), scale);
     if (!this.workspace) return;
+    this.workspace.visible = true
     this.setCenterFromObject(this.workspace);
 
     // 超出画布不展示
 
     const maskRect = this.canvas.getObjects().find((item: any) => item.isMask)
     maskRect ? maskRect.clone((cloned: any) => {
+      cloned.visible = true
       this.canvas.clipPath = cloned;
       this.canvas.renderAll()
       this.canvas.requestRenderAll();

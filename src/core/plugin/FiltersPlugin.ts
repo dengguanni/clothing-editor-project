@@ -155,7 +155,6 @@ class FiltersPlugin {
                 activeObject.set('oldFileName', oldFileName);
                 activeObject.set('FilePath', 'images_temp/' + FileName.substring(0, 1));
                 activeObject.set('oldFilePath', oldFilePath)
-                console.log('activeObject angle', activeObject.angle)
                 // const angle = activeObject.angle
                 // activeObject.rotate(0)
                 activeObject.applyFilters()
@@ -203,20 +202,24 @@ class FiltersPlugin {
                     -1, 5, -1,
                     0, -1, 0]
             }));
+           
             const activeObject = this.canvas.getActiveObjects()[0]
             const scaleX = activeObject.scaleX
             const scaleY = activeObject.scaleY
+            const angle = activeObject.angle
             activeObject.scaleX = 1
             activeObject.scaleY = 1
+            activeObject.rotate(0)
+            activeObject.angle = 0
             const url = activeObject.toDataURL({
                 width: activeObject.width,
                 height: activeObject.height,
-                angle: activeObject.angle,
+                angle: 0,
                 scaleX: activeObject.scaleX,
                 scaleY: activeObject.scaleY,
-
                 multiplier: 1,
             });
+            activeObject.rotate(angle)
             activeObject.scaleX = scaleX
             activeObject.scaleY = scaleY
             if (val) {
