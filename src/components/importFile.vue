@@ -189,7 +189,6 @@ const getFile = (file) => {
     files
   } = file.target;
   if (files.length <= 0) return;
-  console.log('file.target', file.target)
   const fileReader = new FileReader();
 
   const fn = (index) => {

@@ -7,7 +7,7 @@
     <!-- <Button type="primary" @click="getData">
       <commonIconfont type="gistuceng"></commonIconfont>
     </Button> -->
-    <Button type="primary" @click="setSaveData(true)">
+    <Button type="primary" @click="savaProject(true)">
       {{ $t('keep') }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
     </Button>
@@ -40,13 +40,20 @@ const handelSave = computed(() => {
 const userID = computed(() => {
   return store.state.userID
 })
-
+const cutParts = computed(() => {
+  return store.state.cutParts
+})
+const sizeGUID = computed(() => {
+  return store.state.sizeGUID
+})
+const bgColor = computed(() => {
+  return store.state.bgColor
+})
 watch(handelSave, (newVal, oldVal) => {
   if (newVal) {
     setSaveData()
   }
 }, { immediate: true, deep: true });
-const aa = ref('')
 const { t } = useI18n();
 const { canvasEditor } = useSelect();
 const cbMap = {
@@ -65,7 +72,21 @@ const cbMap = {
     canvasEditor.saveImg();
   },
 };
-let a = ref(0)
+const repeatList = {
+  basic: '基础平铺',
+  mirror: '镜像平铺',
+  transverse: '横向平铺',
+  direction: '纵向平铺'
+}
+const test = () => {
+  console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击')
+  const p = {
+    ID: ''
+  }
+  historyAip.setTest(p).then(res => {
+    console.log(res)
+  })
+}
 const getData = () => {
   const frustum = new THREE.Frustum();
   console.log(frustum.setFromProjectionMatrix())
@@ -81,6 +102,87 @@ const getData = () => {
   // })
 
 }
+const savaProject = debounce(function () {
+  let p = {
+    "UserID": userID.value,
+    "SizeGUID": sizeGUID.value,
+    "Parts": [
+    ]
+  }
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
+  let Parts = []
+  let callback = (p) => {
+    Modal.confirm({
+      title: '提示',
+      content: `<p>保存成功</p>`,
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => () => { },
+    });
+    console.log(p)
+    historyAip.setSaveProject(p).then((res) => {
+      console.log('res', res)
+    })
+  }
+  cutParts.value.forEach((element, indexP) => {
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.name == element.Title);
+    let Part = {
+      "bgc_r": bgColor.value.R,
+      "bgc_g": bgColor.value.G,
+      "bgc_b": bgColor.value.B,
+      "Canvas_zoom": "1",
+      "Part_name": element.Title,
+      "Images": [
+      ]
+    }
+    const fn = (objects, index, maskRect, indexP = null) => {
+      if (objects.length > 0) {
+        objects[index].clone(cloned => {
+          cloned.rotate(0)
+          const oldTop = objects[index].angle == 0 ? objects[index].top - maskRect.top : cloned.top - maskRect.top
+          const oldLeft = objects[index].angle == 0 ? objects[index].left - maskRect.left : cloned.left - maskRect.left
+          const oldWidth = objects[index].width * objects[index].scaleX
+          const oldHeight = objects[index].height * objects[index].scaleY
+          const obj = {
+            Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
+            Image_width: (oldWidth / 0.07).toFixed(5) + '',
+            Image_height: (oldHeight / 0.07).toFixed(5) + '',
+            Image_left: (oldLeft / 0.07).toFixed(5) + '',
+            Image_top: (oldTop / 0.07).toFixed(5) + '',
+            // Image_left: (oldLeft - (oldWidth / 0.07).toFixed(5) + oldWidth).toFixed(5) + '',
+            // Image_top: (oldTop - (oldHeight / 0.07).toFixed(5) + oldHeight).toFixed(5) + '',
+            Image_angle: objects[index].angle.toFixed(5) + '',
+            Image_flipX: objects[index].flipX,
+            Image_flipY: objects[index].flipY,
+            Image_visible: true,
+            Image_TileType: objects[index].repeatType ? repeatList[objects[index].repeatType] : ''
+          }
+          objects[index].customVisible && objects[index].cutPartsType == element.Title && !objects[index].tileParentId && Part.Images.push(obj)
+          if (objects[index + 1]) {
+            fn(objects, index + 1, maskRect, indexP)
+          } else {
+            Parts.push(Part)
+            if (indexP == (cutParts.value.length - 1)) {
+              p.Parts = Parts
+              callback(p)
+            }
+          }
+        })
+      } else {
+        Part.Images = []
+        arts.push(Part)
+        if (indexP == (cutParts.value.length - 1)) {
+          p.Parts = Parts
+          callback(p)
+        }
+      }
+    }
+    fn(objects, 0, maskRect, indexP)
+  })
+}, 500);
+
+
+
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
@@ -93,7 +195,7 @@ const setSaveData = debounce(function (showLoading = false) {
     element['src'] = ''
   });
   store.commit('setCanvasObjects', objectsCopy)
-  historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value),userID: userID.value  }]).then(res => {
+  historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value), userID: userID.value }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
     // console.log('保存结果', res)
     showLoading ? ElMessage({

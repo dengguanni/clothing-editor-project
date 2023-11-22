@@ -161,7 +161,7 @@ class CutPartsPlugin {
        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
-            // console.log('总的剪裁参数', p, res)
+            console.log('总的剪裁参数', p, res)
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
             this.load3DScene.setTexture(p.Part_name, url, () => {

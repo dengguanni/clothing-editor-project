@@ -120,6 +120,7 @@ const watchCanvas = () => {
     }
     canvasEditor.canvas.on('object:added', () => {
         console.log('added')
+        canvasEditor.fixedLayer()
         fn()
     })
     canvasEditor.canvas.on('object:modified', () => {
@@ -258,7 +259,7 @@ const changeSelection = () => {
                 el.visible = false
             }
             if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
-              
+
                 console.log('isShowCuts.value', isShowCuts.value)
                 el.visible = true
                 el.isMask = true
@@ -266,7 +267,7 @@ const changeSelection = () => {
                 maskRect.clone((cloned) => {
                     const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                     canvasEditor.canvas.clipPath = cloned;
-                      isShowCuts.value ? el.visible = true : el.visible = false
+                    isShowCuts.value ? el.visible = true : el.visible = false
                     canvasEditor.canvas.renderAll()
                     canvasEditor.canvas.requestRenderAll();
                 });
@@ -288,7 +289,7 @@ const loadCanvasObject = () => {
                     for (var key in obj) {
                         image[key] = obj[key]
                     }
-                    
+
                     if (obj.cutPartsType == cutPartsType.value) {
                         image.visible = true
                     } else {

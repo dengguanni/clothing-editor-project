@@ -1,49 +1,37 @@
 import { setLocal } from '@/utils/local';
 import axios from 'axios' // 引入
+import axiosRetry from 'axios-retry' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
-let baseURL = 'http://8.140.206.30:8099';
+let baseURL = 'http://8.140.206.30:8011';
 import crypto from '@/utils/crypto'
-import { createRouter, useRouter, useRoute } from 'vue-router';
-import { useStore } from 'vuex'
-const router = useRouter()
-// console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 
-// 这一步的目的是判断出当前是开发环境还是生成环境，方法不止一种，达到目的就行
-// if(process.env.NODE_ENV=='development'){
-//   baseURL=''
-// }else{
-//   baseURL=''
-// }
 const userinfo = window.location.search.replace('?code=', '')
 const USER_INFO = crypto.decrypt(userinfo.replace('#', ''))
-
 
 const config = {
     baseURL: baseURL,
     // 因为跨域了，所以这里如果写的话会自动拼接，会有两份，所以隐藏了
-    timeout: 30000 // 设置最大请求时间
+    timeout:  5*60*1000, // 设置最大请求时间
+    retry: 0, //设置全局重试请求次数（最多重试几次请求）
+    retryDelay: 1000, //设置全局请求间隔
+
 }
+
 const _axios = axios.create(config)
 
+axiosRetry(_axios, { retries: 0 });
+axios.defaults.retry = 0
+axios.defaults.headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
 // /* 请求拦截器（请求之前的操作） */
-_axios.interceptors.request.use(
-    config => {
-        // 如果有需要在这里开启请求时的loading动画效果
-        // config.headers.Authorization = getToken  //添加token,需要结合自己的实际情况添加，
-        // config.params.userID = USER_INFO ? JSON.parse(USER_INFO).userId : ''
-        let Data = ''
-        if (config.params) {
-            // config.params.userID = JSON.parse(USER_INFO).userId
-        } else {
-            // console.log('config.data', config.data)
-            // config.data ? Data = (config.data).userID : ''
-            // config.data = JSON.stringify(Data)
-        }
-        return config
-    },
-    err => Promise.reject(err)
-)
+// _axios.interceptors.request.use(
+//     config => {
+//         // 如果有需要在这里开启请求时的loading动画效果
+//         // config.headers.Authorization = getToken  //添加token,需要结合自己的实际情况添加，
+//         return config
+//     },
+//     err => Promise.reject(err)
+// )
 // params.userID = USER_INFO ? JSON.parse(USER_INFO).userId : ''
 // /* 请求之后的操作 */
 _axios.interceptors.response.use((res) => {
@@ -53,8 +41,6 @@ _axios.interceptors.response.use((res) => {
     // if (res.data.code === 401) {
     //   console.log('无权限操作')
     // }
-
-
     if (res.data.OK == 'False') {
         ElMessage({
             showClose: true,
@@ -82,9 +68,7 @@ _axios.interceptors.response.use((res) => {
 // 按理来说应该也可以封装其他的方法
 
 const http = {
-
     get(url = '', params = {}) {
-
         return new Promise((resolve, reject) => {
             _axios({
                 url,
@@ -102,6 +86,7 @@ const http = {
         })
     },
     post(url = '', params = {}) {
+        console.log('url', url)
         return new Promise((resolve, reject) => {
             _axios({
                 url,
@@ -111,15 +96,17 @@ const http = {
                 },
                 method: 'POST'
             }).then(res => {
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '成功返回')
                 resolve(res.data)
+              
                 return res
             }).catch(error => {
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '失败返回',error)
                 reject(error)
             })
         })
     }
 }
-
 // 暴露所写的内容
 export default http
 

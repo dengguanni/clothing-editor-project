@@ -138,7 +138,7 @@ class ControlsRepeat {
             }
             // console.log('平铺参数', p)
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
-  
+
             picture.setBasicRepeat(p).then(res => {
                 console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
                 res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject) : ''
@@ -147,7 +147,7 @@ class ControlsRepeat {
     }
     // 更新图片
     replaceImage = (url, obj = null) => {
-        
+
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
@@ -159,7 +159,7 @@ class ControlsRepeat {
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     this.canvas.getObjects().forEach((el: any) => {
-                        if (el.tileParentId == activeObject.id ) {
+                        if (el.tileParentId == activeObject.id) {
                             this.canvas.remove(el)
                         }
                     })
@@ -183,10 +183,10 @@ class ControlsRepeat {
                     image.left = Mask.left
                     image.top = Mask.top
                     image.rotate(0)
-                   
+
                     //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
                     this.canvas.add(image);
-                   
+
                     // this.editor.setAllCuts()
                     const mask = this.canvas.getObjects().find((item) => item.isMask)
                     const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
