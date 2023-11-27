@@ -94,7 +94,6 @@ watch(cutPartsType, (newVal, oldVal) => {
 watch(cutParts, (newVal, oldVal) => {
     if (newVal.length > 0) {
         loadCuts()
-        console.log('cutParts', cutParts)
         changeSelection()
     }
 }, { immediate: true, deep: true });
@@ -295,14 +294,14 @@ const loadCanvasObject = () => {
                     } else {
                         image.visible = false
                     }
-                    image.repeatType && canvasEditor.handelRepeat(repeatList[image.repeatType], image)
+                    image.repeatType && canvasEditor.handelRepeat(repeatList[image.repeatType], image, true)
                     if (image.customVisible === false) image.visible = false
                     canvasEditor.canvas.add(image)
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {
-                        canvasEditor.setAllCuts(true)
-                        watchCanvas()
+                        console.log('刷新加载对象添加完毕')
+                        canvasEditor.setAllCuts(true,()=>{  watchCanvas()})
                     }
                 }
             };
@@ -310,14 +309,14 @@ const loadCanvasObject = () => {
                 left: 100,
                 top: 100
             };
-            fabric.Image.fromURL(imageURL, callback, properties);
+            obj.FilePath && fabric.Image.fromURL(imageURL, callback, properties);
         } else if (obj.type === 'text') {
             addText(obj)
             if (canvasObjects.value[index + 1]) {
                 fn(canvasObjects.value[index + 1], index + 1)
             } else {
-                canvasEditor.setAllCuts(true)
-                watchCanvas()
+                canvasEditor.setAllCuts(true,()=>{  watchCanvas()})
+              
             }
         }
     }
@@ -337,6 +336,7 @@ const addText = (option) => {
     for (var key in option) {
         text[key] = option[key]
     }
+    console.log('text option', option)
     text.sendBackwards()
     canvasEditor.canvas.add(text)
 };

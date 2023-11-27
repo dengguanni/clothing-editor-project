@@ -114,9 +114,11 @@ class ControlsRepeat {
         }
     }
 
-    handelRepeat(type, obj = null) {
-        this.editor.setAllCuts()
-        this.store.commit('setDisableClipping', true)
+    handelRepeat(type, obj = null, isLoadAll = false) {
+        if (!isLoadAll) {
+            this.editor.setAllCuts()
+            this.store.commit('setDisableClipping', true)
+        }
         console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
         const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
@@ -141,12 +143,13 @@ class ControlsRepeat {
 
             picture.setBasicRepeat(p).then(res => {
                 console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
-                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject) : ''
+                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject, isLoadAll) : ''
+
             })
         })
     }
     // 更新图片
-    replaceImage = (url, obj = null) => {
+    replaceImage = (url, obj = null, isLoadAll) => {
 
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
@@ -177,8 +180,8 @@ class ControlsRepeat {
                     image.visible = activeObject.visible
                     image.cutPartsType = activeObject.cutPartsType
                     image.id = uuid()
-                    // image.FileName = FileName
-                    // image.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                    image.FileName = FileName
+                    image.FilePath = 'images_temp/' + FileName.substring(0, 1)
                     image.hoverCursor = null
                     image.left = Mask.left
                     image.top = Mask.top
@@ -198,7 +201,8 @@ class ControlsRepeat {
                     });
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
-                    this.store.commit('setDisableClipping', false)
+                    !isLoadAll &&  this.store.commit('setDisableClipping', false)
+
                 }
             };
             const properties = {

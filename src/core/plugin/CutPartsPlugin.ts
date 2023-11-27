@@ -56,11 +56,13 @@ class CutPartsPlugin {
         return this.store.state.disableClipping
     })
 
-    setAllCuts(isColorChange: Boolean) {
+    setAllCuts(isColorChange: Boolean, callback = null) {
+
         CutPartsPlugin.num = 1
         if (this.disableClipping.value) return
+        console.log('isColorChange', isColorChange, 'disableClipping', this.disableClipping.value)
         this.editor.fixedLayer()
-        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
         const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId)
         if (this.cutPartsType.value) {
             let ImagesList: any = {}
@@ -92,6 +94,7 @@ class CutPartsPlugin {
 
             const fn = (objects, index, p, maskRect, indexP = null) => {
                 if (objects.length > 0) {
+
                     objects[index].clone(cloned => {
                         cloned.rotate(0)
                         const top = objects[index].angle == 0 ? objects[index].top - maskRect.top : cloned.top - maskRect.top
@@ -108,13 +111,14 @@ class CutPartsPlugin {
                             Image_visible: objects[index].cutPartsType == p.Part_name,
                             Image_TileType: objects[index].repeatType ? CutPartsPlugin.repeatList[objects[index].repeatType] : ''
                         }
-                        if (objects[index].customVisible === false) obj.Image_visible = false
-                        ImagesList[p.Part_name].Images.push(obj)
+                        // if (objects[index].customVisible === false) obj.Image_visible = false
+                        // ImagesList[p.Part_name].Images.push(obj)
+                        objects[index].customVisible && objects[index].cutPartsType == p.Part_name && ImagesList[p.Part_name].Images.push(obj)
                         if (objects[index + 1]) {
                             fn(objects, index + 1, p, maskRect, indexP)
                         } else {
                             p.Images = ImagesList[p.Part_name].Images
-                            this.setCutAllParts(p, p.Part_name.Title, indexP)
+                            this.setCutAllParts(p, p.Part_name.Title, indexP, callback)
                         }
                     })
 
@@ -123,7 +127,6 @@ class CutPartsPlugin {
                     this.setCutAllParts(p, p.Part_name.Title, indexP)
                 }
             }
-            console.log('isColorChange', isColorChange)
             if (!isColorChange) {
                 const maskRect = this.canvas.getObjects().find((item) => item.isMask);
                 let p = {
@@ -156,9 +159,9 @@ class CutPartsPlugin {
         }
     }
 
-    setCutAllParts(p, Title, indexP = null) {
+    setCutAllParts(p, Title, indexP = null, callback = null) {
         this.editor.fixedLayer()
-       console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
             console.log('总的剪裁参数', p, res)
@@ -172,6 +175,7 @@ class CutPartsPlugin {
                         this.store.commit('setsLoad3d', false)
                         this.isSetSteps.value ? '' : this.store.commit('setSave')
                         this.store.commit('setIsSetSteps', false)
+                        callback && callback()
                     }
                     CutPartsPlugin.num++
                 } else {
@@ -179,6 +183,8 @@ class CutPartsPlugin {
                     this.isSetSteps.value ? '' : this.store.commit('setSave')
                     this.store.commit('setsLoad3d', false)
                     this.store.commit('setIsSetSteps', false)
+                    // callback && callback()
+
                 }
             })
         })

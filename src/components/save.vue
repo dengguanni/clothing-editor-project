@@ -7,8 +7,8 @@
     <!-- <Button type="primary" @click="getData">
       <commonIconfont type="gistuceng"></commonIconfont>
     </Button> -->
-    <Button type="primary" @click="savaProject(true)">
-      {{ $t('keep') }}
+    <Button type="primary" @click="savaProject(true)" :disabled="saveBtnDisabled">
+      {{ saveBtnValue }}
       <!-- <Icon type="ios-arrow-down"></Icon> -->
     </Button>
     <!-- <commonIconfont type="jiesuo_o"></commonIconfont> -->
@@ -49,11 +49,23 @@ const sizeGUID = computed(() => {
 const bgColor = computed(() => {
   return store.state.bgColor
 })
+
+let saveBtnValue = ref('保存')
+let saveBtnDisabled = ref(false)
+
 watch(handelSave, (newVal, oldVal) => {
   if (newVal) {
     setSaveData()
   }
 }, { immediate: true, deep: true });
+
+watch(sizeGUID, (newVal, oldVal) => {
+  if (newVal) {
+    saveBtnValue.value = '保存'
+    saveBtnDisabled.value = false
+  }
+}, { immediate: true, deep: true });
+
 const { t } = useI18n();
 const { canvasEditor } = useSelect();
 const cbMap = {
@@ -78,6 +90,7 @@ const repeatList = {
   transverse: '横向平铺',
   direction: '纵向平铺'
 }
+
 const test = () => {
   console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击')
   const p = {
@@ -103,6 +116,8 @@ const getData = () => {
 
 }
 const savaProject = debounce(function () {
+  saveBtnValue.value = '处理中'
+  saveBtnDisabled.value = true
   let p = {
     "UserID": userID.value,
     "SizeGUID": sizeGUID.value,
@@ -112,6 +127,7 @@ const savaProject = debounce(function () {
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
   let Parts = []
   let callback = (p) => {
+
     Modal.confirm({
       title: '提示',
       content: `<p>保存成功</p>`,
@@ -122,6 +138,8 @@ const savaProject = debounce(function () {
     console.log(p)
     historyAip.setSaveProject(p).then((res) => {
       console.log('res', res)
+      saveBtnValue.value = '保存'
+      saveBtnDisabled.value = false
     })
   }
   cutParts.value.forEach((element, indexP) => {
@@ -182,7 +200,7 @@ const savaProject = debounce(function () {
 }, 500);
 
 
-
+// 保存步骤
 const setSaveData = debounce(function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))

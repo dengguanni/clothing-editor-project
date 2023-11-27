@@ -3,7 +3,7 @@ import axios from 'axios' // 引入
 import axiosRetry from 'axios-retry' // 引入
 // import { getToken } from '@/utils/token'
 import { ElMessage } from 'element-plus';
-let baseURL = 'http://8.140.206.30:8011';
+let baseURL = 'http://8.140.206.30:8099';
 import crypto from '@/utils/crypto'
 
 const userinfo = window.location.search.replace('?code=', '')
@@ -86,7 +86,6 @@ const http = {
         })
     },
     post(url = '', params = {}) {
-        console.log('url', url)
         return new Promise((resolve, reject) => {
             _axios({
                 url,

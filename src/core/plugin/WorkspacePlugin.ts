@@ -139,7 +139,6 @@ class WorkspacePlugin {
   }
 
   setZoomAuto(scale: number, cb?: (left?: number, top?: number) => void) {
-    console.log('this.workspace', this.workspace)
     const { workspaceEl } = this;
     const width = workspaceEl.offsetWidth;
     const height = workspaceEl.offsetHeight;

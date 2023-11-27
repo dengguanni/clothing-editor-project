@@ -400,14 +400,12 @@ const getSaveData = () => {
   }
 
   historyAip.getHistory(p).then(res => {
-    console.log(p, res)
     if (res.Tag.length > 0) {
       const data = res.Tag[0].Table[0].JsonValue
       const dataJson = JSON.parse(data)
       if (dataJson.commodityInfo.GUID) {
         sendGoodsId(dataJson.commodityInfo)
       }
-      console.log('dataJson', dataJson)
       store.commit('setSaveData', dataJson)
       dataJson.commodityInfo.sizeGUID ? store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID) : store.commit('setPageLoading', false)
       dataJson.commodityInfo.cutParts ? store.commit('setCutParts', dataJson.commodityInfo.cutParts) : store.commit('setPageLoading', false)
