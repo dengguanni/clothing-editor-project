@@ -72,6 +72,7 @@ class CutPartsPlugin {
             })
             objects.forEach(el => {
                 if (el.type == 'text' && el.cutPartsType == this.cutPartsType.value) {
+                    console.log('el运行',el.FileName)
                     const FileName = guid() + '.png'
                     el.clone(clone => {
                         clone.rotate(0);
@@ -87,6 +88,8 @@ class CutPartsPlugin {
                         })
                         el.FileName = FileName
                         el.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                        console.log('el.FileName', el.FileName)
+                        console.log('el.FilePath', el.FilePath)
                         setUserUploadFile(url, FileName, 'images_temp/', null)
                     })
                 }

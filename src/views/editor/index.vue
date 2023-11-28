@@ -13,6 +13,7 @@
       <div class="header-left">
         <div class="logo">
           <img src="http://8.140.206.30:8089/ImageSource/Other/Logo.png" style="height: 54px; width: 180px;" />
+         <span style="color: rgb(180, 178, 178);"> 更新时间:11.28</span>
         </div>
         <history></history>
       </div>
@@ -26,8 +27,6 @@
             <iSwitch v-model="state.ruler" @on-change="rulerSwitch" size="small" class="switch"></iSwitch>
           </Tooltip> -->
       <!-- <Divider type="vertical" /> -->
-
-
 
       <!-- 预览 -->
       <!-- <previewCurrent /> -->
@@ -51,16 +50,16 @@
             <MenuItem :name="5" class="menu-item">
             <!-- <Icon type="md-book" size="30" /> -->
             <commonIconfont type="background" :fill="state.menuActive == 5 ? '#3064F2' : '#4E5969'"></commonIconfont>
-            <div>{{ $t('background') }}</div>
+            <div> 背景</div>
             </MenuItem>
             <MenuItem :name="2" class="menu-item">
             <!-- <Icon type="logo-angular" size="30" /> -->
             <commonIconfont type="wenzi_huaban1" :fill="state.menuActive == 2 ? '#3064F2' : '#4E5969'"></commonIconfont>
-            <div>{{ $t('elements') }}</div>
+            <div>文字</div>
             </MenuItem>
             <MenuItem :name="6" class="menu-item">
             <commonIconfont type="weibiaoti1" :fill="state.menuActive == 6 ? '#3064F2' : '#4E5969'"></commonIconfont>
-            <div>{{ $t('import_files') }}</div>
+            <div>上传</div>
             </MenuItem>
             <!-- <MenuItem :name="1" class="menu-item">
                 <Icon type="md-book" size="24" />

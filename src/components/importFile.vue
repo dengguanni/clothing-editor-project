@@ -145,7 +145,6 @@ const replaceImage = (str, fileHeaderPath) => {
           store.commit('setDisableClipping', false)
           canvasEditor.setAllCuts()
           canvasEditor.canvas.requestRenderAll();
-
         }
       };
       const properties = {

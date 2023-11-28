@@ -1,10 +1,3 @@
-/*
- * @Author: 邓官妮
- * @Date: 2022-09-03 19:16:55
- * @LastEditors: 邓官妮
- * @LastEditTime: 2023-02-09 13:17:11
- * @Description: 自定义事件
- */
 
 import EventEmitter from 'events';
 import { fabric } from 'fabric';
@@ -42,8 +35,8 @@ class CanvasEventEmitter extends EventEmitter {
     if (actives && actives.length === 1) {
       this.emit(SelectEvent.ONE, actives);
     } else if (actives && actives.length > 1) {
-      this.mSelectMode = 'multiple';
-      this.emit(SelectEvent.MULTI, actives);
+      // this.mSelectMode = 'multiple';
+      // this.emit(SelectEvent.MULTI, actives);
     } else {
       this.emit(SelectEvent.CANCEL);
     }

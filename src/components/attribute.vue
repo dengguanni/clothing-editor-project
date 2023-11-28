@@ -228,9 +228,9 @@
   </div>
   <Row justify="space-between" align="middle" style="margin: 24px 0px"
     v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
-    <Col span="4"><span>{{ $t('attributes.angle') }}</span></Col>
+    <Col span="4"><span>旋转</span></Col>
     <Col span="12">
-    <Slider v-model="baseAttr.angle" :min="-180" :max="180" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
+    <Slider v-model="baseAttr.angle" :min="-360" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
       :disabled="disabled">
     </Slider>
     </Col>
@@ -505,6 +505,7 @@ const init = () => {
 
 // 修改字体
 const changeFontFamily = (fontName) => {
+  console.log('fontName', fontName)
   if (!fontName) return;
   // 跳过加载的属性;
   const skipFonts = ['arial', 'Microsoft YaHei'];
@@ -543,6 +544,7 @@ const changeCommon = (key, value) => {
   }
   // 旋转角度适配
   if (key === 'angle') {
+    console.log('angle,',value )
    
     activeObject.rotate(value);
     value === 0 ? activeObject.angle = 0 : ''

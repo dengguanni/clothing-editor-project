@@ -108,6 +108,7 @@ const store = createStore({
       state.selected = val
     },
     setPageLoading(state, val) {
+      console.log('setPageLoading',val)
       state.pageLoading = val
     },
     setGoodsId(state, GUID) {

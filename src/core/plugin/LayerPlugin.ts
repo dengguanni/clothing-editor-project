@@ -42,13 +42,14 @@ class LayerPlugin {
       const activeObject = this.canvas.getActiveObjects()[0];
       if (activeObject) {
         console.log('上移', activeObject)
+        activeObject.bringForward();
         if (activeObject.repeatType) {
           this.canvas.getObjects().forEach(element => {
             if (element.tileParentId == activeObject.id)
               element.bringForward()
           });
         }
-        activeObject.bringForward();
+
       }
       this.fixedLayer()
     }

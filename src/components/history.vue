@@ -92,7 +92,7 @@ const clear = () => {
       canvasEditor.canvas.remove(el)
     }
   })
- store.commit('setDisableClipping', false)
+//  store.commit('setDisableClipping', false)
  canvasEditor.setAllCuts()
 }
 const setAuxiliaryLine = () => {

@@ -213,13 +213,14 @@ const addText = (option) => {
     type: 'text',
     FileName: FileName,
     FilePath: 'images_temp/' + FileName.substring(0, 1),
+    // fontFamily: 'Microsoft YaHei'
   });
   const top = mask.top + (mask.height * mask.scaleY)/2 - (text.height / 2)
   const left = mask.left + (mask.width * mask.scaleX)/2 - (text.width / 2)
   text.top = top
+  text.fontFamily = '华康金刚黑'
   text.left = left
   text.customVisible = true
-  
   canvasEditor.canvas.add(text);
   canvasEditor.canvas.setActiveObject(text);
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]

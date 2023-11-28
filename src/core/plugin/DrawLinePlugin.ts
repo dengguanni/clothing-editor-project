@@ -1,10 +1,4 @@
-/*
- * @Author: 邓官妮
- * @Date: 2023-06-21 22:09:36
- * @LastEditors: 邓官妮
- * @LastEditTime: 2023-06-22 16:07:52
- * @Description: file content
- */
+
 
 import { v4 as uuid } from 'uuid';
 import { fabric } from 'fabric';

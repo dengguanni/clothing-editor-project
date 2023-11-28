@@ -171,7 +171,7 @@ class ControlsRepeat {
                     image.set({
                         ...this.lockObj,
                         selectable: false,
-                        // evented: false,
+                        evented: null,
                         isRepeat: true,
                     })
                     activeObject.isBackground ? image.isBackgroundRepeat = true : image.isBackgroundRepeat = false
@@ -186,7 +186,8 @@ class ControlsRepeat {
                     image.left = Mask.left
                     image.top = Mask.top
                     image.rotate(0)
-
+                    image.isLock = true
+                    image.hasControls= false
                     //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
                     this.canvas.add(image);
 
@@ -201,7 +202,7 @@ class ControlsRepeat {
                     });
                     image.moveTo(z);
                     this.canvas.requestRenderAll();
-                    !isLoadAll &&  this.store.commit('setDisableClipping', false)
+                    !isLoadAll && this.store.commit('setDisableClipping', false)
 
                 }
             };
