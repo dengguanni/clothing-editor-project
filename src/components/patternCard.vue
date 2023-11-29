@@ -8,7 +8,7 @@
       <div class="tree">
         <div class="all-btn">全部分类</div>
         <el-tree-v2 :data="treeData" :props="treeProps" :height="499" @nodeExpand="getNode" @currentChange="selectNOde"
-          @getCurrentNode="getCurrentNode"></el-tree-v2>
+        ></el-tree-v2>
       </div>
     </div>
     <div class="right">
@@ -60,6 +60,7 @@ const init = () => {
   getTreeInfo()
 }
 const getGoodsId = (item) => {
+  console.log('56789',item)
   store.commit('setCommodityInfo', item)
   store.commit('setGoodsId', item.GUID)
   emit('sendGoodsId', item)
@@ -82,6 +83,7 @@ const searchGoods = (val) => {
   })
 }
 const getNode = (val) => {
+  console.log('val', val)
   if (val.HasChilds == '1') {
     commodityApi.getLeftClassificationList({ PGUID: val.id }).then(res => {
       let arr1 = []
@@ -116,23 +118,27 @@ const getNode = (val) => {
     })
   }
 }
+// 获取商品列表
 const selectNOde = (val) => {
-  const p = {
-    TreeNodeGUID: val.id,
-    Page_Index: 0,
-    QueryKeyWord: '',
-    Page_RowCount: 1
-  }
-  commodityApi.getGoodsImageListByTreeNode(p).then(res => {
-    let arr = []
-    if (res.Tag[0].Table) {
-      res.Tag[0].Table.forEach(el => {
-        arr.push(el)
-      })
-      goodList.value = arr
-      currentParentNodeId.value = val.id
+  if (val.HasChilds == 0 ) {
+    const p = {
+      TreeNodeGUID: val.id,
+      Page_Index: 0,
+      QueryKeyWord: '',
+      Page_RowCount: 1
     }
-  })
+    commodityApi.getGoodsImageListByTreeNode(p).then(res => {
+      let arr = []
+      if (res.Tag[0].Table) {
+        res.Tag[0].Table.forEach(el => {
+          arr.push(el)
+        })
+        goodList.value = arr
+        currentParentNodeId.value = val.id
+      }
+    })
+  }
+
 }
 
 const getTreeInfo = () => {

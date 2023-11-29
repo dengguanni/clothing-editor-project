@@ -150,7 +150,6 @@ class ControlsRepeat {
     }
     // 更新图片
     replaceImage = (url, obj = null, isLoadAll) => {
-
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
@@ -170,8 +169,8 @@ class ControlsRepeat {
                     image.cutPartsType = activeObject.cutPartsType
                     image.set({
                         ...this.lockObj,
-                        selectable: false,
-                        evented: null,
+                        // selectable: false,
+                        // evented: null,
                         isRepeat: true,
                     })
                     activeObject.isBackground ? image.isBackgroundRepeat = true : image.isBackgroundRepeat = false
@@ -186,22 +185,16 @@ class ControlsRepeat {
                     image.left = Mask.left
                     image.top = Mask.top
                     image.rotate(0)
-                    image.isLock = true
-                    image.hasControls= false
+                    // image.isLock = true
+                    image.hasControls = false
                     //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
-                    this.canvas.add(image);
-
-                    // this.editor.setAllCuts()
-                    const mask = this.canvas.getObjects().find((item) => item.isMask)
-                    const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
-                    this.canvas.bringToFront(mask)
-                    this.canvas.sendToBack(backgroundImage)
                     const objects = this.canvas.getObjects()
                     objects.forEach((element, index) => {
                         if (element.id == activeObject.id) z = index
                     });
-                    image.moveTo(z);
-                    this.canvas.requestRenderAll();
+                    this.canvas.add(image);
+                    activeObject.isBackground ? this.canvas.sendToBack(image) : image.moveTo(z)
+                    this.editor.fixedLayer()
                     !isLoadAll && this.store.commit('setDisableClipping', false)
 
                 }

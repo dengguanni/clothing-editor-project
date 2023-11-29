@@ -27,10 +27,11 @@ class LoadScene {
                 }
             })
         }
-        console.log('加载模型')
         const loader = new GLTFLoader();
         const timestamp = Date.parse(new Date());
-        loader.load(baseUrl + 'ProjectTemplate/58871fa2-4b3a-11ee-b1c4-00163e10d08e/duanxiu.glb?t=' + timestamp, object => {
+        const path = url.slice(25)
+        console.log('path', path)
+        loader.load(baseUrl + path + '?t=' + timestamp, object => {
             const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
             normalMap.wrapT = 100
             normalMap.wrapS = 100
@@ -71,19 +72,6 @@ class LoadScene {
             })
             group.name = name
             LoadScene.scene.add(group);
-            console.log('oadScene.scene', LoadScene.scene)
-            // object.scene.traverse(v => {
-            //     if (v.type == 'Mesh') {
-            //         const material = new THREE.MeshLambertMaterial({
-            //             map: v.material.map,
-            //             color: '0x3eee',
-
-            //         })
-            //         v.material = material
-            //     }
-            // })
-
-            // LoadScene.scene.add(object.scene);
         });
         // const dracoLoader = new DRACOLoader();
         // //解压模型的位置信息
@@ -94,8 +82,6 @@ class LoadScene {
         // loader.load('yifu1_draco', function (glb) {
         //     LoadScene.scene.add(glb);
         //  })
-
-
     }
 
 

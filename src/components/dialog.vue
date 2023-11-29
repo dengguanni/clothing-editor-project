@@ -15,16 +15,34 @@
 </template>
   
 <script setup >
+import { useStore } from 'vuex'
 import { defineEmits } from 'vue'
+const store = useStore()
 const props = defineProps({
     dialogType: {
         type: Number,
         default: 4
     }
 })
+const commodityInfoTitle = computed(() => {
+    return store.state.saveData.commodityInfo.Title 
+})
+const commodityInfo = computed(() => {
+    return store.state.saveData.commodityInfo 
+})
 watch(props.dialogType, (newVal, oldVal) => {
     if (newVal) {
         setTitle()
+    }
+}, { immediate: true, deep: true });
+watch(commodityInfoTitle, (newVal, oldVal) => {
+    if (newVal) {
+        console.log('commodityInfoTitle',newVal )
+    }
+}, { immediate: true, deep: true });
+watch(commodityInfo, (newVal, oldVal) => {
+    if (newVal) {
+        console.log('commodityInfo',newVal )
     }
 }, { immediate: true, deep: true });
 let title = ref('效果图')
@@ -33,13 +51,15 @@ const closeDailog = () => {
     emit('closeDailog')
 }
 
+
+
 const setTitle = () => {
     if (props.dialogType == 4 || props.dialogType == 5) {
         title.value = '效果图'
     } else if (props.dialogType == 2 || props.dialogType == 3) {
-        title.value = '青少年轻薄运动长袖防晒衣'
+        title.value = commodityInfoTitle.value
     } else {
-        title.value = '青少年轻薄运动长袖防晒衣'
+        title.value = commodityInfoTitle.value
     }
     return title.value
 

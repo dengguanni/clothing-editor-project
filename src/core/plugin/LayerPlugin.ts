@@ -20,21 +20,24 @@ class LayerPlugin {
     this.editor = editor;
   }
   fixedLayer() {
+    console.log('1this.canvas.getObjects()', this.canvas.getObjects())
     const mask = this.canvas.getObjects().find((item) => item.isMask)
     // const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
     const backgroundImages = this.canvas.getObjects().filter(item => item.isBackground)
     const line = this.canvas.getObjects().find((item) => item.id == 'grid');
     const workspace = this.canvas.getObjects().find((item) => item.id == 'workspace');
-    const backgroundRepeat = this.canvas.getObjects().find((item) => item.isBackgroundRepeat);
+    const backgroundRepeats = this.canvas.getObjects().filter((item) => item.isBackgroundRepeat);
     mask ? this.canvas.bringToFront(mask) : ''
     line ? this.canvas.bringToFront(line) : ''
     // console.log('backgroundImage', backgroundImage)
     backgroundImages.forEach(item => {
       this.canvas.sendToBack(item)
     })
-    // backgroundImage ? this.canvas.sendToBack(backgroundImage) : ''
-    backgroundRepeat ? this.canvas.sendToBack(backgroundRepeat) : ''
+    backgroundRepeats.forEach(item => {
+      this.canvas.sendToBack(item)
+    })
     workspace ? this.canvas.sendToBack(workspace) : ''
+    console.log('2this.canvas.getObjects()', this.canvas.getObjects())
   }
   up() {
     const actives = this.canvas.getActiveObjects();
@@ -110,34 +113,34 @@ class LayerPlugin {
   contextMenu() {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
-      return [
-        {
-          text: '图层管理',
-          hotkey: '❯',
-          subitems: [
-            {
-              text: '上一个',
-              hotkey: 'key',
-              onclick: () => this.up(),
-            },
-            {
-              text: '下一个',
-              hotkey: 'key',
-              onclick: () => this.down(),
-            },
-            {
-              text: '置顶',
-              hotkey: 'key',
-              onclick: () => this.upTop(),
-            },
-            {
-              text: '置底',
-              hotkey: 'key',
-              onclick: () => this.downTop(),
-            },
-          ],
-        },
-      ];
+      // return [
+      //   {
+      //     text: '图层管理',
+      //     hotkey: '❯',
+      //     subitems: [
+      //       {
+      //         text: '上一个',
+      //         hotkey: 'key',
+      //         onclick: () => this.up(),
+      //       },
+      //       {
+      //         text: '下一个',
+      //         hotkey: 'key',
+      //         onclick: () => this.down(),
+      //       },
+      //       {
+      //         text: '置顶',
+      //         hotkey: 'key',
+      //         onclick: () => this.upTop(),
+      //       },
+      //       {
+      //         text: '置底',
+      //         hotkey: 'key',
+      //         onclick: () => this.downTop(),
+      //       },
+      //     ],
+      //   },
+      // ];
       // return [{ text: '复制', hotkey: 'Ctrl+V', disabled: false, onclick: () => this.clone() }];
     }
   }
