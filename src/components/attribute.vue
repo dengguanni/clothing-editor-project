@@ -451,7 +451,7 @@ const setAllCuts = debounce(() => {
   //   obj.rotate(baseAttr.angle)
   //   canvasEditor.canvas.renderAll();
   // }
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 }, 400)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
@@ -513,7 +513,7 @@ const changeFontFamily = (fontName) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     activeObject && activeObject.set('fontFamily', fontName);
     canvasEditor.canvas.renderAll();
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
     return;
   }
   Spin.show();
@@ -526,7 +526,7 @@ const changeFontFamily = (fontName) => {
       activeObject && activeObject.set('fontFamily', fontName);
       canvasEditor.canvas.renderAll();
       Spin.hide();
-      store.commit('setAllCuts')
+     canvasEditor.setAllCuts(false)
     })
     .catch((err) => {
       Spin.hide();
@@ -555,7 +555,7 @@ const changeCommon = (key, value) => {
   canvasEditor.canvas.renderAll();
   console.log('key', key, value)
   setTimeout(() => {
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
   }, 300);
 };
 
@@ -574,7 +574,7 @@ const borderSet = (key) => {
     activeObject.set(stroke.value);
     canvasEditor.canvas.renderAll();
   }
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 };
 
 // 阴影设置
@@ -591,7 +591,7 @@ const changeFontWeight = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 };
 
 // 斜体
@@ -601,7 +601,7 @@ const changeFontStyle = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 };
 
 // 中划

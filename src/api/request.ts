@@ -95,12 +95,12 @@ const http = {
                 },
                 method: 'POST'
             }).then(res => {
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '成功返回')
+                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '成功返回')
                 resolve(res.data)
               
                 return res
             }).catch(error => {
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '失败返回',error)
+                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '失败返回',error)
                 reject(error)
             })
         })

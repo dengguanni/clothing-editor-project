@@ -56,6 +56,7 @@ import mitts from '@/utils/mitts.js';
 import commodityApi from '@/api/commodity'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import { useStore } from 'vuex'
+import historyAip from '@/api/history.ts'
 const store = useStore()
 const { canvasEditor } = useSelect();
 const info: any = ref({
@@ -86,13 +87,22 @@ const bgColor = computed(() => {
     return store.state.bgColor
 })
 const sizeGUID = computed(() => {
-    return store.state.saveData.commodityInfo.sizeGUID
+    return store.state.sizeGUID
+})
+const colorList = computed(() => {
+    return store.state.colorList
+})
+const userID = computed(() => {
+    return store.state.userID
+})
+const goodsId = computed(() => {
+    return store.state.goodsId
 })
 
 const value1 = ref('1')
 const sizeSelected = ref('')
 const colorSelected = ref('')
-const colorList = ref([]);
+// const colorList = ref([]);
 const activeObject = canvasEditor.canvas.getActiveObject();
 const baseAttr = reactive({
     id: '',
@@ -123,56 +133,96 @@ watch(
     (val) => {
         if (val.GUID) {
             info.value = { ...val }
-            getBgColor(val.GUID)
+            // getBgColor(val.GUID)
         }
     }
 );
 watch(sizeGUID, (newVal, oldVal) => {
-    if (newVal) changeSize({ GUID: newVal })
+    if (newVal) {
+        sizeSelected.value = newVal
+        getSaveData()
+    }
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
-    if (newVal) colorSelected.value = newVal.GUID
-}, { immediate: true, deep: true });
-watch(
-    () => props.sizeList,
-    (val) => {
-        if (val.length > 0) {
-            if (!sizeGUID.value) sizeSelected.value = val[0].GUID
+    if (newVal) {
+        console.log('颜色变化')
+        colorSelected.value = newVal.GUID
 
-        }
     }
-);
+}, { immediate: true, deep: true });
+watch(goodsId, (newVal, oldVal) => {
+    if (newVal) {
+        getBgColor(newVal)
+    }
+}, { immediate: true, deep: true });
+
 
 const openDailog = (val) => {
     emit('openDailog', val)
 }
-const getObjectAttr = () => {
-    baseAttr.fill = activeObject.get('fill');
-}
-const changeCommon = (key, value) => {
-    activeObject && activeObject.set(key, value);
-    canvasEditor.canvas.renderAll();
-    getObjectAttr();
-}
+
 const changeSize = (item: any) => {
-    sizeSelected.value = item.GUID
+    store.commit('setPageLoading', true)
+    store.commit('setBgColor', '')
+    store.commit('setCutParts', '')
     store.commit('setGoodsSizeGUID', item.GUID)
-    changeColor(bgColor.value)
+    // store.commit('setDisableClipping', true)
+
 }
-const changeColor = (item: any) => {
-    colorSelected.value = item.GUID
-    store.commit('setBgColor', item)
-}
-const getBgColor = (GUID: string) => {
-    commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
-        colorList.value = [...res.Tag[0].Table]
-        store.commit('setBgColorList', [...res.Tag[0].Table])
-        if (!bgColor.value) {
-            colorSelected.value = colorList.value[0].GUID
-            GoodsInfo.modelColorList = colorList.value
-            store.commit('setBgColor', colorList.value[0])
+const getSaveData = () => {
+    store.commit('setPageLoading', true)
+    store.commit('setIsSetSteps', true)
+    const steps = {
+        ID: 0,
+        ID_Next: 0,
+        ID_Previous: 0,
+    }
+    store.commit('setSaveSteps', steps)
+    const p = {
+        ID: '',
+        userID: userID.value
+    }
+    historyAip.getHistory(p).then(res => {
+        if (res.Tag.length > 0) {
+            const data = res.Tag[0].Table[0].JsonValue
+            const dataJson = JSON.parse(data)
+            console.log('获取旧数据,', dataJson)
+            const objectsData = dataJson.canvasObjects
+            store.commit('setCanvasObjects', objectsData)
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '存储的颜色1加载完毕', dataJson.commodityInfo.bgColo)
+            dataJson.commodityInfo.bgColor ? store.commit('setBgColor', dataJson.commodityInfo.bgColor) : store.commit('setPageLoading', false)
            
         }
+    })
+}
+
+const changeColor = (item: any) => {
+    store.commit('setBgColor', item)
+    canvasEditor.setAllCuts(true)
+}
+const getBgColor = (GUID: string) => {
+    console.log('获取颜色', GUID)
+    commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '颜色列表加载完毕')
+        if (res.Tag[0]) {
+            // colorList.value = [...res.Tag[0].Table]
+            store.commit('setBgColorList', [...res.Tag[0].Table])
+            if (!bgColor.value) {
+                // colorSelected.value = colorList.value[0].GUID
+                GoodsInfo.modelColorList = colorList.value
+                // store.commit('setBgColor', colorList.value[0])
+                // changeColor(colorSelected.value)
+            }
+        } else {
+            ElMessage({
+                showClose: true,
+                message: '该版型未设置底板颜色',
+                type: 'error',
+            })
+            store.commit('setBgColor', '')
+            store.commit('setBgColorList', [])
+        }
+
     })
 }
 </script>

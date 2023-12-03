@@ -161,7 +161,7 @@ const doHide = debounce(() => {
   activeObject.visible ? '' : canvasEditor.canvas.discardActiveObject()
   activeObject.customVisible = activeObject.visible
   canvasEditor.canvas.renderAll();
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 }, 500)
 const textType = (type, item) => {
   if (type.includes('text')) {

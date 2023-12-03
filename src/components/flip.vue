@@ -86,7 +86,7 @@ const flip = (type) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
   canvasEditor.canvas.renderAll();
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
   canvasEditor.setRepeat(activeObject.repeatType, true)
 };
 const angle = (value) => {
@@ -96,7 +96,7 @@ const angle = (value) => {
   store.commit('setObjectAttr')
   canvasEditor.setRepeat(activeObject.repeatType, true)
   canvasEditor.canvas.renderAll();
-  store.commit('setAllCuts')
+ canvasEditor.setAllCuts(false)
 }
 </script>
 

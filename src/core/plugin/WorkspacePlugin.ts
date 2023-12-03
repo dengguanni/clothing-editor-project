@@ -154,18 +154,19 @@ class WorkspacePlugin {
     // 超出画布不展示
 
     const maskRect = this.canvas.getObjects().find((item: any) => item.isMask)
+    let path: any
+    if (maskRect) path = new fabric.Rect({ width: maskRect.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
     maskRect ? maskRect.clone((cloned: any) => {
       cloned.visible = true
-      this.canvas.clipPath = cloned;
+      this.canvas.clipPath = maskRect ? path : cloned;
       this.canvas.renderAll()
       this.canvas.requestRenderAll();
     }) : this.workspace.clone((cloned: fabric.Rect) => {
-      this.canvas.clipPath = cloned;
+      this.canvas.clipPath = maskRect ? path : cloned
       this.canvas.requestRenderAll();
     });
     if (cb) cb(this.workspace.left, this.workspace.top);
   }
-
   _getScale() {
     const viewPortWidth = this.workspaceEl.offsetWidth;
     const viewPortHeight = this.workspaceEl.offsetHeight;

@@ -64,7 +64,7 @@ const svgList = reactive([
 )
 const changeSelection = (item) => {
     MaximizePlugin.setMax(item.type)
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
 }
 
 </script>

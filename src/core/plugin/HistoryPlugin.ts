@@ -112,7 +112,6 @@ class HistoryPlugin {
             }
             if (image.customVisible === false) image.visible = false
             image.sendBackwards()
-            console.log('image', image)
             this.canvas.add(image)
             if (canvasObjects[index + 1]) {
               fn(canvasObjects[index + 1], index + 1)
@@ -145,7 +144,7 @@ class HistoryPlugin {
           this.canvas.requestRenderAll();
           this.store.commit('setDisableClipping', false)
           this.editor.setAllCuts(true)
-          // setTimeout(() => { this.store.commit('setIsSetSteps', false) }, 500)
+        
         }
       }
     }
@@ -179,7 +178,6 @@ class HistoryPlugin {
           this.canvas.remove(element)
         });
         const objectsData = JSON.parse(data)
-
         this.store.commit('setSaveData', JSON.parse(data))
         this.loadObject(JSON.parse(data).canvasObjects)
         this.store.commit('setBgColor', objectsData.commodityInfo.bgColor)

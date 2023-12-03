@@ -6,8 +6,7 @@
                 <div :class="item.Title == active ? 'active-image' : 'image'"
                     @click=" store.commit('setCutPartsType', item.Title)">
                     <div class="thumbnail">
-                        <img :src="'http://8.140.206.30:8099/ImageSource/ParkIco/' + item.Title + '.jpg'"
-                            style="width: 100%; height: auto;">
+                        <img :src="item.ImageUrl" style=" width: 40%;">
                     </div>
                 </div>
                 <div class="text-1">{{ item.Title }} </div>
@@ -44,12 +43,11 @@ const repeatList = {
     transverse: '横向平铺',
     direction: '纵向平铺'
 }
-
+let listenCanvas = false
 const URLbase64 = ref('')
 const active = ref('')
 const isLoadAll = ref(false)
 const cutParts = computed(() => {
-    console.log('cutParts', store.state.cutParts)
     return store.state.cutParts
 })
 const isShowCuts = computed(() => {
@@ -70,9 +68,6 @@ const canvasObjects = computed(() => {
 const sizeGUID = computed(() => {
     return store.state.sizeGUID
 })
-const handelAllCuts = computed(() => {
-    return store.state.handelAllCuts
-})
 const goodsId = computed(() => {
     return store.state.saveData.commodityInfo.GUID
 })
@@ -82,11 +77,6 @@ const modelInfo = computed(() => {
 const disableClipping = computed(() => {
     return store.state.disableClipping
 })
-watch(handelAllCuts, (newVal, oldVal) => {
-    if (newVal) {
-        canvasEditor.setAllCuts(false)
-    }
-}, { immediate: true, deep: true });
 
 watch(cutPartsType, (newVal, oldVal) => {
     if (newVal) {
@@ -99,19 +89,18 @@ watch(cutParts, (newVal, oldVal) => {
         changeSelection()
     }
 }, { immediate: true, deep: true });
-watch(bgColor, (newVal, oldVal) => {
-    if (newVal.GUID) {
-        canvasEditor.getIsLoadAll() ? canvasEditor.setAllCuts(true) : ''
-    }
-}, { immediate: true, deep: true });
 watch(sizeGUID, (newVal, oldVal) => {
     if (newVal) {
         init(newVal)
     }
 }, { immediate: true, deep: true });
 const watchCanvas = () => {
+
+    if (listenCanvas) return
+    console.log('监听')
+    listenCanvas = true
     const fn = () => {
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '监听到操作')
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '监听到操作')
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
         const objects = canvasEditor.canvas.getObjects()
@@ -143,6 +132,7 @@ const watchCanvas = () => {
         store.commit('setSelected', val.transform.target)
     })
     canvasEditor.canvas.on('object:removed', (val) => {
+        console.log('removed')
         canvasEditor.canvas.getObjects().forEach((el) => {
             if (val.target.isRepeat && el.tileParentId == val.target.id) {
                 canvasEditor.canvas.remove(el)
@@ -151,48 +141,55 @@ const watchCanvas = () => {
         fn(isSetSteps.value)
     })
 }
-
+// 获取裁片 模型信息 
 const init = (newVal) => {
-    if (cutParts.value.length == 0) {
-        let arr = []
-        picture.getCutParts({ SizeGUID: newVal }).then(res => {
-            if (res.Tag[0]) {
-                const modelInfo = {
-                    modelName: res.Tag[0].modelName,
-                    modelUrl: res.Tag[0].modelUrl,
-                    modelUrl_Path: res.Tag[0].modelUrl_Path,
-                }
-                store.commit('setModelInfo', modelInfo)
-                res.Tag[0].Table.forEach(el => {
-                    arr.push({
-                        Title: el.Title,
-                        ImageUrl: el.ImageUrl,
-                        ImageUrl_Path: el.ImageUrl_Path
-                    })
-                })
-                GoodsInfo.SizeGUID = newVal
-                const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-                LoadScene.loadModel(res.Tag[0].modelUrl, res.Tag[0].modelName, color)
+    const objects = canvasEditor.canvas.getObjects().filter((item) => item.id !== 'workspace')
+    objects.forEach(el => canvasEditor.canvas.remove(el))
+    let arr = []
+    picture.getCutParts({ SizeGUID: newVal }).then(res => {
+        if (res.Tag[0]) {
+            const modelInfo = {
+                modelName: res.Tag[0].modelName,
+                modelUrl: res.Tag[0].modelUrl,
+                modelUrl_Path: res.Tag[0].modelUrl_Path,
+                MaskUrl_Path: res.Tag[0].MaskUrl_Path
             }
-            store.commit('setCutParts', arr)
-            store.commit('setCutPartsType', cutParts.value[0].Title)
-            canvasEditor.setAllCuts(true)
-        })
-    } else {
-        store.commit('setCutPartsType', cutParts.value[0].Title)
-    }
-    if (modelInfo.value.modelUrl) {
-        const color = 'rgb(' + bgColor.value.R + ',' + bgColor.value.G + ',' + bgColor.value.B + ')'
-        LoadScene.loadModel(modelInfo.value.modelUrl, modelInfo.value.modelName, color)
-    }
+            store.commit('setModelInfo', modelInfo)
+            res.Tag[0].Table.forEach(el => {
+                arr.push({
+                    Title: el.Title,
+                    ImageUrl: el.ImageUrl,
+                    ImageUrl_Path: el.ImageUrl_Path,
+                    MaskUrl_Path: el.MaskUrl_Path
+                })
+            })
+            let callback = () => {
+                arr && store.commit('setCutParts', arr)
+                cutParts.value[0] && store.commit('setCutPartsType', cutParts.value[0].Title)
+            }
+            LoadScene.loadModel(modelInfo.modelUrl, modelInfo.modelName, callback)
+            GoodsInfo.SizeGUID = newVal
+        }
 
+        if (arr.length == 0) {
+            ElMessage({
+                showClose: true,
+                message: '该尺码暂无裁片',
+                type: 'error',
+            })
+            store.commit('setPageLoading', false)
+        } else {
+            canvasEditor.setAllCuts(true)
+        }
+
+    })
 }
 // 加载裁片
 const loadCuts = debounce(() => {
-    console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
+    store.commit('setDisableClipping', true)
+    // console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
     if (objects.length !== 0) store.commit('setPageLoading', false)
-    console.log('(objects.length', objects.length)
     store.commit('setIsSetSteps', true)
     objects.forEach(el => {
         canvasEditor.canvas.remove(el)
@@ -200,21 +197,22 @@ const loadCuts = debounce(() => {
     canvasEditor.canvas.requestRenderAll();
     let i = 0
     const fn = (index) => {
-
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        const imageURL = cutParts.value[index].ImageUrl_Path
+        const time = Date.parse(new Date())
+        // const imageURL = cutParts.value[index].MaskUrl_Path + '?num=' + time
+        const imageURL = cutParts.value[index].MaskUrl_Path
         let callback = (image, isError) => {
             image.set({
-                scaleX: 0.07,
-                scaleY: 0.07,
+                scaleX: 1,
+                scaleY: 1,
                 width: image.width,
                 height: image.height,
                 opacity: 0.3,
                 hasControls: false,
                 selectable: false,
                 evented: false,
-                left: workspace.width / 2 - (image.width * 0.07) / 2,
-                top: workspace.height / 2 - (image.height * 0.07) / 2,
+                left: workspace.width / 2 - (image.width * 1) / 2,
+                top: workspace.height / 2 - (image.height * 1) / 2,
             })
             image.name = cutParts.value[index].Title
             image.cutPartsType = cutParts.value[index].Title
@@ -223,8 +221,8 @@ const loadCuts = debounce(() => {
             image.visible = cutParts.value[index].Title == cutPartsType.value
             if (cutParts.value[index].Title == cutPartsType.value) {
                 image.clone((cloned) => {
-                    // const path = new fabric.Rect({ width: workspace.width, height: image.height, top: image.top, left: image.left })
-                    canvasEditor.canvas.clipPath = cloned;
+                    const path = new fabric.Rect({ width: image.width, height: image.height, top: image.top, left: image.left })
+                    canvasEditor.canvas.clipPath = path;
                     canvasEditor.canvas.renderAll()
                     canvasEditor.canvas.requestRenderAll();
                 });
@@ -232,14 +230,11 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.add(image)
             canvasEditor.canvas.requestRenderAll();
             i++
-            console.log(i, cutParts.value.length)
 
             if (i == cutParts.value.length) {
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '裁片加载结束')
                 loadCanvasObject()
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '加载结束')
             }
-
-
         };
         const properties = {
             left: 100,
@@ -248,67 +243,11 @@ const loadCuts = debounce(() => {
         fabric.Image.fromURL(imageURL, callback, properties);
 
     }
-    // fn(0)
     cutParts.value.forEach((el, index) => {
         fn(index)
     })
 }, 1000)
-const loadCuts1 = debounce(() => {
-    console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
-    const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
-    if (objects.length == 0) store.commit('setPageLoading', false)
 
-    store.commit('setIsSetSteps', true)
-    objects.forEach(el => {
-        canvasEditor.canvas.remove(el)
-    })
-    canvasEditor.canvas.requestRenderAll();
-    const fn = (index) => {
-        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        var img = new Image();
-        const ImageUrl_Path = cutParts.value[index].ImageUrl_Path
-        img.src = baseUrl + ImageUrl_Path
-        img.onload = function () {
-            var pattern = new fabric.Pattern({ source: img, repeat: 'repeat' });
-            var maskRect = new fabric.Rect(
-                {
-                    scaleX: 0.07,
-                    scaleY: 0.07,
-                    width: img.width,
-                    height: img.height,
-                    fill: pattern,
-                    opacity: 0.3,
-                    hasControls: false,
-                    selectable: false,
-                    evented: false,
-                    left: workspace.width / 2 - (img.width * 0.07) / 2,
-                    top: workspace.height / 2 - (img.height * 0.07) / 2,
-                });
-            maskRect.name = cutParts.value[index].Title
-            maskRect.cutPartsType = cutParts.value[index].Title
-            maskRect.objectCaching = false
-            maskRect.isMask = cutParts.value[index].Title == cutPartsType.value
-            maskRect.visible = cutParts.value[index].Title == cutPartsType.value
-            if (cutParts.value[index].Title == cutPartsType.value) {
-                maskRect.clone((cloned) => {
-                    const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
-                    canvasEditor.canvas.clipPath = cloned;
-                    canvasEditor.canvas.renderAll()
-                    canvasEditor.canvas.requestRenderAll();
-                });
-            }
-            canvasEditor.canvas.add(maskRect);
-            canvasEditor.canvas.requestRenderAll();
-            if (cutParts.value[index + 1] == undefined) {
-                loadCanvasObject()
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '加载结束')
-            } else {
-                fn(index + 1)
-            }
-        };
-    }
-    fn(0)
-}, 1000)
 // 切换裁片
 const changeSelection = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
@@ -328,18 +267,14 @@ const changeSelection = () => {
                 el.visible = false
             }
             if (el.isMask !== undefined && el.cutPartsType == cutPartsType.value) {
-
-                console.log('isShowCuts.value', isShowCuts.value)
                 el.visible = true
                 el.isMask = true
                 maskRect = el
-                maskRect.clone((cloned) => {
-                    const path = new fabric.Rect({ width: workspace.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
-                    canvasEditor.canvas.clipPath = cloned;
-                    isShowCuts.value ? el.visible = true : el.visible = false
-                    canvasEditor.canvas.renderAll()
-                    canvasEditor.canvas.requestRenderAll();
-                });
+                const path = new fabric.Rect({ width: maskRect.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
+                canvasEditor.canvas.clipPath = path;
+                isShowCuts.value ? el.visible = true : el.visible = false
+                canvasEditor.canvas.renderAll()
+                canvasEditor.canvas.requestRenderAll();
 
             }
         }
@@ -350,13 +285,7 @@ const changeSelection = () => {
 const loadCanvasObject = () => {
     console.log('刷新加载对象', canvasObjects.value)
     store.commit('setIsSetSteps', true)
-    if (!canvasObjects.value[0]) {
-        store.commit('setPageLoading', false)
-        canvasEditor.setAllCuts(true)
-        watchCanvas()
-    }
     const fn = (obj, index) => {
-
         if (obj.type == 'image') {
             const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
             let callback = (image, isError) => {
@@ -376,23 +305,17 @@ const loadCanvasObject = () => {
                     try {
                         canvasEditor.canvas.add(image)
                     } catch (error) {
-                        console.log('canvasObjects.value', canvasObjects.value)
                         if (canvasObjects.value[index + 1]) {
                             fn(canvasObjects.value[index + 1], index + 1)
                         } else {
-                            console.log('刷新加载对象添加完毕')
-                            store.commit('setPageLoading', false)
-                            canvasEditor.setAllCuts(true, () => { watchCanvas() })
+                            fnEnd()
                         }
                     }
-
 
                     if (canvasObjects.value[index + 1]) {
                         fn(canvasObjects.value[index + 1], index + 1)
                     } else {
-                        console.log('刷新加载对象添加完毕')
-                        store.commit('setPageLoading', false)
-                        canvasEditor.setAllCuts(true, () => { watchCanvas() })
+                        fnEnd()
                     }
                 }
             };
@@ -406,14 +329,37 @@ const loadCanvasObject = () => {
             if (canvasObjects.value[index + 1]) {
                 fn(canvasObjects.value[index + 1], index + 1)
             } else {
-                store.commit('setPageLoading', false)
-                canvasEditor.setAllCuts(true, () => { watchCanvas() })
-
+                fnEnd()
             }
         }
     }
-    if (canvasObjects.value[0]) fn(canvasObjects.value[0], 0)
-    canvasEditor.canvas.requestRenderAll();
+    canvasObjects.value.length > 0 ? fn(canvasObjects.value[0], 0) : fnEnd()
+    const fnEnd = () => {
+        store.commit('setDisableClipping', false)
+        canvasEditor.setAllCuts(true, () => {
+            watchCanvas()
+            setTimeout(() => {
+                store.commit('setIsSetSteps', false)
+                store.commit('setPageLoading', false)
+            }, 1000)
+            console.log('刷新加载对象添加完毕')
+        })
+    }
+    // canvasEditor.setAllCuts(true, () => {
+    //     console.log('颜色加载完毕1', canvasObjects.value)
+    //     if (!canvasObjects.value[0]) {
+    //         console.log('颜色加载完毕2')
+    //         store.commit('setPageLoading', false)
+    //         store.commit('setDisableClipping', false)
+    //         watchCanvas()
+    //         store.commit('setIsSetSteps', false)
+    //     } else {
+
+    //     }
+
+    // })
+
+    // canvasEditor.canvas.requestRenderAll();
 
 }
 const addText = (option) => {
@@ -465,6 +411,9 @@ const addText = (option) => {
 
     .menu-list {
         width: 70px;
+        height: 526px;
+        overflow-x: hidden;
+        overflow-y: scroll;
         background: #FFFFFF;
         border-radius: 5px 5px 5px 5px;
         padding: 10px 5px;
@@ -504,9 +453,10 @@ const addText = (option) => {
 
         .thumbnail {
             height: 37px;
-            width: 30px;
+            width: 55px;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
         .text-1 {

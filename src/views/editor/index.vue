@@ -13,7 +13,7 @@
       <div class="header-left">
         <div class="logo">
           <img src="http://8.140.206.30:8089/ImageSource/Other/Logo.png" style="height: 54px; width: 180px;" />
-         <span style="color: rgb(180, 178, 178);"> 更新时间:11.28</span>
+          <span style="color: rgb(180, 178, 178);"> 更新时间:11.28</span>
         </div>
         <history></history>
       </div>
@@ -301,8 +301,8 @@ const state = reactive({
 const saveData = computed(() => {
   return store.state.saveData
 })
-const goodsGUID = computed(() => {
-  return store.state.saveData.commodityInfo.GUID
+const goodsId = computed(() => {
+  return store.state.goodsId
 })
 const pageLoading = computed(() => {
   return store.state.pageLoading
@@ -374,7 +374,8 @@ const init = () => {
   event.init(canvas);
   state.show = true;
   state.isShowHeader = true;
-  getSaveData()
+  store.commit('setPageLoading', false)
+  // getSaveData()
 }
 
 // 获取字体数据 新增字体样式使用
@@ -391,33 +392,7 @@ const init = () => {
 //     downFile(dataUrl, 'font.png');
 //   }
 // },
-const getSaveData = () => {
-  store.commit('setIsSetSteps', true)
-  const p = {
-    ID: '',
-    userID: userID.value
-  }
 
-  historyAip.getHistory(p).then(res => {
-    if (res.Tag.length > 0) {
-      const data = res.Tag[0].Table[0].JsonValue
-      const dataJson = JSON.parse(data)
-      if (dataJson.commodityInfo.GUID) {
-        sendGoodsId(dataJson.commodityInfo)
-      }
-      store.commit('setSaveData', dataJson)
-      dataJson.commodityInfo.sizeGUID ? store.commit('setGoodsSizeGUID', dataJson.commodityInfo.sizeGUID) : store.commit('setPageLoading', false)
-      dataJson.commodityInfo.cutParts ? store.commit('setCutParts', dataJson.commodityInfo.cutParts) : store.commit('setPageLoading', false)
-      dataJson.commodityInfo.cutParts[0]?.Title ? store.commit('setCutPartsType', dataJson.commodityInfo.cutParts[0].Title) : store.commit('setPageLoading', false)
-      dataJson.commodityInfo.colorList ? store.commit('setBgColorList', dataJson.commodityInfo.colorList) : store.commit('setPageLoading', false)
-      dataJson.commodityInfo.bgColor ? store.commit('setBgColor', dataJson.commodityInfo.bgColor) : store.commit('setPageLoading', false)
-      console.log('更新裁片2')
-    } else {
-      store.commit('setPageLoading', false)
-    }
-
-  })
-}
 
 const mapTileClick = (val) => {
   switch (val) {
@@ -509,6 +484,14 @@ const openDailog = (val) => {
 }
 
 const changeMode = (val) => {
+  if (val && !goodsId.value) {
+    ElMessage({
+      showClose: true,
+      message: '请先选择版型',
+      type: 'error',
+    })
+    return
+  }
   state.isDesign = val;
   if (state.isDesignn) {
     state.menuActive = 1

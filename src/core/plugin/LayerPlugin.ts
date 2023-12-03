@@ -20,7 +20,6 @@ class LayerPlugin {
     this.editor = editor;
   }
   fixedLayer() {
-    console.log('1this.canvas.getObjects()', this.canvas.getObjects())
     const mask = this.canvas.getObjects().find((item) => item.isMask)
     // const backgroundImage = this.canvas.getObjects().find((item) => item.isBackground)
     const backgroundImages = this.canvas.getObjects().filter(item => item.isBackground)
@@ -37,25 +36,44 @@ class LayerPlugin {
       this.canvas.sendToBack(item)
     })
     workspace ? this.canvas.sendToBack(workspace) : ''
-    console.log('2this.canvas.getObjects()', this.canvas.getObjects())
+    // console.log('2this.canvas.getObjects()', this.canvas.getObjects())
   }
   up() {
+    // console.log('1this.canvas.getObjects()', this.canvas.getObjects())
+    let indexD
+    const objects = this.canvas.getObjects()
     const actives = this.canvas.getActiveObjects();
-    if (actives && actives.length === 1) {
-      const activeObject = this.canvas.getActiveObjects()[0];
-      if (activeObject) {
-        console.log('上移', activeObject)
-        activeObject.bringForward();
-        if (activeObject.repeatType) {
-          this.canvas.getObjects().forEach(element => {
-            if (element.tileParentId == activeObject.id)
-              element.bringForward()
-          });
-        }
-
+    this.canvas.getObjects().forEach((element, index) => {
+      if (element.id == actives.id) indexD = index
+    })
+    console.log('indexD', indexD)
+    let z
+    const fn = (index) => {
+      if (!objects[index]) return
+      if ( objects[index].cutPartsType == actives.cutPartsType && objects[index].isMask == undefined) {
+        z = index
+        console.log(objects[index])
+        console.log('z',z)
+      } else {
+        fn(index + 1)
       }
-      this.fixedLayer()
     }
+    fn(indexD)
+    // if (actives && actives.length === 1) {
+    //   const activeObject = this.canvas.getActiveObjects()[0];
+    //   if (activeObject) {
+    //     console.log('上移', activeObject)
+    //     activeObject.bringForward();
+    //     if (activeObject.repeatType) {
+    //       this.canvas.getObjects().forEach(element => {
+    //         if (element.tileParentId == activeObject.id)
+    //           element.bringForward()
+    //       });
+    //     }
+
+    //   }
+    //   this.fixedLayer()
+    // }
   }
 
   upTop() {

@@ -19,7 +19,8 @@ class LoadScene {
     is3dPreview = computed(() => {
         return this.store.state.is3dPreview
     })
-    static loadModel(url: string, name: string, modelColor: any = null) {
+    static loadModel(url: string, name: string, callBack = null) {
+        console.log('url', url)
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
                 if (c.isGroup) {
@@ -27,11 +28,20 @@ class LoadScene {
                 }
             })
         }
+        if (!url) {
+            ElMessage({
+                showClose: true,
+                message: '该尺码暂无3D模型',
+                type: 'error',
+            })
+            return
+        }
         const loader = new GLTFLoader();
         const timestamp = Date.parse(new Date());
         const path = url.slice(25)
         console.log('path', path)
-        loader.load(baseUrl + path + '?t=' + timestamp, object => {
+        loader.load(baseUrl + path + '?time=' + timestamp, object => {
+            // console.log('loader object', object)
             const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
             normalMap.wrapT = 100
             normalMap.wrapS = 100
@@ -39,15 +49,15 @@ class LoadScene {
             object.name = name
             let group = new THREE.Group()
             object.scene.traverse(v => {
-                if (v.type == 'Mesh' && modelColor) {
-                    const color = new THREE.Color(modelColor)
+                if (v.type == 'Mesh') {
+                    // const color = new THREE.Color(modelColor)
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
                     normalMap.wrapT = 100
                     normalMap.wrapS = 100
                     normalMap.repeat.set(700, 700)
                     const frontMaterial = new THREE.MeshLambertMaterial({
                         map: v.material.map,
-                        color: color,
+                        // color: color,
                         side: THREE.DoubleSide,
                         transparent: false,
                         displacementScale: 0.05,
@@ -69,9 +79,23 @@ class LoadScene {
                     cube.name = v.name ? v.name : ''
                     group.add(cube)
                 }
+                if (v.name == 'cothingCamera' || v.type == 'PerspectiveCamera') {
+                    v.name = 'clothingCamera'
+                    this.camera.position.x = v.position.x
+                    this.camera.position.z = v.position.z
+                    this.camera.position.y = v.position.y
+                    this.camera.rotation.x = v.rotation.x
+                    this.camera.rotation.z = v.rotation.z
+                    this.camera.rotation.y = v.rotation.y
+                    LoadScene.control.saveState()
+                    // console.log('相机', v)
+                    // LoadScene.scene.add(v);
+                }
             })
             group.name = name
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '模型加载完毕')
             LoadScene.scene.add(group);
+            callBack ? callBack() : ''
         });
         // const dracoLoader = new DRACOLoader();
         // //解压模型的位置信息
@@ -87,6 +111,7 @@ class LoadScene {
 
     setTexture = (name, url, callback) => {
         if (url) {
+            console.log('贴图')
             LoadScene.scene.traverse((child: any) => {
                 if (child.name == name) {
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
@@ -166,7 +191,7 @@ class LoadScene {
             -0.13816378273860236, 0.01996416024727918);
 
         LoadScene.control.enablePan = false
-        LoadScene.control.saveState()
+        // LoadScene.control.saveState()
         const render = () => {
             LoadScene.control.update();
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
@@ -200,7 +225,7 @@ class LoadScene {
         }
         this.is3dPreview.value ? '' : LoadScene.control.reset()
         LoadScene.scene.traverse((c: any) => {
-            if (c.name == 'duanxiu') {
+            if (c.name == 'clothingModel') {
                 c.position.set(0, 0, 0)
                 c.rotation.set(0, 0, 0)
                 c.rotation.y = 0
@@ -248,7 +273,7 @@ class LoadScene {
                     testTween.easing(TWEEN.Easing.Quadratic.Out);
                     testTween.start(); //开始
                 }
-                if (c.name == 'duanxiu') {
+                if (c.name == 'clothingModel') {
                     if (direction.includes('左')) {
                         setModelRotation({ x: 2.7697086512561713, y: -0.7981105367000209, z: 0.8317052112167073 })
                     } else if (direction.includes('右')) {

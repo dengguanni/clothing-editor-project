@@ -21,7 +21,7 @@ const setSaveProject = function (params: any = {}) {
     return http.post(`Plugin_Text?ClassName=Plug_in_ofs.DrawTools.Export&time=` + time, params)
 }
 const setTest = function (params: any = {}) {
-    console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '调用接口')
+    //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '调用接口')
     const time = new Date().getTime()
     return http.get(`Plugin_Text?ClassName=Plug_in_ofs.DrawTools.Test&time=` + time, params)
 }

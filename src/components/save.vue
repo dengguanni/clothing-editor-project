@@ -92,7 +92,7 @@ const repeatList = {
 }
 
 const test = () => {
-  console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击')
+  //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击')
   const p = {
     ID: ''
   }
@@ -163,12 +163,12 @@ const savaProject = debounce(function () {
           const oldHeight = objects[index].height * objects[index].scaleY
           const obj = {
             Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
-            Image_width: (oldWidth / 0.07).toFixed(5) + '',
-            Image_height: (oldHeight / 0.07).toFixed(5) + '',
-            Image_left: (oldLeft / 0.07).toFixed(5) + '',
-            Image_top: (oldTop / 0.07).toFixed(5) + '',
-            // Image_left: (oldLeft - (oldWidth / 0.07).toFixed(5) + oldWidth).toFixed(5) + '',
-            // Image_top: (oldTop - (oldHeight / 0.07).toFixed(5) + oldHeight).toFixed(5) + '',
+            Image_width: (oldWidth / 1).toFixed(5) + '',
+            Image_height: (oldHeight / 1).toFixed(5) + '',
+            Image_left: (oldLeft / 1).toFixed(5) + '',
+            Image_top: (oldTop / 1).toFixed(5) + '',
+            // Image_left: (oldLeft - (oldWidth / 1).toFixed(5) + oldWidth).toFixed(5) + '',
+            // Image_top: (oldTop - (oldHeight / 1).toFixed(5) + oldHeight).toFixed(5) + '',
             Image_angle: objects[index].angle.toFixed(5) + '',
             Image_flipX: objects[index].flipX,
             Image_flipY: objects[index].flipY,

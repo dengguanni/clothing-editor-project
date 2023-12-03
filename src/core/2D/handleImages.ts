@@ -25,7 +25,7 @@ export const setAllCuts = (SizeGUID) => {
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     let p = {
         SizeGUID: SizeGUID,
-        Canvas_zoom: '0.07',
+        Canvas_zoom: '1',
         Part_name: maskRect.cutPartsType,
         Images: []
     }

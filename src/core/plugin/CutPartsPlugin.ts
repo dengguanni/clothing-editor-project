@@ -57,13 +57,17 @@ class CutPartsPlugin {
     })
 
     setAllCuts(isColorChange: Boolean, callback = null) {
-
         CutPartsPlugin.num = 1
-        if (this.disableClipping.value) return
-        console.log('isColorChange', isColorChange, 'disableClipping', this.disableClipping.value)
+        console.log('  剪裁通道this.disableClipping.value ', this.disableClipping.value, ' this.bgColor.value', this.bgColor.value, 'this.sizeGUID.value', this.sizeGUID.value)
+        if (this.disableClipping.value || !this.bgColor.value || !this.sizeGUID.value || this.cutParts.value.length == 0) {
+            // this.store.commit('setPageLoading', false)
+            return
+        }
+        console.log('过来了isColorChange', isColorChange, 'this.cutParts.valu', this.cutParts.value)
         this.editor.fixedLayer()
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
         const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId)
+        console.log('剪裁objects', objects)
         if (this.cutPartsType.value) {
             let ImagesList: any = {}
             this.cutParts.value.forEach(el => {
@@ -72,7 +76,6 @@ class CutPartsPlugin {
             })
             objects.forEach(el => {
                 if (el.type == 'text' && el.cutPartsType == this.cutPartsType.value) {
-                    console.log('el运行',el.FileName)
                     const FileName = guid() + '.png'
                     el.clone(clone => {
                         clone.rotate(0);
@@ -97,7 +100,6 @@ class CutPartsPlugin {
 
             const fn = (objects, index, p, maskRect, indexP = null) => {
                 if (objects.length > 0) {
-
                     objects[index].clone(cloned => {
                         cloned.rotate(0)
                         const top = objects[index].angle == 0 ? objects[index].top - maskRect.top : cloned.top - maskRect.top
@@ -127,7 +129,7 @@ class CutPartsPlugin {
 
                 } else {
                     p.Images = []
-                    this.setCutAllParts(p, p.Part_name.Title, indexP)
+                    this.setCutAllParts(p, p.Part_name.Title, indexP, callback)
                 }
             }
             if (!isColorChange) {
@@ -145,6 +147,7 @@ class CutPartsPlugin {
             } else {
                 this.store.commit('setsLoad3d', true)
                 this.isLoadAll = true
+                console.log('加载全部', this.cutParts.value)
                 this.cutParts.value.forEach((element, indexP) => {
                     const maskRect = this.canvas.getObjects().find((item) => item.name == element.Title);
                     let p = {
@@ -164,30 +167,30 @@ class CutPartsPlugin {
 
     setCutAllParts(p, Title, indexP = null, callback = null) {
         this.editor.fixedLayer()
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
-            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
-            console.log('总的剪裁参数', p, res)
+            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
+            console.log('总的剪裁参数', p.Part_name, p, res)
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
+            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
             this.load3DScene.setTexture(p.Part_name, url, () => {
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '贴模型完毕')
+                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '贴模型完毕')
                 if (indexP !== null) {
                     if (this.cutParts.value.length == CutPartsPlugin.num) {
-                        console.log('保存', !this.isSetSteps.value)
+                        console.log('总的  保存', !this.isSetSteps.value)
                         this.store.commit('setsLoad3d', false)
                         this.isSetSteps.value ? '' : this.store.commit('setSave')
-                        this.store.commit('setIsSetSteps', false)
-                        callback && callback()
+                        // this.store.commit('setIsSetSteps', false)
+                        // console.log('p', p)
+                        callback ? callback() : ''
                     }
                     CutPartsPlugin.num++
                 } else {
                     console.log('保存', !this.isSetSteps.value)
                     this.isSetSteps.value ? '' : this.store.commit('setSave')
                     this.store.commit('setsLoad3d', false)
-                    this.store.commit('setIsSetSteps', false)
-                    // callback && callback()
-
+                    // this.store.commit('setIsSetSteps', false)
+                    // console.log('setIsSetSteps', false)
                 }
             })
         })

@@ -366,7 +366,7 @@ const menuList1Click = (type) => {
 
 const del = debounce(function () {
     canvasEditor.del();
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
 }, 300);
 const btnClick = (item) => {
     const activeObject = canvasEditor.canvas.getActiveObject()
@@ -426,7 +426,7 @@ const scaleSmall = debounce((obj) => {
     activeObject.top = activeObject.top + top
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
 
 }, 300);
 
@@ -445,7 +445,7 @@ const scaleBig = debounce((obj) => {
     activeObject.top = activeObject.top - top
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
 }, 300);
 const lock = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
@@ -498,19 +498,19 @@ const menu3Click = (type) => {
             break
         case 'layer-up':
             canvasEditor.up();
-            store.commit('setAllCuts')
+           canvasEditor.setAllCuts(false)
             break
         case 'layer-down':
             canvasEditor.down();
-            store.commit('setAllCuts')
+           canvasEditor.setAllCuts(false)
             break
         case 'layer-top':
             canvasEditor.upTop();
-            store.commit('setAllCuts')
+           canvasEditor.setAllCuts(false)
             break
         case 'layer-bottom':
             canvasEditor.downTop();
-            store.commit('setAllCuts')
+           canvasEditor.setAllCuts(false)
             break
         case 'createCopy':
             clone();

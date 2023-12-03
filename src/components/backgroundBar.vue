@@ -51,6 +51,16 @@ const store = useStore()
 const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
+
+const sizeGUID = computed(() => {
+    return store.state.saveData.commodityInfo.sizeGUID
+})
+const goodsId = computed(() => {
+    return store.state.goodsId
+})
+const bgColor = computed(() => {
+    return store.state.bgColor
+})
 onMounted(() => {
     init()
 })
@@ -88,65 +98,80 @@ const getImagesLibrary = (QueryKeyWord) => {
     })
 
 }
+const setTips = () => {
+    let message = null
+    if (!goodsId.value) {
+        message = '请先选择版型'
+    } else if (!sizeGUID.value) {
+        message = '请先选择尺码'
+    } else if (!bgColor.value) {
+        message = '请先选择底板颜色'
+    }
 
-// 点击添加
-const addItem = (item) => {
-    if (!cutPartsType.value) {
+    if (message) {
         ElMessage({
             showClose: true,
-            message: '请先选择版型',
+            message: message,
             type: 'error',
         })
-    } else {
-        const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
-        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        const currentBackground = canvasEditor.canvas.getObjects().find((item) => item.isBackground && item.cutPartsType == cutPartsType.value)
-        const imageURL = baseUrl + item.ImageUrl_Path;
-        let callback = (image, isError) => {
-            if (!isError) {
-                for (let key in initializationAttribute) {
-                    image[key] = initializationAttribute[key]
-                }
-                image.name = item.Title
-                image.cutPartsType = cutPartsType.value
-                image.id = uuid()
-                image.ImageUrl = item.ImageUrl
-                image.FileName = item.FileName
-                image.FilePath = item.FilePath
-                const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-                canvasEditor.canvas.setActiveObject(image);
-                if (props.isBg) {
-                    store.commit('setDisableClipping', true)
-                    if (currentBackground) canvasEditor.canvas.remove(currentBackground)
-                    image.isBackground = true
-                    // canvasEditor.canvas.sendToBack(info)
-                    // canvasEditor.canvas.sendToBack(image)
-                    // canvasEditor.canvas.sendToBack(workspace)
-                    MaximizePlugin.setMax('width')
-                    MaximizePlugin.setMax('height')
-                    store.commit('setDisableClipping', false)
-
-                }
-                image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX) / 2
-                image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY) / 2
-                canvasEditor.canvas.add(image);
-
-                // console.log('添加后image', image)
-                // canvasEditor.canvas.bringToFront(maskRect)
-                store.commit('setSelected', image)
-                canvasEditor.canvas.requestRenderAll();
-            }
-        };
-
-        const properties = {
-            left: 100,
-            top: 100
-        };
-        fabric.Image.fromURL(imageURL, callback, properties);
+        store.commit('setPageLoading', false)
     }
+    return message
+}
+// 点击添加
+const addItem = (item) => {
+    if (setTips()) return
+    console.log('点击添加')
+    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    const currentBackground = canvasEditor.canvas.getObjects().find((item) => item.isBackground && item.cutPartsType == cutPartsType.value)
+    const imageURL = baseUrl + item.ImageUrl_Path;
+    let callback = (image, isError) => {
+        if (!isError) {
+            for (let key in initializationAttribute) {
+                image[key] = initializationAttribute[key]
+            }
+            image.name = item.Title
+            image.cutPartsType = cutPartsType.value
+            image.id = uuid()
+            image.ImageUrl = item.ImageUrl
+            image.FileName = item.FileName
+            image.FilePath = item.FilePath
+            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+            canvasEditor.canvas.setActiveObject(image);
+            if (props.isBg) {
+                store.commit('setDisableClipping', true)
+                if (currentBackground) canvasEditor.canvas.remove(currentBackground)
+                image.isBackground = true
+                // canvasEditor.canvas.sendToBack(info)
+                // canvasEditor.canvas.sendToBack(image)
+                // canvasEditor.canvas.sendToBack(workspace)
+                MaximizePlugin.setMax('width')
+                MaximizePlugin.setMax('height')
+                store.commit('setDisableClipping', false)
+
+            }
+            image.left = maskRect.left + (maskRect.width * maskRect.scaleX) / 2 - (image.width * image.scaleX) / 2
+            image.top = maskRect.top + (maskRect.height * maskRect.scaleY) / 2 - (image.height * image.scaleY) / 2
+            canvasEditor.canvas.add(image);
+
+            // console.log('添加后image', image)
+            // canvasEditor.canvas.bringToFront(maskRect)
+            store.commit('setSelected', image)
+            canvasEditor.canvas.requestRenderAll();
+        }
+    };
+
+    const properties = {
+        left: 100,
+        top: 100
+    };
+    fabric.Image.fromURL(imageURL, callback, properties);
+
 }
 // 拖拽添加
 const dragItem = (event) => {
+    if (setTips()) return
     if (!props.isBg) {
         const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
         const URL = event.toElement.currentSrc;
@@ -187,15 +212,8 @@ const dragItem = (event) => {
             left: 0,
             top: 0
         };
-        if (!cutPartsType.value) {
-            ElMessage({
-                showClose: true,
-                message: '请先选择版型',
-                type: 'error',
-            })
-        } else {
-            fabric.Image.fromURL(imageURL, callback, properties);
-        }
+        fabric.Image.fromURL(imageURL, callback, properties);
+
     }
 }
 

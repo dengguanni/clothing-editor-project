@@ -119,7 +119,7 @@ class ControlsRepeat {
             this.editor.setAllCuts()
             this.store.commit('setDisableClipping', true)
         }
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
+        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
         const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
         const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
         console.log('activeObject', activeObject.left - Mask.left)
@@ -139,10 +139,10 @@ class ControlsRepeat {
                 Image_angle: activeObject.angle
             }
             // console.log('平铺参数', p)
-            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
+            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
 
             picture.setBasicRepeat(p).then(res => {
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
+                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
                 res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject, isLoadAll) : ''
 
             })
@@ -150,7 +150,7 @@ class ControlsRepeat {
     }
     // 更新图片
     replaceImage = (url, obj = null, isLoadAll) => {
-        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
+        ////console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
         let callback1 = () => {
@@ -187,7 +187,7 @@ class ControlsRepeat {
                     image.rotate(0)
                     // image.isLock = true
                     image.hasControls = false
-                    //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
+                    ////console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片结束并添加图片')
                     const objects = this.canvas.getObjects()
                     objects.forEach((element, index) => {
                         if (element.id == activeObject.id) z = index

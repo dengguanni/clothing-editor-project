@@ -35,6 +35,8 @@ import { reactive, ref, onUnmounted, onMounted } from 'vue'
 import LoadScene from '@/core/3D/loadScene.ts'
 import mitts from '@/utils/mitts'
 import GoodsInfo from '@/core/objects/goods/goodsInfo'
+import useSelect from '@/hooks/select';
+const { canvasEditor } = useSelect();
 import { useStore } from 'vuex'
 const store = useStore()
 const bgColor = computed(() => {
@@ -119,6 +121,7 @@ const changeImage = (val) => {
 const changeColor = (item) => {
     colorSelection.value = item.GUID
     store.commit('setBgColor', item)
+    canvasEditor.setAllCuts(true)
 }
 const changeMode = (val) => {
     is3D.value = val

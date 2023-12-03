@@ -39,6 +39,7 @@ const delImagesCustom = function (params: any = {}) {
 const getCutParts = function (params: any = {}) {
     return http.get(`/Plugin_Text?ClassName=Plug_in_ofs.ProjectTemplate.GetPartList`, params)
 }
+
 // web-画布-剪裁元素
 // 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=b41451ac-4512-483b-bfd8-eaf44ec96927
 const setCutParts = function (params: any = {}) {

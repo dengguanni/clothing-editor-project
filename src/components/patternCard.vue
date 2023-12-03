@@ -7,8 +7,8 @@
       </div>
       <div class="tree">
         <div class="all-btn">全部分类</div>
-        <el-tree-v2 :data="treeData" :props="treeProps" :height="499" @nodeExpand="getNode" @currentChange="selectNOde"
-        ></el-tree-v2>
+        <el-tree-v2 :data="treeData" :props="treeProps" :height="499" @nodeExpand="getNode"
+          @currentChange="selectNOde"></el-tree-v2>
       </div>
     </div>
     <div class="right">
@@ -39,6 +39,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElTreeV2 } from 'element-plus'
 import commodityApi from '@/api/commodity'
 import { useStore } from 'vuex'
+import useSelect from '@/hooks/select';
+const { canvasEditor } = useSelect();
 const store = useStore()
 const emit = defineEmits()
 let searchKey = ref('')
@@ -59,10 +61,18 @@ onMounted(() => {
 const init = () => {
   getTreeInfo()
 }
+// 切换商品
 const getGoodsId = (item) => {
-  console.log('56789',item)
+  store.commit('setBgColor', '')
   store.commit('setCommodityInfo', item)
+  store.commit('setGoodsSizeGUID', '')
   store.commit('setGoodsId', item.GUID)
+  store.commit('setCutPartsType', '')
+  store.commit('setCutParts', '')
+  const path = new fabric.Rect({ width: 703, height: 703 })
+  const objects = canvasEditor.canvas.getObjects().filter((item) => item.id !== 'workspace')
+  objects.forEach(el => canvasEditor.canvas.remove(el))
+  canvasEditor.canvas.clipPath = path;
   emit('sendGoodsId', item)
 }
 const searchGoods = (val) => {
@@ -120,7 +130,7 @@ const getNode = (val) => {
 }
 // 获取商品列表
 const selectNOde = (val) => {
-  if (val.HasChilds == 0 ) {
+  if (val.HasChilds == 0) {
     const p = {
       TreeNodeGUID: val.id,
       Page_Index: 0,

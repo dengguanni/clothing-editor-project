@@ -190,17 +190,36 @@ const state = reactive({
 const cutPartsType = computed(() => {
   return store.state.cutPartsType
 })
-onMounted(() => {
+const goodsId = computed(() => {
+  return store.state.goodsId
 })
-const addText = (option) => {
-  if (!cutPartsType.value) {
+const sizeGUID = computed(() => {
+  return store.state.sizeGUID
+})
+const bgColor = computed(() => {
+  return store.state.bgColor
+})
+
+const setTips = () => {
+  let message = null
+  if (!goodsId.value) {
+    message = '请先选择版型'
+  } else if (!sizeGUID.value) {
+    message = '请先选择尺码'
+  } else if (!bgColor.value) {
+    message = '请先选择底板颜色'
+  }
+  if (message) {
     ElMessage({
       showClose: true,
-      message: '请先选择版型',
+      message: message,
       type: 'error',
     })
-    return
   }
+  return message
+}
+const addText = (option) => {
+  if (setTips()) return
   const active = canvasEditor.canvas.getActiveObjects()[0]
   const mask = canvasEditor.canvas.getObjects().find(el => el.isMask)
   const FileName = guid() + '.png'
@@ -215,8 +234,8 @@ const addText = (option) => {
     FilePath: 'images_temp/' + FileName.substring(0, 1),
     // fontFamily: 'Microsoft YaHei'
   });
-  const top = mask.top + (mask.height * mask.scaleY)/2 - (text.height / 2)
-  const left = mask.left + (mask.width * mask.scaleX)/2 - (text.width / 2)
+  const top = mask.top + (mask.height * mask.scaleY) / 2 - (text.height / 2)
+  const left = mask.left + (mask.width * mask.scaleX) / 2 - (text.width / 2)
   text.top = top
   text.fontFamily = '华康金刚黑'
   text.left = left

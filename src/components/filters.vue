@@ -221,7 +221,7 @@ const replaceImage = (url, type) => {
       activeObject.applyFilters()
       console.log('activeObject,',activeObject)
       canvasEditor.setRepeat(activeObject.repeatType, true)
-      store.commit('setAllCuts')
+     canvasEditor.setAllCuts(false)
       setCheckBoxList(state.noParamsFilters, type)
       canvasEditor.canvas.renderAll();
     });
@@ -249,7 +249,7 @@ const restoreImage = (callback = null) => {
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll();
     setCheckBoxList(state.noParamsFilters, null)
-    store.commit('setAllCuts')
+   canvasEditor.setAllCuts(false)
     callback ? callback() : ''
   });
 }

@@ -29,6 +29,7 @@ const store = createStore({
       cutParts: [],
       cutPartsType: '',
       colorList: [],
+      goodsId: '',
       // 撤回-回退
       saveSteps: {
         ID: '',
@@ -36,7 +37,6 @@ const store = createStore({
         ID_Previous: 0
       },
       handelSave: 0,
-      handelAllCuts: 0,
       handleLock: 0,
       pageLoading: false,
       isSetSteps: false,
@@ -65,9 +65,7 @@ const store = createStore({
     setIsShowCuts(state) {
       state.isShowCuts = state.isShowCuts = !state.isShowCuts
     },
-    setAllCuts(state) {
-      state.handelAllCuts = state.handelAllCuts + 1
-    },
+
     setDisableClipping(state, val) {
       state.disableClipping = val
     },
@@ -112,10 +110,13 @@ const store = createStore({
       state.pageLoading = val
     },
     setGoodsId(state, GUID) {
+      console.log('切换 id',GUID)
       state.saveData.commodityInfo.GUID = GUID
+      state.goodsId = GUID
     },
     setBgColorList(state, val) {
       state.saveData.commodityInfo.colorList = val
+      state.colorList = val
     },
     setSizeList(state, val) {
       state.saveData.commodityInfo.sizeList = val
@@ -132,7 +133,6 @@ const store = createStore({
       state.saveData.modelInfo = obj
     },
     setCutPartsType(state, val) {
-
       state.cutPartsType = val
     },
     setCanvasObjects(state, val) {
