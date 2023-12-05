@@ -20,7 +20,6 @@ import FlipPlugin from './plugin/FlipPlugin';
 import RulerPlugin from './plugin/RulerPlugin';
 import FiltersPlugin from './plugin/FiltersPlugin';
 // import MaterialPlugin from './plugin/MaterialPlugin';
-import ControlsTile from './plugin/ControlsTile'
 import CutPartsPlugin from './plugin/CutPartsPlugin'
 import ControlsRepeat from './plugin/ControlsRepeat'
 
@@ -47,7 +46,6 @@ export {
   FlipPlugin,
   RulerPlugin,
   // MaterialPlugin,
-  ControlsTile,
   TestPlugin,
   FiltersPlugin,
   CutPartsPlugin,

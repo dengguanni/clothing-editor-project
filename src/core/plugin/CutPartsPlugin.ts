@@ -58,16 +58,16 @@ class CutPartsPlugin {
 
     setAllCuts(isColorChange: Boolean, callback = null) {
         CutPartsPlugin.num = 1
-        console.log('  剪裁通道this.disableClipping.value ', this.disableClipping.value, ' this.bgColor.value', this.bgColor.value, 'this.sizeGUID.value', this.sizeGUID.value)
+        // console.log('  剪裁通道this.disableClipping.value ', this.disableClipping.value, ' this.bgColor.value', this.bgColor.value, 'this.sizeGUID.value', this.sizeGUID.value)
         if (this.disableClipping.value || !this.bgColor.value || !this.sizeGUID.value || this.cutParts.value.length == 0) {
             // this.store.commit('setPageLoading', false)
             return
         }
-        console.log('过来了isColorChange', isColorChange, 'this.cutParts.valu', this.cutParts.value)
+        console.log('过来了isColorChange', isColorChange, 'this.cutParts.valu', this.cutParts.value,'this.bgColor.value', this.bgColor.value)
         this.editor.fixedLayer()
-        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
         const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId)
-        console.log('剪裁objects', objects)
+        // console.log('剪裁objects', objects)
         if (this.cutPartsType.value) {
             let ImagesList: any = {}
             this.cutParts.value.forEach(el => {
@@ -167,21 +167,19 @@ class CutPartsPlugin {
 
     setCutAllParts(p, Title, indexP = null, callback = null) {
         this.editor.fixedLayer()
-        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
-            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
             console.log('总的剪裁参数', p.Part_name, p, res)
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
             this.load3DScene.setTexture(p.Part_name, url, () => {
-                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '贴模型完毕')
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '贴模型完毕')
                 if (indexP !== null) {
                     if (this.cutParts.value.length == CutPartsPlugin.num) {
                         console.log('总的  保存', !this.isSetSteps.value)
                         this.store.commit('setsLoad3d', false)
                         this.isSetSteps.value ? '' : this.store.commit('setSave')
-                        // this.store.commit('setIsSetSteps', false)
-                        // console.log('p', p)
                         callback ? callback() : ''
                     }
                     CutPartsPlugin.num++
@@ -189,8 +187,8 @@ class CutPartsPlugin {
                     console.log('保存', !this.isSetSteps.value)
                     this.isSetSteps.value ? '' : this.store.commit('setSave')
                     this.store.commit('setsLoad3d', false)
-                    // this.store.commit('setIsSetSteps', false)
-                    // console.log('setIsSetSteps', false)
+                    this.store.commit('setSaveBtnDisabled', false)
+  
                 }
             })
         })

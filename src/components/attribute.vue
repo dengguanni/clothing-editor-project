@@ -251,7 +251,6 @@ import { Spin } from 'view-ui-plus';
 import { ElColorPicker, ElSelect } from 'element-plus'
 import { useStore } from 'vuex'
 import { debounce } from 'lodash-es';
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 const store = useStore()
 const event = inject('event');
 const update = getCurrentInstance();

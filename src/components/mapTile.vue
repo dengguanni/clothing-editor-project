@@ -55,7 +55,6 @@ import { Message } from 'view-ui-plus';
 import Lock from '@/components/lock.vue'
 import { v4 as uuid } from 'uuid';
 import MouseEventEventListener from '@/utils/event/mouse.ts'
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import { useStore } from 'vuex'
 import greyButton from '@/components/common/greyButton.vue'
 import buttonLimitions from '@/core/limitations/buttonLimitions'
@@ -224,8 +223,6 @@ onMounted(() => {
     MouseEventEventListener.setMouseup()
     event.on('selectOne', init);
     MouseEventEventListener.setMouseupFn = () => { }
-    ControlsTile.canvas = canvasEditor.canvas
-    // ControlsTile.setCanvasObserve(canvasEditor.canvas)
     canvasEditor.setCanvasObserve(canvasEditor.canvas)
     MouseEventEventListener.rmMouseup()
     event.off('selectOne', init);

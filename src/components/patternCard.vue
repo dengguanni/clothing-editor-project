@@ -69,6 +69,9 @@ const getGoodsId = (item) => {
   store.commit('setGoodsId', item.GUID)
   store.commit('setCutPartsType', '')
   store.commit('setCutParts', '')
+  store.commit('setBgColorList', '')
+  store.commit('setSaveBtnDisabled', true)
+  
   const path = new fabric.Rect({ width: 703, height: 703 })
   const objects = canvasEditor.canvas.getObjects().filter((item) => item.id !== 'workspace')
   objects.forEach(el => canvasEditor.canvas.remove(el))

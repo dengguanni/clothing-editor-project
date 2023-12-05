@@ -88,6 +88,8 @@ class ControlsRepeat {
 
         if (activeObject.isRepeat && activeObject.repeatType) {
             if (activeObject.parentCroppingFileName) {
+                activeObject.repeatType = null
+                activeObject.isRepeat = false
                 Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
                 return
             }
@@ -109,7 +111,6 @@ class ControlsRepeat {
                     this.canvas.remove(el)
                 }
             })
-            console.log('平铺setAllCuts')
             // this.editor.setAllCuts()
         }
     }

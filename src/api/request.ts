@@ -12,7 +12,7 @@ const USER_INFO = crypto.decrypt(userinfo.replace('#', ''))
 const config = {
     baseURL: baseURL,
     // 因为跨域了，所以这里如果写的话会自动拼接，会有两份，所以隐藏了
-    timeout:  5*60*1000, // 设置最大请求时间
+    timeout: 60 * 1000, // 设置最大请求时间 5 * 60 * 1000,
     retry: 0, //设置全局重试请求次数（最多重试几次请求）
     retryDelay: 1000, //设置全局请求间隔
 
@@ -42,6 +42,7 @@ _axios.interceptors.response.use((res) => {
     //   console.log('无权限操作')
     // }
     if (res.data.OK == 'False') {
+        console.log('res.data', res.data)
         ElMessage({
             showClose: true,
             message: res.data.Message,
@@ -53,12 +54,19 @@ _axios.interceptors.response.use((res) => {
 },
     err => {
         if (err) {
+            console.log('err', err)
             // 在这里关闭请求时的loading动画效果
-            ElMessage({
-                showClose: true,
-                message: err,
-                type: 'error',
-            })
+            if (err.config.url.includes('Plugin_Text?ClassName=Plug_in_ofs.DrawTools.Export') && err.message.includes('timeout of')) {
+
+            } else {
+                ElMessage({
+                    showClose: true,
+                    message: err.message,
+                    type: 'error',
+                })
+            }
+
+
         }
         return Promise.reject(err)
     }
@@ -97,7 +105,7 @@ const http = {
             }).then(res => {
                 //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '成功返回')
                 resolve(res.data)
-              
+
                 return res
             }).catch(error => {
                 //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '失败返回',error)

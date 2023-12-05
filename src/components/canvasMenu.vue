@@ -170,7 +170,7 @@ const init = (newVal) => {
             LoadScene.loadModel(modelInfo.modelUrl, modelInfo.modelName, callback)
             GoodsInfo.SizeGUID = newVal
         }
-
+        console.log('获取新裁片', arr)
         if (arr.length == 0) {
             ElMessage({
                 showClose: true,
@@ -283,8 +283,27 @@ const changeSelection = () => {
 }
 // 刷新加载对象
 const loadCanvasObject = () => {
-    console.log('刷新加载对象', canvasObjects.value)
     store.commit('setIsSetSteps', true)
+    const fnEnd = () => {
+        if (bgColor.value) {
+            store.commit('setDisableClipping', false)
+            canvasEditor.setAllCuts(true, () => {
+                watchCanvas()
+                setTimeout(() => {
+                    store.commit('setSaveBtnDisabled', false)
+                    store.commit('setIsSetSteps', false)
+                    store.commit('setPageLoading', false)
+                }, 1000)
+                console.log('刷新加载对象添加完毕')
+            })
+        } else {
+            console.log('刷新加载对象(没有对象)')
+            store.commit('setDisableClipping', false)
+            watchCanvas()
+            store.commit('setPageLoading', false)
+        }
+
+    }
     const fn = (obj, index) => {
         if (obj.type == 'image') {
             const imageURL = baseUrl + 'UserUploadFile/' + obj.FilePath + '/' + obj.FileName
@@ -333,33 +352,12 @@ const loadCanvasObject = () => {
             }
         }
     }
-    canvasObjects.value.length > 0 ? fn(canvasObjects.value[0], 0) : fnEnd()
-    const fnEnd = () => {
-        store.commit('setDisableClipping', false)
-        canvasEditor.setAllCuts(true, () => {
-            watchCanvas()
-            setTimeout(() => {
-                store.commit('setIsSetSteps', false)
-                store.commit('setPageLoading', false)
-            }, 1000)
-            console.log('刷新加载对象添加完毕')
-        })
+    if (canvasObjects.value.length > 0) {
+        fn(canvasObjects.value[0], 0)
+    } else {
+        fnEnd()
     }
-    // canvasEditor.setAllCuts(true, () => {
-    //     console.log('颜色加载完毕1', canvasObjects.value)
-    //     if (!canvasObjects.value[0]) {
-    //         console.log('颜色加载完毕2')
-    //         store.commit('setPageLoading', false)
-    //         store.commit('setDisableClipping', false)
-    //         watchCanvas()
-    //         store.commit('setIsSetSteps', false)
-    //     } else {
 
-    //     }
-
-    // })
-
-    // canvasEditor.canvas.requestRenderAll();
 
 }
 const addText = (option) => {

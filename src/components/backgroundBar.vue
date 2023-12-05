@@ -51,6 +51,9 @@ const store = useStore()
 const cutPartsType = computed(() => {
     return store.state.cutPartsType
 })
+const cutParts = computed(() => {
+    return store.state.cutParts
+})
 
 const sizeGUID = computed(() => {
     return store.state.saveData.commodityInfo.sizeGUID
@@ -61,6 +64,10 @@ const goodsId = computed(() => {
 const bgColor = computed(() => {
     return store.state.bgColor
 })
+const colorList = computed(() => {
+    return store.state.colorList
+})
+
 onMounted(() => {
     init()
 })
@@ -106,6 +113,10 @@ const setTips = () => {
         message = '请先选择尺码'
     } else if (!bgColor.value) {
         message = '请先选择底板颜色'
+    } else if (!cutParts.value) {
+        message = '该尺码暂无裁片'
+    } else if (!colorList.value) {
+        message = '该尺码暂底板颜色'
     }
 
     if (message) {
@@ -121,7 +132,6 @@ const setTips = () => {
 // 点击添加
 const addItem = (item) => {
     if (setTips()) return
-    console.log('点击添加')
     const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     const currentBackground = canvasEditor.canvas.getObjects().find((item) => item.isBackground && item.cutPartsType == cutPartsType.value)

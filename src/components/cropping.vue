@@ -235,6 +235,8 @@ const restore = () => {
                 image.FilePath = activeObjects.parentCroppingFilePath
                 image.FileName = activeObjects.parentCroppingFileName
                 image.oldFileName = activeObjects.parentCroppingFileName
+                image.parentCroppingFileName = ''
+                image.parentCroppingFilePath = ''
                 image.oldFilePath = activeObjects.parentCroppingFilePath
                 image.ImageUrl = activeObjects.ImageUrl
                 image.cutPartsType = activeObjects.cutPartsType
@@ -259,7 +261,7 @@ const restore = () => {
         };
         fabric.Image.fromURL(imageURL, callback, properties);
         const info = canvasEditor.canvas.getObjects().find((item) => {
-            if (item.hasCropping || item.parentUrl) {
+            if ((item.hasCropping || item.parentUrl && item.id === activeObjects.id)) {
                 canvasEditor.canvas.remove(item)
             }
         });

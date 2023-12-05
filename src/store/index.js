@@ -52,7 +52,8 @@ const store = createStore({
       previewType: 'small',
       userID: '',
       disableClipping: false,
-      isShowCuts: true
+      isShowCuts: true,
+      saveBtnDisabled: true
     }
   },
   mutations: {
@@ -79,6 +80,9 @@ const store = createStore({
     },
     setUserID(state, val) {
       state.userID = val
+    },
+    setSaveBtnDisabled(state, val) {
+      state.saveBtnDisabled = val
     },
     setIs3dPreview(state, val) {
       state.is3dPreview = val
@@ -126,6 +130,7 @@ const store = createStore({
       state.sizeGUID = sizeGUID
     },
     setBgColor(state, val) {
+      console.log('颜色',val )
       state.saveData.commodityInfo.bgColor = val
       state.bgColor = val
     },

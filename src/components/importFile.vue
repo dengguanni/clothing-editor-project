@@ -56,7 +56,6 @@ import mitts from '@/utils/mitts'
 import baseUrl from '@/config/constants/baseUrl'
 import { basicInheritAttribute, initializationAttribute } from '@/config/customAttributeFabricObj.ts'
 import { useStore } from 'vuex'
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
 const store = useStore()
 const { fabric, canvasEditor } = useSelect();
@@ -70,6 +69,26 @@ const cutPartsType = computed(() => {
 })
 const userID = computed(() => {
   return store.state.userID
+})
+
+const goodsId = computed(() => {
+  return store.state.goodsId
+})
+
+const sizeGUID = computed(() => {
+  return store.state.sizeGUID
+})
+
+const bgColor = computed(() => {
+  return store.state.bgColor
+})
+
+const colorList = computed(() => {
+  return store.state.colorList
+})
+
+const cutParts = computed(() => {
+    return store.state.cutParts
 })
 let showDelIcon = ref('')
 const pageIndex = ref(0)
@@ -286,15 +305,32 @@ async function imgToBase64(url) {
     }
   })
 }
-const addItem = (item) => {
-  if (!cutPartsType.value) {
+const setTips = () => {
+  let message = null
+  if (!goodsId.value) {
+    message = '请先选择版型'
+  } else if (!sizeGUID.value) {
+    message = '请先选择尺码'
+  } else if (!bgColor.value) {
+    message = '请先选择底板颜色'
+  } else if (!cutParts.value) {
+    message = '该尺码暂无裁片'
+  } else if (!colorList.value) {
+    message = '该尺码暂底板颜色'
+  }
+
+  if (message) {
     ElMessage({
       showClose: true,
-      message: '请先选择版型',
+      message: message,
       type: 'error',
     })
-    return
+    store.commit('setPageLoading', false)
   }
+  return message
+}
+const addItem = (item) => {
+  if (setTips()) return
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
   const imageURL = baseUrl + item.ImageUrl_Path;
   let callback = (image, isError) => {

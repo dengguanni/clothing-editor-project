@@ -26,7 +26,7 @@ const setUserUploadFile = function (params: any = {}) {
 //web-设计-文件上传-入库
 // 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=b1e73c7e-63ac-4764-9043-61ca033f53a2
 const setImagesCustom = function (params: any = {}) {
-    return http.get(`/ExSql?SqlCmdName=Web\\new_images_custom&DBC=d1`, params)
+    return http.get(`/Plugin_Text?ClassName=Plug_in_ofs.UploadImage.new_images_custom&DBC=d1`, params)
 }
 //web-设计-上传-删除已上传的图片
 // 文档地址：http://8.140.206.30:8011/SqlCmdDocument?GUID=b1e73c7e-63ac-4764-9043-61ca033f53a2

@@ -17,7 +17,6 @@
 
 <script setup name="Flip">
 import useSelect from '@/hooks/select';
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import greyButton from '@/components/common/greyButton.vue'
 import buttonLimitions from '@/core/limitations/buttonLimitions'
 import { useStore } from 'vuex'

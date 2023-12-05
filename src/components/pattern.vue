@@ -133,7 +133,6 @@ watch(
     (val) => {
         if (val.GUID) {
             info.value = { ...val }
-            // getBgColor(val.GUID)
         }
     }
 );
@@ -145,7 +144,6 @@ watch(sizeGUID, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 watch(bgColor, (newVal, oldVal) => {
     if (newVal) {
-        console.log('颜色变化')
         colorSelected.value = newVal.GUID
 
     }
@@ -162,11 +160,11 @@ const openDailog = (val) => {
 }
 
 const changeSize = (item: any) => {
-    store.commit('setPageLoading', true)
+    // store.commit('setPageLoading', true)
     store.commit('setBgColor', '')
     store.commit('setCutParts', '')
     store.commit('setGoodsSizeGUID', item.GUID)
-    // store.commit('setDisableClipping', true)
+    store.commit('setSaveBtnDisabled', true)
 
 }
 const getSaveData = () => {
@@ -203,7 +201,7 @@ const changeColor = (item: any) => {
 const getBgColor = (GUID: string) => {
     console.log('获取颜色', GUID)
     commodityApi.getColorListByGoodGUID({ GUID: GUID }).then(res => {
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '颜色列表加载完毕')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒',GUID ,'颜色列表加载完毕',res)
         if (res.Tag[0]) {
             // colorList.value = [...res.Tag[0].Table]
             store.commit('setBgColorList', [...res.Tag[0].Table])
@@ -388,7 +386,7 @@ const getBgColor = (GUID: string) => {
             // border-bottom: 1px solid #DCE1E9;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-around;
 
             .image {
                 height: 120px;

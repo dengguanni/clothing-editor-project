@@ -13,6 +13,7 @@ export const getImagesCustom = async (userID: any, imageList: any, Page_Index: n
         userID: userID
     }
     picture.getImagesCustom(p).then(res => {
+        console.log('获取历史记录', res)
         res.Tag.length > 0 ? imageList.value = [...res.Tag[0].Table] : ''
         callback ? callback() : ''
     })
@@ -91,7 +92,6 @@ const splitFile = (files, size, callback) => {
                     end = size + end
                     index == n ? callback(arr) : fn(index + 1)
                 }
-                console.log('arr', arr);
             } catch (e) {
                 console.log(e);
             }

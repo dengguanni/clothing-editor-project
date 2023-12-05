@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createMultiMaterialObject } from 'three/examples/jsm/utils/SceneUtils.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
@@ -41,21 +40,27 @@ class LoadScene {
         const path = url.slice(25)
         console.log('path', path)
         loader.load(baseUrl + path + '?time=' + timestamp, object => {
-            // console.log('loader object', object)
             const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
             normalMap.wrapT = 100
             normalMap.wrapS = 100
             normalMap.repeat.set(700, 700)
             object.name = name
             let group = new THREE.Group()
+
             object.scene.traverse(v => {
+            //     object.scene.traverse(v => {
+            //         if (v.type == 'Mesh') {
+            //             v.geometry.material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+            //         }
+            //     })
+                
                 if (v.type == 'Mesh') {
                     // const color = new THREE.Color(modelColor)
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
                     normalMap.wrapT = 100
                     normalMap.wrapS = 100
                     normalMap.repeat.set(700, 700)
-                    const frontMaterial = new THREE.MeshLambertMaterial({
+                    const frontMaterial = new THREE.MeshBasicMaterial({
                         map: v.material.map,
                         // color: color,
                         side: THREE.DoubleSide,
@@ -64,7 +69,7 @@ class LoadScene {
                         normalMap: normalMap,
                         normalScale: new THREE.Vector2(3, 3),
                     })
-                    const backMaterial = new THREE.MeshLambertMaterial({
+                    const backMaterial = new THREE.MeshBasicMaterial({
                         map: v.material.map,
                         color: 0xffffff,
                         side: THREE.BackSide,
@@ -80,16 +85,16 @@ class LoadScene {
                     group.add(cube)
                 }
                 if (v.name == 'cothingCamera' || v.type == 'PerspectiveCamera') {
-                    v.name = 'clothingCamera'
-                    this.camera.position.x = v.position.x
-                    this.camera.position.z = v.position.z
-                    this.camera.position.y = v.position.y
-                    this.camera.rotation.x = v.rotation.x
-                    this.camera.rotation.z = v.rotation.z
-                    this.camera.rotation.y = v.rotation.y
+                    console.log('新的相机', v)
+                    console.log('旧的相机', LoadScene.camera)
+                    LoadScene.camera.position.x = v.position.x + 0.1
+                    LoadScene.camera.position.z = v.position.z + 1
+                    LoadScene.camera.position.y = v.position.y
+                    LoadScene.camera.rotation.x = v.rotation.x
+                    LoadScene.camera.rotation.z = v.rotation.z
+                    LoadScene.camera.rotation.y = v.rotation.y
+                    // LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
                     LoadScene.control.saveState()
-                    // console.log('相机', v)
-                    // LoadScene.scene.add(v);
                 }
             })
             group.name = name
@@ -111,7 +116,6 @@ class LoadScene {
 
     setTexture = (name, url, callback) => {
         if (url) {
-            console.log('贴图')
             LoadScene.scene.traverse((child: any) => {
                 if (child.name == name) {
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
@@ -142,7 +146,7 @@ class LoadScene {
         LoadScene.renderer = renderer
         LoadScene.scene = new THREE.Scene();
         LoadScene.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 200);
-        LoadScene.camera.position.set(-0.08928988914516146, -0.1569660082212971, -3.169317572406974);
+        // LoadScene.camera.position.set(0, 0, -3.169317572406974);
         LoadScene.scene.add(LoadScene.camera);
         LoadScene.scene.background = new THREE.Color("#F5F5F5");
         const light1 = new THREE.DirectionalLight(0xffffff);
@@ -184,12 +188,13 @@ class LoadScene {
 
         // 创建轨道控制器
         LoadScene.control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
-        LoadScene.control.enablePan = true
+        // LoadScene.control.enablePan = true
         LoadScene.control.hylMovePanY = false
         LoadScene.control.hylMovePanX = true
-        LoadScene.control.target.set(-0.017017322512750035,
-            -0.13816378273860236, 0.01996416024727918);
-
+        // LoadScene.control.target.set(-0.017017322512750035,
+        //     -0.13816378273860236, 0.01996416024727918);
+        LoadScene.control.target.set(0,
+            0, 0);
         LoadScene.control.enablePan = false
         // LoadScene.control.saveState()
         const render = () => {

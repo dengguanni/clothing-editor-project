@@ -199,6 +199,12 @@ const sizeGUID = computed(() => {
 const bgColor = computed(() => {
   return store.state.bgColor
 })
+const cutParts = computed(() => {
+  return store.state.cutParts
+})
+const colorList = computed(() => {
+  return store.state.colorList
+})
 
 const setTips = () => {
   let message = null
@@ -208,6 +214,10 @@ const setTips = () => {
     message = '请先选择尺码'
   } else if (!bgColor.value) {
     message = '请先选择底板颜色'
+  } else if (!cutParts.value) {
+    message = '该尺码暂无裁片'
+  } else if (!colorList.value) {
+    message = '该尺码暂底板颜色'
   }
   if (message) {
     ElMessage({

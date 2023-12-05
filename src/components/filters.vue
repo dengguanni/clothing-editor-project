@@ -81,7 +81,6 @@ import mitts from '@/utils/mitts'
 import { v4 as uuid } from 'uuid';
 import baseUrl from '@/config/constants/baseUrl'
 import { setUserUploadFile } from '@/core/2D/handleImages.ts'
-import ControlsTile from '@/core/plugin/ControlsTile.ts'
 import { Message } from 'view-ui-plus';
 import { useStore } from 'vuex'
 import { basicInheritAttribute } from '@/config/customAttributeFabricObj.ts'

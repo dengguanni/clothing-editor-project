@@ -1,6 +1,4 @@
-<!--
- * @Description: 保存文件
--->
+
 
 <template>
   <div class="save-box">
@@ -49,9 +47,11 @@ const sizeGUID = computed(() => {
 const bgColor = computed(() => {
   return store.state.bgColor
 })
-
+const saveBtnDisabled = computed(() => {
+  return store.state.saveBtnDisabled
+})
 let saveBtnValue = ref('保存')
-let saveBtnDisabled = ref(false)
+// let saveBtnDisabled = ref(true)
 
 watch(handelSave, (newVal, oldVal) => {
   if (newVal) {
@@ -62,7 +62,8 @@ watch(handelSave, (newVal, oldVal) => {
 watch(sizeGUID, (newVal, oldVal) => {
   if (newVal) {
     saveBtnValue.value = '保存'
-    saveBtnDisabled.value = false
+    
+    // saveBtnDisabled.value = false
   }
 }, { immediate: true, deep: true });
 
@@ -117,7 +118,9 @@ const getData = () => {
 }
 const savaProject = debounce(function () {
   saveBtnValue.value = '处理中'
-  saveBtnDisabled.value = true
+
+  store.commit('setSaveBtnDisabled', true)
+  // saveBtnDisabled.value = true
   let p = {
     "UserID": userID.value,
     "SizeGUID": sizeGUID.value,
@@ -127,7 +130,6 @@ const savaProject = debounce(function () {
   const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
   let Parts = []
   let callback = (p) => {
-
     Modal.confirm({
       title: '提示',
       content: `<p>保存成功</p>`,
@@ -139,7 +141,7 @@ const savaProject = debounce(function () {
     historyAip.setSaveProject(p).then((res) => {
       console.log('res', res)
       saveBtnValue.value = '保存'
-      saveBtnDisabled.value = false
+      store.commit('setSaveBtnDisabled', false)
     })
   }
   cutParts.value.forEach((element, indexP) => {
