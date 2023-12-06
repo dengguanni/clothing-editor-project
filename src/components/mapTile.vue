@@ -1,5 +1,5 @@
 <template>
-    <div v-show="mixinState.mSelectMode === 'one'">
+    <div v-show="mixinState.mSelectMode === 'one' && !selected.hasCropping">
         <div class="box-01" v-if="mixinState.mSelectOneType !== 'text'">
             <!-- <greyButton></greyButton> -->
             <greyButton v-for="item in menuList1" :key="item.type" @buttonClick="menuList1Click(item.type)"

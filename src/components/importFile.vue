@@ -88,7 +88,7 @@ const colorList = computed(() => {
 })
 
 const cutParts = computed(() => {
-    return store.state.cutParts
+  return store.state.cutParts
 })
 let showDelIcon = ref('')
 const pageIndex = ref(0)
@@ -118,7 +118,6 @@ const showIcon = (item) => {
 }
 // 替换图片
 const replaceImage = (str, fileHeaderPath) => {
-  console.log('replaceImage',)
   store.commit('setDisableClipping', true)
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   let layer
@@ -138,32 +137,38 @@ const replaceImage = (str, fileHeaderPath) => {
           const height = image.height
           const oldActiveObject = canvasEditor.canvas.getObjects().find((item) => item.FileName === oldFileName);
           basicInheritAttribute.forEach(el => image.set(el, oldActiveObject[el]))
-          image.height = height
-          image.width = width
-          image.name = FileName
-          image.scaleX = oldActiveObject.width / (image.width / oldActiveObject.scaleX)
-          image.scaleY = oldActiveObject.height / (image.height / oldActiveObject.scaleY)
-          image.id = uuid()
-          image.FileName = FileName
-          image.FilePath = 'images_custom/' + FileName.substring(0, 1)
-          image.cutPartsType = cutPartsType.value
-          image.oldFilePath = image.FilePath
-          image.oldFileName = FileName
-          image.filters = []
-          canvasEditor.canvas.add(image);
+          oldActiveObject.clone(cloned => {
+            cloned.rotate(0)
+            image.height = height
+            image.width = width
+            image.name = FileName
+            image.scaleX = oldActiveObject.width / (image.width / oldActiveObject.scaleX)
+            image.scaleY = oldActiveObject.height / (image.height / oldActiveObject.scaleY)
+            image.id = uuid()
+            image.FileName = FileName
+            image.FilePath = 'images_custom/' + FileName.substring(0, 1)
+            image.cutPartsType = cutPartsType.value
+            image.oldFilePath = image.FilePath
+            image.oldFileName = FileName
+            image.filters = []
+            image.left = cloned.left
+            image.top = cloned.top
+            image.rotate(oldActiveObject.angle)
+            canvasEditor.canvas.add(image);
+            canvasEditor.fixedLayer()
+            canvasEditor.canvas.remove(oldActiveObject)
+            image.moveTo(layer)
+            console.log('layer', layer)
+            const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
+            canvasEditor.canvas.setActiveObject(info);
+            image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : store.commit('setDisableClipping', false)
+            image.repeatType ? canvasEditor.setRepeat(image.repeatType, true) : store.commit('setDisableClipping', false)
+            image.Sharpen ? canvasEditor.setSharpening(true) : store.commit('setDisableClipping', false)
+            store.commit('setDisableClipping', false)
+            canvasEditor.setAllCuts()
+            canvasEditor.canvas.requestRenderAll();
+          })
 
-          canvasEditor.fixedLayer()
-          canvasEditor.canvas.remove(oldActiveObject)
-          image.moveTo(layer)
-          console.log('layer', layer)
-          const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
-          canvasEditor.canvas.setActiveObject(info);
-          image.filtersType ? canvasEditor.changeFilters(image.filtersType, true, null) : store.commit('setDisableClipping', false)
-          image.repeatType ? canvasEditor.setRepeat(image.repeatType, true) : store.commit('setDisableClipping', false)
-          image.Sharpen ? canvasEditor.setSharpening(true) : store.commit('setDisableClipping', false)
-          store.commit('setDisableClipping', false)
-          canvasEditor.setAllCuts()
-          canvasEditor.canvas.requestRenderAll();
         }
       };
       const properties = {

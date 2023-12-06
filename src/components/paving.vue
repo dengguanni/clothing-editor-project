@@ -1,8 +1,9 @@
 
 <template>
-    <div class="paving" v-if="mixinState.mSelectMode === 'one'">
+    <div class="paving" v-if="mixinState.mSelectMode === 'one' && !selected.hasCropping">
         <Tooltip :content="item.label" v-for="(item, i ) in svgList" :key="item.type">
-            <greyButton @buttonClick="changeSelection(item)" :width="64"  :disabled="item.disabled" :type="item.iconType" :svg="item.svg">
+            <greyButton @buttonClick="changeSelection(item)" :width="64" :disabled="item.disabled" :type="item.iconType"
+                :svg="item.svg">
             </greyButton>
             <!-- <commonIconfont type="background" size="26"></commonIconfont> -->
         </Tooltip>
@@ -22,6 +23,11 @@ const { mixinState, canvasEditor }: any = useSelect();
 const handleLock = computed(() => {
     return store.state.handleLock
 });
+
+const selected = computed(() => {
+    return store.state.selected
+});
+
 watch(handleLock, (newVal, oldVal) => {
     if (newVal) {
         const activeObject = canvasEditor.canvas.getActiveObject()
@@ -64,7 +70,7 @@ const svgList = reactive([
 )
 const changeSelection = (item) => {
     MaximizePlugin.setMax(item.type)
-   canvasEditor.setAllCuts(false)
+    canvasEditor.setAllCuts(false)
 }
 
 </script>

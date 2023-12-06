@@ -1,5 +1,5 @@
 <template>
-  <div class="box-1" v-if="mixinState.mSelectMode === 'one'">
+  <div class="box-1" v-if="mixinState.mSelectMode === 'one' && !selected.hasCropping">
     <!-- 字体属性 -->
     <div v-show="textType.includes(mixinState.mSelectOneType)" v-if="isText">
       <!-- <Divider plain orientation="left">{{ $t('attributes.font') }}</Divider> -->

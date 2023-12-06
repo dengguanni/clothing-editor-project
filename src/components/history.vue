@@ -3,7 +3,7 @@
   <div class="reserve-line"></div>
   <div style="display: inline-block">
     <!-- 后退 -->
-    <Tooltip :content="$t('history.revocation') + `(${saveSteps.ID_Previous})`">
+    <Tooltip :content="$t('history.revocation') ">
       <Button @click="canvasEditor.undo" type="text" size="small" :disabled="saveSteps.ID_Previous < 1" class="item">
         <!-- <commonIcon angleKey="withdraw"></commonIcon> -->
         <commonIconfont type="chehui" size="23" v-show="saveSteps.ID_Previous > 0"></commonIconfont>
@@ -11,7 +11,7 @@
       </Button>
     </Tooltip>
     <!-- 重做 -->
-    <Tooltip :content="$t('history.redo') + `(${saveSteps.ID_Next == -1 ? 0 : saveSteps.ID_Next})`">
+    <Tooltip :content="$t('history.redo') ">
       <Button @click="canvasEditor.redo" type="text" size="small" :disabled="saveSteps.ID_Next < 1" class="item">
         <!-- <commonIcon angleKey="redo"></commonIcon> -->
         <commonIconfont type="zhongzuo" size="23" v-show="saveSteps.ID_Next > 0"></commonIconfont>
@@ -88,12 +88,12 @@ const beforeClear = () => {
 const clear = () => {
   store.commit('setDisableClipping', true)
   canvasEditor.canvas.getObjects().forEach(el => {
-    if (el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined && el.cutPartsType == cutPartsType.value) {
+    if ((el.id !== 'grid' && el.id !== 'workspace' && el.isMask == undefined && el.cutPartsType == cutPartsType.value) || el.hasCropping) {
       canvasEditor.canvas.remove(el)
     }
   })
- store.commit('setDisableClipping', false)
- canvasEditor.setAllCuts()
+  store.commit('setDisableClipping', false)
+  canvasEditor.setAllCuts()
 }
 const setAuxiliaryLine = () => {
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);

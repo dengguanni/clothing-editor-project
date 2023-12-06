@@ -7,7 +7,7 @@
 -->
 
 <template>
-  <div v-if="mixinState.mSelectMode === 'one'" class="filp">
+  <div v-if="mixinState.mSelectMode === 'one' && !selected.hasCropping" class="filp">
     <Tooltip :content="item.label" v-for="item in menuList" :key="item.type">
       <greyButton @buttonClick="changeSelection(item)" :width="64" :svg="item.svg" :disabled="disabled">
       </greyButton>

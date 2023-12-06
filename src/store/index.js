@@ -53,7 +53,8 @@ const store = createStore({
       userID: '',
       disableClipping: false,
       isShowCuts: true,
-      saveBtnDisabled: true
+      saveBtnDisabled: true,
+      
     }
   },
   mutations: {

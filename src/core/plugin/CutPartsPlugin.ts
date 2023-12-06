@@ -187,7 +187,7 @@ class CutPartsPlugin {
                     console.log('保存', !this.isSetSteps.value)
                     this.isSetSteps.value ? '' : this.store.commit('setSave')
                     this.store.commit('setsLoad3d', false)
-                    this.store.commit('setSaveBtnDisabled', false)
+                    
   
                 }
             })

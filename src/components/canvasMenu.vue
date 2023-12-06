@@ -127,7 +127,8 @@ const watchCanvas = () => {
         if (val.transform.target.tileParentId) {
             const obj = canvasEditor.canvas.getObjects().find(el => el.id == val.transform.target.tileParentId)
             canvasEditor.canvas.discardActiveObject();
-            canvasEditor.canvas.setActiveObject(obj);
+            console.log('obj', obj)
+            obj && canvasEditor.canvas.setActiveObject(obj);
         }
         store.commit('setSelected', val.transform.target)
     })
@@ -187,6 +188,7 @@ const init = (newVal) => {
 // 加载裁片
 const loadCuts = debounce(() => {
     store.commit('setDisableClipping', true)
+    store.commit('setSaveBtnDisabled', false)
     // console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
     if (objects.length !== 0) store.commit('setPageLoading', false)
@@ -250,6 +252,9 @@ const loadCuts = debounce(() => {
 
 // 切换裁片
 const changeSelection = () => {
+    canvasEditor.canvas.getObjects().forEach(el => {
+        if (el.hasCropping) canvasEditor.canvas.remove(el)
+    })
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
     activeObject ? activeObject.cutPartsType == cutPartsType.value ? '' : canvasEditor.canvas.discardActiveObject() : ''
     load3DScene.setModelCamera(cutPartsType.value)
@@ -284,6 +289,8 @@ const changeSelection = () => {
 // 刷新加载对象
 const loadCanvasObject = () => {
     store.commit('setIsSetSteps', true)
+    store.commit('setPageLoading', false)
+    watchCanvas()
     const fnEnd = () => {
         if (bgColor.value) {
             store.commit('setDisableClipping', false)

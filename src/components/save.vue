@@ -62,7 +62,7 @@ watch(handelSave, (newVal, oldVal) => {
 watch(sizeGUID, (newVal, oldVal) => {
   if (newVal) {
     saveBtnValue.value = '保存'
-    
+
     // saveBtnDisabled.value = false
   }
 }, { immediate: true, deep: true });
@@ -165,10 +165,10 @@ const savaProject = debounce(function () {
           const oldHeight = objects[index].height * objects[index].scaleY
           const obj = {
             Image_fullName: objects[index].FilePath + '/' + objects[index].FileName,
-            Image_width: (oldWidth / 1).toFixed(5) + '',
-            Image_height: (oldHeight / 1).toFixed(5) + '',
-            Image_left: (oldLeft / 1).toFixed(5) + '',
-            Image_top: (oldTop / 1).toFixed(5) + '',
+            Image_width: (oldWidth / 0.07).toFixed(5) + '',
+            Image_height: (oldHeight / 0.07).toFixed(5) + '',
+            Image_left: (oldLeft / 0.07).toFixed(5) + '',
+            Image_top: (oldTop / 0.07).toFixed(5) + '',
             // Image_left: (oldLeft - (oldWidth / 1).toFixed(5) + oldWidth).toFixed(5) + '',
             // Image_top: (oldTop - (oldHeight / 1).toFixed(5) + oldHeight).toFixed(5) + '',
             Image_angle: objects[index].angle.toFixed(5) + '',

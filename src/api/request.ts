@@ -12,7 +12,7 @@ const USER_INFO = crypto.decrypt(userinfo.replace('#', ''))
 const config = {
     baseURL: baseURL,
     // 因为跨域了，所以这里如果写的话会自动拼接，会有两份，所以隐藏了
-    timeout: 60 * 1000, // 设置最大请求时间 5 * 60 * 1000,
+    timeout: 5 * 60 * 1000, // 设置最大请求时间 5 * 60 * 1000,
     retry: 0, //设置全局重试请求次数（最多重试几次请求）
     retryDelay: 1000, //设置全局请求间隔
 

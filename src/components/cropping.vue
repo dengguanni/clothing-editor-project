@@ -8,7 +8,6 @@
             <div class="filter-item" v-for="(value, key) in imageList" :key="key" @click=addItem(value)>
                 <img :src="value.src" />
             </div>
-            <!-- <img :src="imageBase64" style=" border-color: black;" /> -->
         </div>
     </div>
 </template>
@@ -74,6 +73,82 @@ const imageList = reactive([
     }
 ])
 onMounted(() => {
+    let scaleX
+    let scaleY
+    canvasEditor.canvas.on('object:scaling', function (options) {
+
+        // console.log('object:scaling', options)
+        // console.log('options.transform', options.transform)
+        if (!state.hasCropping) return
+        const croppedImageH = croppedImage.value.height * croppedImage.value.scaleY
+        const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
+        const maskH = options.target.height * options.target.scaleY
+        const maskW = options.target.width * options.target.scaleX
+        const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+        // 右
+        if (options.transform.corner == 'mr' || options.transform.corner == 'tr' || options.transform.corner == 'br') {
+            let rightOffset = croppedImageW + croppedImage.value.left - mask.left
+            if (maskW.toFixed(0) == rightOffset.toFixed(0)) {
+                scaleX = mask.scaleX
+                console.log('相等', scaleX)
+            }
+
+            if (maskW < rightOffset) {
+                console.log('小于', scaleX)
+                scaleX && (mask.scaleX = scaleX)
+            }
+        }
+        // 下
+        if (options.transform.corner == 'mb' || options.transform.corner == 'br' || options.transform.corner == 'bl') {
+            let topOffset = croppedImageH + croppedImage.value.top - mask.top
+            if (maskH.toFixed(0) == topOffset.toFixed(0)) {
+                scaleY = mask.scaleY
+            }
+            if (maskH < topOffset) {
+                scaleY && (mask.scaleY = scaleY)
+            }
+        }
+        // 上
+        if (options.transform.corner == 'mt' || options.transform.corner == 'tr' || options.transform.corner == 'tl') {
+            if (options.target.top.toFixed(0) == croppedImage.value.top.toFixed(0)) {
+                scaleY = mask.scaleY
+            }
+            if (croppedImage.value.top < options.target.top) {
+                mask.top = croppedImage.value.top
+                scaleY && (mask.scaleY = scaleY)
+            }
+        }
+        // 左
+        if (options.transform.corner == 'ml' || options.transform.corner == 'tl' || options.transform.corner == 'bl') {
+            if (options.target.left.toFixed(0) == croppedImage.value.left.toFixed(0)) {
+                scaleX = mask.scaleX
+            }
+            if (croppedImage.value.left < options.target.left) {
+                mask.left = croppedImage.value.left
+                scaleX && (mask.scaleX = scaleX)
+            }
+        }
+
+        // if (options.target.top == croppedImage.value.top) {
+        //     scaleX = options.target.scaleY
+        // }
+
+        // console.log('maskW', maskW, 'scaleX', scaleX, 'croppedImageW', croppedImageW)
+        // console.log('maskH', maskW, 'scaleY', scaleY, 'croppedImageH', croppedImageH)
+
+        // action corner lastX scaleX
+        // console.log(options.target.height * options.target.scaleY)
+        // if (options.target.top < croppedImage.value.top) {
+        //     mask.scaleY = scaleY
+        // }
+        // if (options.target.left < croppedImage.value.left) {
+        //     mask.scaleX = scaleX
+
+        // }
+        // scaleX = null
+        // scaleY= null
+
+    })
     canvasEditor.canvas.on('object:moving', function (options) {
         if (state.hasCropping && options?.deselected?.length !== 0) {
             const croppedImageH = croppedImage.value.height * croppedImage.value.scaleY
@@ -81,18 +156,18 @@ onMounted(() => {
             const maskH = mask.height * mask.scaleY
             const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
             const maskW = mask.width * mask.scaleX
-            if (croppedImageH >= maskH) {
+            if (croppedImageH >= croppedImageW) {
                 if (options.target.top > croppedImage.value.top + croppedImageH - maskH) {
                     mask.top = croppedImage.value.top + croppedImageH - maskH
                 }
                 if (options.target.top < croppedImage.value.top) {
                     mask.top = croppedImage.value.top
                 }
-                if (options.target.left > croppedImage.value.left + croppedImageW - maskW) {
-                    mask.left = croppedImage.value.left + croppedImageW - maskW
-                }
-                if (options.target.left < croppedImage.value.left) {
+                if (options.target.left > croppedImage.value.left) {
                     mask.left = croppedImage.value.left
+                }
+                if (options.target.left < (croppedImage.value.left - maskW / 2)) {
+                    mask.left = croppedImage.value.left - maskW / 2
                 }
             } else {
                 if (options.target.top > croppedImage.value.top) {
@@ -117,9 +192,27 @@ onMounted(() => {
     canvasEditor.canvas.on('selection:cleared', function (options) {
         const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
         if (state.hasCropping && options.deselected) {
+            console.log(options.deselected[0].id, mask.id)
             options.deselected[0].id == mask.id && handelCutParts(croppedImage.value)
         }
     })
+    canvasEditor.canvas.on('selection:created', function (options) {
+        console.log('selection:created')
+        // const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+        // if (state.hasCropping && options.deselected) {
+        //     console.log(options.deselected[0].id, mask.id)
+        //     options.deselected[0].id == mask.id && handelCutParts(croppedImage.value)
+        // }
+    })
+    canvasEditor.canvas.on('selection:updated', function (options) {
+        console.log('selection:updated')
+        const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
+        if (state.hasCropping && options.deselected) {
+            console.log(options.deselected[0].id, mask.id)
+            options.deselected[0].id == mask.id && handelCutParts(croppedImage.value)
+        }
+    })
+
 })
 onUnmounted(() => {
     const mask = canvasEditor.canvas.getObjects().find(item => item.hasCropping)
@@ -132,80 +225,96 @@ const handelCutParts = (image) => {
     const objects = canvasEditor.canvas.getObjects();
     const cutMask = objects.find(item => item.hasCropping)
     if (cutMask) {
-        const p = {
-            Canvas_width: workspace.width,
-            Canvas_height: workspace.height,
-            Image_fullName: image.FilePath + '/' + image.FileName,
-            Image_width: image.width,
-            Image_height: image.height,
-            Image_scaleX: image.scaleX,
-            Image_scaleY: image.scaleY,
-            Image_left: image.left,
-            Image_top: image.top,
-            Image_angle: image.angle,
-            Mask_name: cutMask.name,
-            Mask_width: cutMask.width * cutMask.scaleX,
-            Mask_height: cutMask.height * cutMask.scaleY,
-            Mask_left: cutMask.left,
-            Mask_top: cutMask.top,
-            Mask_angle: cutMask.angle,
-            Image_flipX: image.flipX,
-            Image_flipY: image.flipY,
-            Image_visible: image.visible
-        }
-        picture.setCutParts(p).then(res => {
-            console.log('剪裁参数', p, 'res', res)
-            const FileName = guid() + '.png'
-            const callback = () => {
-                let imgInstance
-                const imgEl = document.createElement('img');
-                imgEl.src = 'data:image/jpeg;base64,' + res.Tag[0].base64;
-                imageBase64.value = imgEl.src
-                document.body.appendChild(imgEl);
-                imgInstance = new fabric.Image(imgEl, {
-                    id: uuid(),
-                    name: image.name,
-                    width: image.width * image.scaleX,
-                    height: image.height * image.scaleY,
-                    angle: image.angle,
-                    saveScaleX: image.scaleX,
-                    saveScaleY: image.scaleY,
-                    top: image.top,
-                    left: image.left,
-                    angle: image.angle,
-                })
-                imgInstance.name = FileName
-                imgInstance.cutPartsType = cutPartsType.value
-                imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
-                imgInstance.FileName = FileName
-                imgInstance.filtersType = image.filtersType
-                imgInstance.parentCroppingFilePath = image.FilePath
-                imgInstance.parentCroppingFileName = image.FileName
-                imgInstance.parentUrl = image.ImageUrl
-                imgInstance.visible = true
-                imgInstance.ImageUrl = image.ImageUrl
-                imgInstance.customVisible = true
-                console.log('imgInstance', imgInstance)
-                imgEl.onload = () => {
-                    const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
-                    canvasEditor.canvas.remove(oldObj)
-                    // imgInstance.scaleX = image.scaleX
-                    // imgInstance.scaleY = image.scaleY
-                    store.commit('setDisableClipping', false)
-                    canvasEditor.canvas.add(imgInstance);
-                    canvasEditor.canvas.bringToFront(maskRect)
-                    canvasEditor.canvas.renderAll();
-                    imgEl.remove();
+        let cutMaskLeft
+        let cutMaskTop
+        let imageLeft
+        let imageTop
+        cutMask.clone(cutMaskC => {
+            cutMaskC.rotate(0)
+            image.clone(imageC => {
+                imageC.rotate(0)
+                imageLeft = imageC.left
+                imageTop = imageC.top
+                cutMaskLeft = cutMaskC.left
+                cutMaskTop = cutMaskC.top
 
+                const p = {
+                    Canvas_width: workspace.width,
+                    Canvas_height: workspace.height,
+                    Image_fullName: image.FilePath + '/' + image.FileName,
+                    Image_width: image.width,
+                    Image_height: image.height,
+                    Image_scaleX: image.scaleX,
+                    Image_scaleY: image.scaleY,
+                    Image_left: imageLeft,
+                    Image_top: imageTop,
+                    Image_angle: image.angle,
+                    Mask_name: cutMask.name,
+                    Mask_width: cutMask.width * cutMask.scaleX,
+                    Mask_height: cutMask.height * cutMask.scaleY,
+                    Mask_left: cutMaskLeft,
+                    Mask_top: cutMaskTop,
+                    Mask_angle: cutMask.angle,
+                    Image_flipX: image.flipX,
+                    Image_flipY: image.flipY,
+                    Image_visible: image.visible
                 }
-                canvasEditor.canvas.remove(croppedImage.value)
-                canvasEditor.canvas.remove(cutMask)
-                croppedImage.value = null
-                state.hasCropping = false
-            }
-            setUserUploadFile('data:image/jpeg;base64,' + res.Tag[0].base64, FileName, 'images_temp//', callback)
+                picture.setCutParts(p).then(res => {
+                    const FileName = guid() + '.png'
+                    const callback = () => {
+                        let imgInstance
+                        const imgEl = document.createElement('img');
+                        imgEl.src = 'data:image/jpeg;base64,' + res.Tag[0].base64;
+                        imageBase64.value = imgEl.src
+                        document.body.appendChild(imgEl);
+                        imgInstance = new fabric.Image(imgEl, {
+                            id: uuid(),
+                            name: image.name,
+                            width: image.width * image.scaleX,
+                            height: image.height * image.scaleY,
+                            angle: image.angle,
+                            saveScaleX: image.scaleX,
+                            saveScaleY: image.scaleY,
+                            top: image.top,
+                            left: image.left,
+                            angle: image.angle,
+                        })
+                        imgInstance.name = FileName
+                        imgInstance.cutPartsType = cutPartsType.value
+                        imgInstance.FilePath = 'images_temp/' + FileName.substring(0, 1)
+                        imgInstance.FileName = FileName
+                        imgInstance.filtersType = image.filtersType
+                        imgInstance.parentCroppingFilePath = image.FilePath
+                        imgInstance.parentCroppingFileName = image.FileName
+                        imgInstance.parentUrl = image.ImageUrl
+                        imgInstance.visible = true
+                        imgInstance.ImageUrl = image.ImageUrl
+                        imgInstance.customVisible = true
+                        console.log('imgInstance', imgInstance)
+                        imgEl.onload = () => {
+                            const oldObj = canvasEditor.canvas.getObjects().find((item) => image.id == item.id);
+                            canvasEditor.canvas.remove(oldObj)
+                            // imgInstance.scaleX = image.scaleX
+                            // imgInstance.scaleY = image.scaleY
+                            store.commit('setDisableClipping', false)
+                            canvasEditor.canvas.add(imgInstance);
+                            canvasEditor.canvas.bringToFront(maskRect)
+                            canvasEditor.canvas.renderAll();
+                            imgEl.remove();
+
+                        }
+                        canvasEditor.canvas.remove(croppedImage.value)
+                        canvasEditor.canvas.remove(cutMask)
+                        croppedImage.value = null
+                        state.hasCropping = false
+                    }
+                    setUserUploadFile('data:image/jpeg;base64,' + res.Tag[0].base64, FileName, 'images_temp//', callback)
+
+                })
+            })
 
         })
+
 
     }
 
@@ -220,13 +329,18 @@ const restore = () => {
     if (activeObjects.parentCroppingFilePath) {
         const imageURL = baseUrl + '/UserUploadFile/' + activeObjects.parentCroppingFilePath + '/' + activeObjects.parentCroppingFileName
         let callback = (image, isError) => {
+            const width = image.width
+            const height = image.height
             if (!isError) {
                 canvasEditor.canvas.remove(activeObjects)
                 basicInheritAttribute.forEach(el => image.set(el, activeObjects[el]))
                 image.id = uuid()
                 image.name = activeObjects.name
-                image.height = activeObjects.height / activeObjects.saveScaleY
-                image.width = activeObjects.width / activeObjects.saveScaleX
+                // image.scaleX = activeObjects.width / (image.width / activeObjects.scaleX)
+                // image.scaleY = activeObjects.height / (image.height / activeObjects.scaleY)
+                console.log('image.scaleX ', image.scaleX, 'image.scaleY', image.scaleY)
+                image.height = height
+                image.width = width
                 image.scaleX = activeObjects.saveScaleX
                 image.scaleY = activeObjects.saveScaleY
                 image.top = activeObjects.top
@@ -246,6 +360,7 @@ const restore = () => {
                 image.parentUrl = null
                 store.commit('setDisableClipping', false)
                 canvasEditor.canvas.add(image);
+                canvasEditor.canvas.remove(activeObjects)
                 const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
                 canvasEditor.canvas.setActiveObject(info);
                 canvasEditor.canvas.bringToFront(maskRect)
@@ -316,20 +431,24 @@ const addItem = (item) => {
     })
     const imageURL = item.src;
     let callback = (image, isError) => {  //添加裁片
-
+        const croppedImageH = croppedImage.value.height * croppedImage.value.scaleY
+        const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
+        const num = croppedImageH > croppedImageW ? croppedImageH : croppedImageW
+        // const scale = croppedImageH > croppedImageW ? croppedImage.value.scaleY : croppedImage.value.scaleX
 
         if (!isError) {
             image.hasCropping = true
             image.id = uuid()
             image.name = item.name
-            const scale = croppedImage.value.height * croppedImage.value.scaleY / image.height
-            image.scaleX = scale
-            image.scaleY = scale
-            image.top = croppedImage.value.top
+            const imageScale = num / image.height
+            image.scaleX = imageScale
+            image.scaleY = imageScale
             image.angle = croppedImage.value.angle
             const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
             const imageW = image.width * image.scaleX
-            image.left = croppedImageW >imageW ?  croppedImage.value.left+(croppedImageW/2) -(imageW/2) : croppedImage.value.left-(croppedImageW/2)-(imageW/2) 
+            image.top = croppedImageH > croppedImageW ? croppedImage.value.top : croppedImage.value.top + (croppedImageH - image.scaleY * image.height) / 2
+            image.left = croppedImageH > croppedImageW ? croppedImage.value.left + (croppedImageW - image.scaleX * image.width) / 2 : croppedImage.value.left
+            image.isTrimmingMask = true
             canvasEditor.canvas.add(image);
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
             canvasEditor.canvas.discardActiveObject();
@@ -337,8 +456,6 @@ const addItem = (item) => {
             canvasEditor.canvas.bringToFront(maskRect)
             canvasEditor.canvas.requestRenderAll();
             state.hasCropping = true
-
-
         }
     };
     const properties = {
@@ -353,70 +470,16 @@ const addItem = (item) => {
 }
 
 
-// 插入图片文件
-const insertImgFile = (file) => {
-    if (!file) throw new Error('file is undefined');
-    let imgInstance
-    const imgEl = document.createElement('img');
-    imgEl.src = file;
-    // 插入页面
-    document.body.appendChild(imgEl);
-    // 创建图片对象
-    imgInstance = new fabric.Image(imgEl, {
-        id: 3,
-        name: '剪裁图'
-    })
-    // 设置缩放
-    imgInstance.scaleX = 703 / imgInstance.width;
-    // 设置图片背景在竖直方向上的缩放比例
-    imgInstance.scaleY = 703 / imgInstance.height;
-    imgInstance = new fabric.Image(imgEl, {
-        id: uuid(),
-        name: '图片1',
-        left: 250,
-        top: 250,
-    })
-    imgEl.onload = () => {
-        canvasEditor.canvas.add(imgInstance);
-        canvasEditor.canvas.setActiveObject(imgInstance);
-        canvasEditor.canvas.renderAll();
-        // 删除页面中的图片元素
-        imgEl.remove();
-
-    };
-}
-async function imgToBase64(url) {
-    return new Promise((resolve, reject) => {
-        const image = new Image()
-        image.src = url
-        image.onload = () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = image.naturalWidth // 使用 naturalWidth 为了保证图片的清晰度
-            canvas.height = image.naturalHeight
-            canvas.style.width = `${canvas.width / window.devicePixelRatio}px`
-            canvas.style.height = `${canvas.height / window.devicePixelRatio}px`
-            const ctx = canvas.getContext('2d')
-            if (!ctx) {
-                return null
-            }
-            ctx.drawImage(image, 0, 0)
-            const base64 = canvas.toDataURL('image/png')
-            return resolve(base64)
-        }
-        image.onerror = (err) => {
-            return reject(err);
-        }
-    })
-}
-
-
-// if (activeObject) {
-//     state.type = activeObject.type;
-// }
 const goBack = () => {
     emit('goBack', 'cropping')
+    state.hasCropping && handelCutParts(croppedImage.value)
     state.hasCropping = false
 }
+onUnmounted(() => {
+    canvasEditor.canvas.getObjects().forEach(el => {
+        if (el.hasCropping) canvasEditor.canvas.remove(el)
+    })
+})
 </script>
 <style lang="less" scoped>
 .menu {

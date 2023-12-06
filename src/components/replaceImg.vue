@@ -7,7 +7,7 @@
 -->
 
 <template>
-  <div v-if="mixinState.mSelectMode === 'one' && type === 'image'">
+  <div v-if="mixinState.mSelectMode === 'one' && type === 'image' && !selected.hasCropping">
     <Button @click="replace" type="text" long class="btn-02" :disabled="disabled">图片替换 </Button>
   </div>
 </template>
