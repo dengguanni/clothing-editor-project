@@ -54,7 +54,7 @@ const store = createStore({
       disableClipping: false,
       isShowCuts: true,
       saveBtnDisabled: true,
-      
+      testBase64: ''
     }
   },
   mutations: {
@@ -67,7 +67,9 @@ const store = createStore({
     setIsShowCuts(state) {
       state.isShowCuts = state.isShowCuts = !state.isShowCuts
     },
-
+    setTestBase64(state, val) {
+      state.testBase64 = val
+    },
     setDisableClipping(state, val) {
       state.disableClipping = val
     },
@@ -111,11 +113,11 @@ const store = createStore({
       state.selected = val
     },
     setPageLoading(state, val) {
-      console.log('setPageLoading',val)
+      console.log('setPageLoading', val)
       state.pageLoading = val
     },
     setGoodsId(state, GUID) {
-      console.log('切换 id',GUID)
+      console.log('切换 id', GUID)
       state.saveData.commodityInfo.GUID = GUID
       state.goodsId = GUID
     },
@@ -131,7 +133,7 @@ const store = createStore({
       state.sizeGUID = sizeGUID
     },
     setBgColor(state, val) {
-      console.log('颜色',val )
+      console.log('颜色', val)
       state.saveData.commodityInfo.bgColor = val
       state.bgColor = val
     },

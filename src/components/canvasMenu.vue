@@ -12,6 +12,7 @@
                 <div class="text-1">{{ item.Title }} </div>
             </div>
         </div>
+        <img :src="testBase64" style="width: 300px;height: auto;">
     </div>
 </template>
   
@@ -47,6 +48,10 @@ let listenCanvas = false
 const URLbase64 = ref('')
 const active = ref('')
 const isLoadAll = ref(false)
+const testBase64 = computed(() => {
+    return store.state.testBase64
+})
+
 const cutParts = computed(() => {
     return store.state.cutParts
 })
@@ -97,7 +102,6 @@ watch(sizeGUID, (newVal, oldVal) => {
 const watchCanvas = () => {
 
     if (listenCanvas) return
-    console.log('监听')
     listenCanvas = true
     const fn = () => {
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '监听到操作')
@@ -189,7 +193,7 @@ const init = (newVal) => {
 const loadCuts = debounce(() => {
     store.commit('setDisableClipping', true)
     store.commit('setSaveBtnDisabled', false)
-    // console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
+    console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
     if (objects.length !== 0) store.commit('setPageLoading', false)
     store.commit('setIsSetSteps', true)
@@ -202,7 +206,7 @@ const loadCuts = debounce(() => {
         const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
         const time = Date.parse(new Date())
         // const imageURL = cutParts.value[index].MaskUrl_Path + '?num=' + time
-        const imageURL = cutParts.value[index].MaskUrl_Path
+        const imageURL = baseUrl + cutParts.value[index].MaskUrl_Path
         let callback = (image, isError) => {
             image.set({
                 scaleX: 1,
@@ -289,8 +293,7 @@ const changeSelection = () => {
 // 刷新加载对象
 const loadCanvasObject = () => {
     store.commit('setIsSetSteps', true)
-    store.commit('setPageLoading', false)
-    watchCanvas()
+
     const fnEnd = () => {
         if (bgColor.value) {
             store.commit('setDisableClipping', false)
@@ -301,10 +304,10 @@ const loadCanvasObject = () => {
                     store.commit('setIsSetSteps', false)
                     store.commit('setPageLoading', false)
                 }, 1000)
-                console.log('刷新加载对象添加完毕')
+                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '刷新加载对象添加完毕')
             })
         } else {
-            console.log('刷新加载对象(没有对象)')
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '刷新加载对象(没有对象)')
             store.commit('setDisableClipping', false)
             watchCanvas()
             store.commit('setPageLoading', false)

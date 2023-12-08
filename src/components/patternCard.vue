@@ -96,7 +96,6 @@ const searchGoods = (val) => {
   })
 }
 const getNode = (val) => {
-  console.log('val', val)
   if (val.HasChilds == '1') {
     commodityApi.getLeftClassificationList({ PGUID: val.id }).then(res => {
       let arr1 = []

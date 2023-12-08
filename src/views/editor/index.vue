@@ -13,7 +13,7 @@
       <div class="header-left">
         <div class="logo">
           <img src="http://8.140.206.30:8089/ImageSource/Other/Logo.png" style="height: 54px; width: 180px;" />
-          <span style="color: rgb(180, 178, 178);"> 更新时间:12.05</span>
+          <span style="color: rgb(180, 178, 178);"> 更新时间:12.08</span>
         </div>
         <history></history>
       </div>

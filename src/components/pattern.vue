@@ -160,7 +160,7 @@ const openDailog = (val) => {
 }
 
 const changeSize = (item: any) => {
-    // store.commit('setPageLoading', true)
+    console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击尺码：加载开始')
     store.commit('setBgColor', '')
     store.commit('setCutParts', '')
     store.commit('setGoodsSizeGUID', item.GUID)

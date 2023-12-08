@@ -4,7 +4,6 @@ import TWEEN from '@tweenjs/tween.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createMultiMaterialObject } from 'three/examples/jsm/utils/SceneUtils.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import baseUrl from '@/config/constants/baseUrl';
 import { useStore } from 'vuex'
 class LoadScene {
@@ -15,11 +14,12 @@ class LoadScene {
     static renderer: any
     static control: any
     static screenshotList: Array<any> = []
+    static cameras: any
     is3dPreview = computed(() => {
         return this.store.state.is3dPreview
     })
     static loadModel(url: string, name: string, callBack = null) {
-        console.log('url', url)
+         console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载模型')
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
                 if (c.isGroup) {
@@ -38,29 +38,23 @@ class LoadScene {
         const loader = new GLTFLoader();
         const timestamp = Date.parse(new Date());
         const path = url.slice(25)
-        console.log('path', path)
+        // baseUrl + path + '?time=' + timestamp
         loader.load(baseUrl + path + '?time=' + timestamp, object => {
+            LoadScene.cameras = []
             const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png');
             normalMap.wrapT = 100
             normalMap.wrapS = 100
             normalMap.repeat.set(700, 700)
             object.name = name
             let group = new THREE.Group()
-
             object.scene.traverse(v => {
-            //     object.scene.traverse(v => {
-            //         if (v.type == 'Mesh') {
-            //             v.geometry.material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-            //         }
-            //     })
-                
+                // 正文
                 if (v.type == 'Mesh') {
-                    // const color = new THREE.Color(modelColor)
                     const normalMap = new THREE.TextureLoader().load(baseUrl + 'ImageSource/Other/Texture.png'); //法线贴图
                     normalMap.wrapT = 100
                     normalMap.wrapS = 100
                     normalMap.repeat.set(700, 700)
-                    const frontMaterial = new THREE.MeshBasicMaterial({
+                    const frontMaterial = new THREE.MeshLambertMaterial({
                         map: v.material.map,
                         // color: color,
                         side: THREE.DoubleSide,
@@ -69,7 +63,7 @@ class LoadScene {
                         normalMap: normalMap,
                         normalScale: new THREE.Vector2(3, 3),
                     })
-                    const backMaterial = new THREE.MeshBasicMaterial({
+                    const backMaterial = new THREE.MeshLambertMaterial({
                         map: v.material.map,
                         color: 0xffffff,
                         side: THREE.BackSide,
@@ -84,16 +78,16 @@ class LoadScene {
                     cube.name = v.name ? v.name : ''
                     group.add(cube)
                 }
-                if (v.name == 'cothingCamera' || v.type == 'PerspectiveCamera') {
-                    console.log('新的相机', v)
-                    console.log('旧的相机', LoadScene.camera)
-                    LoadScene.camera.position.x = v.position.x + 0.1
-                    LoadScene.camera.position.z = v.position.z + 1
+                if (v.type == 'PerspectiveCamera') {
+                    LoadScene.cameras.push(v)
+                }
+                if (v.name.includes('默认') && v.type == 'PerspectiveCamera') {
+                    LoadScene.camera.position.x = v.position.x
+                    LoadScene.camera.position.z = v.position.z
                     LoadScene.camera.position.y = v.position.y
                     LoadScene.camera.rotation.x = v.rotation.x
                     LoadScene.camera.rotation.z = v.rotation.z
                     LoadScene.camera.rotation.y = v.rotation.y
-                    // LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
                     LoadScene.control.saveState()
                 }
             })
@@ -101,16 +95,8 @@ class LoadScene {
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '模型加载完毕')
             LoadScene.scene.add(group);
             callBack ? callBack() : ''
+           
         });
-        // const dracoLoader = new DRACOLoader();
-        // //解压模型的位置信息
-        // dracoLoader.setDecoderPath(baseUrl + 'public/static/');
-        // dracoLoader.setDecoderConfig({ type: 'js' });
-        // dracoLoader.preload();
-        // loader.setDRACOLoader(dracoLoader);
-        // loader.load('yifu1_draco', function (glb) {
-        //     LoadScene.scene.add(glb);
-        //  })
     }
 
 
@@ -146,7 +132,7 @@ class LoadScene {
         LoadScene.renderer = renderer
         LoadScene.scene = new THREE.Scene();
         LoadScene.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 200);
-        // LoadScene.camera.position.set(0, 0, -3.169317572406974);
+        LoadScene.camera.position.set(0, 10, 10);
         LoadScene.scene.add(LoadScene.camera);
         LoadScene.scene.background = new THREE.Color("#F5F5F5");
         const light1 = new THREE.DirectionalLight(0xffffff);
@@ -188,15 +174,11 @@ class LoadScene {
 
         // 创建轨道控制器
         LoadScene.control = new OrbitControls(LoadScene.camera, LoadScene.renderer.domElement);
-        // LoadScene.control.enablePan = true
+        LoadScene.control.enablePan = false
         LoadScene.control.hylMovePanY = false
-        LoadScene.control.hylMovePanX = true
-        // LoadScene.control.target.set(-0.017017322512750035,
-        //     -0.13816378273860236, 0.01996416024727918);
+        LoadScene.control.hylMovePanX = false
         LoadScene.control.target.set(0,
             0, 0);
-        LoadScene.control.enablePan = false
-        // LoadScene.control.saveState()
         const render = () => {
             LoadScene.control.update();
             LoadScene.renderer.render(LoadScene.scene, LoadScene.camera);
@@ -262,37 +244,58 @@ class LoadScene {
     }
 
     setModelCamera(direction: string) {
-        if (LoadScene.scene) {
-            LoadScene.scene.traverse((c: any) => {
-                const setModelRotation = (targetPosition: any) => {
-                    let position = { x: LoadScene.camera.position.x, y: LoadScene.camera.position.y, z: LoadScene.camera.position.z };
-                    let testTween = new TWEEN.Tween(position);
-                    testTween.to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 1000);
-                    testTween.onStart(function () {
-                    }).onUpdate(function (object) {
-                        LoadScene.camera.position.x = object.x
-                        LoadScene.camera.position.z = object.z
-                        LoadScene.camera.position.y = object.y
-                    }).onComplete(function () {
-                    });
-                    testTween.easing(TWEEN.Easing.Quadratic.Out);
-                    testTween.start(); //开始
-                }
-                if (c.name == 'clothingModel') {
-                    if (direction.includes('左')) {
-                        setModelRotation({ x: 2.7697086512561713, y: -0.7981105367000209, z: 0.8317052112167073 })
-                    } else if (direction.includes('右')) {
-                        setModelRotation({ x: -2.8087046119192127, y: -0.7981105367000209, z: 0.8317052112167073 })
-                    } else if (direction.includes('前')) {
-                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: -3 })
-                    } else if (direction.includes('后')) {
-                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: 2.980386083644747 })
-                    } else {
-                        setModelRotation({ x: 0.06689093537133349, y: -0.33589342830992186, z: -3 })
-                    }
-                }
-            })
+        const setModelRotation = (targetPosition: any) => {
+            let position = {
+                x1: LoadScene.camera.position.x,
+                y1: LoadScene.camera.position.y,
+                z1: LoadScene.camera.position.z,
+                x2: LoadScene.camera.rotation.x,
+                y2: LoadScene.camera.rotation.y,
+                z2: LoadScene.camera.rotation.z
+            };
+            let testTween = new TWEEN.Tween(position);
+            testTween.to({
+                x1: targetPosition.x1,
+                y1: targetPosition.y1,
+                z1: targetPosition.z1,
+                x2: targetPosition.x2,
+                y2: targetPosition.y2,
+                z2: targetPosition.z2,
+            }, 1000);
+            testTween.onStart(function () {
+            }).onUpdate(function (object) {
+                LoadScene.camera.position.x = object.x1
+                LoadScene.camera.position.z = object.z1
+                LoadScene.camera.position.y = object.y1
+                LoadScene.camera.rotation.x = object.x2
+                LoadScene.camera.rotation.z = object.z2
+                LoadScene.camera.rotation.y = object.y2
+
+            }).onComplete(function () {
+                // if (LoadScene.cameras[0].name.includes('默认')) LoadScene.control.saveState()
+            });
+            testTween.easing(TWEEN.Easing.Quadratic.Out);
+            testTween.start(); //开始
         }
+        let p = null
+        LoadScene.cameras.forEach(element => {
+            if (element.name.includes(direction)) {
+                p = {
+                    x1: element.position.x,
+                    y1: element.position.y,
+                    z1: element.position.z,
+                    x2: element.rotation.x,
+                    y2: element.rotation.y,
+                    z2: element.rotation.z
+                }
+                setModelRotation(p)
+            }
+        });
+        !p && ElMessage({
+            showClose: true,
+            message: '当前模型没有' + direction ,
+            type: 'error',
+        })
 
     }
 }

@@ -63,9 +63,7 @@ class CutPartsPlugin {
             // this.store.commit('setPageLoading', false)
             return
         }
-        console.log('过来了isColorChange', isColorChange, 'this.cutParts.valu', this.cutParts.value,'this.bgColor.value', this.bgColor.value)
         this.editor.fixedLayer()
-        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '截图准备')
         const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId)
         // console.log('剪裁objects', objects)
         if (this.cutPartsType.value) {
@@ -147,7 +145,6 @@ class CutPartsPlugin {
             } else {
                 this.store.commit('setsLoad3d', true)
                 this.isLoadAll = true
-                console.log('加载全部', this.cutParts.value)
                 this.cutParts.value.forEach((element, indexP) => {
                     const maskRect = this.canvas.getObjects().find((item) => item.name == element.Title);
                     let p = {
@@ -169,12 +166,11 @@ class CutPartsPlugin {
         this.editor.fixedLayer()
         console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
-            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕')
-            console.log('总的剪裁参数', p.Part_name, p, res)
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕',p, res)
             const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始贴模型')
+            
+            this.store.commit('setTestBase64', url )
             this.load3DScene.setTexture(p.Part_name, url, () => {
-                console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '贴模型完毕')
                 if (indexP !== null) {
                     if (this.cutParts.value.length == CutPartsPlugin.num) {
                         console.log('总的  保存', !this.isSetSteps.value)
