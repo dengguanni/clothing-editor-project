@@ -150,13 +150,18 @@ const replaceImage = (str, fileHeaderPath) => {
             image.cutPartsType = cutPartsType.value
             image.oldFilePath = image.FilePath
             image.oldFileName = FileName
+            image.parentCroppingFilePath = null
+            image.parentCroppingFileName = null
+            image.parentUrl = null
             image.filters = []
             image.left = cloned.left
             image.top = cloned.top
             image.rotate(oldActiveObject.angle)
+            canvasEditor.canvas.remove(oldActiveObject)
+            console.log('oldActiveObject', oldActiveObject)
             canvasEditor.canvas.add(image);
             canvasEditor.fixedLayer()
-            canvasEditor.canvas.remove(oldActiveObject)
+           
             image.moveTo(layer)
             console.log('layer', layer)
             const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);

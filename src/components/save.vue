@@ -134,7 +134,7 @@ const savaProject = debounce(function () {
       title: '提示',
       content: `<p>保存成功</p>`,
       okText: '确认',
-      cancelText: '取消',
+      cancelText: ' ',
       onOk: () => () => { },
     });
     console.log(p)
@@ -203,10 +203,9 @@ const savaProject = debounce(function () {
 
 
 // 保存步骤
-const setSaveData = debounce(function (showLoading = false) {
+const setSaveData = function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
-  // console.log('保存对象', objects)
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '整体设计'))
   const objectsCopy = JSON.parse(JSON.stringify(objects))
   objectsCopy.forEach((element, index) => {
     allCustomAttribute.forEach(key => {
@@ -218,14 +217,9 @@ const setSaveData = debounce(function (showLoading = false) {
   historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value), userID: userID.value }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
     // console.log('保存结果', res)
-    showLoading ? ElMessage({
-      showClose: true,
-      message: '保存成功',
-      type: 'success',
-    }) : ''
     store.commit('setPageLoading', false)
   })
-}, 700);
+}
 
 /**
  * @desc clear canvas 清空画布

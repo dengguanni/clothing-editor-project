@@ -1,5 +1,0 @@
-class AddObject {
-    static addImage = () => {
-
-    }
-}

@@ -229,6 +229,7 @@ class CopyPlugin {
             const grid = this.cutPartsType.value == this.cache.cutPartsType ? 10 : 0
             basicInheritAttribute.forEach(el => {
               c[el] = this.cache[el]
+              c.publicControlId = null
             })
             this.addText(c, null)
           })
@@ -248,7 +249,8 @@ class CopyPlugin {
               top: this.cache.top + grid,
               visible: true,
               repeatType: this.cache.repeatType,
-              filters: []
+              filters: [],
+              publicControlId: null
             })
             this.canvas.add(c)
             this.editor.fixedLayer()

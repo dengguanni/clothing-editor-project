@@ -34,7 +34,7 @@ export const allCustomAttribute = [
     'saveScaleY',
     'hasCropping'
 ]
-// 继承属性
+// copy继承属性
 export const basicInheritAttribute = [
     'tileParentFileName',  //平铺父级文件名
     'isMask', //判断是否裁片
@@ -68,8 +68,10 @@ export const basicInheritAttribute = [
     'width',
     'height',
     'left',
-    'top'
+    'top',
+    'publicControlId'
 ]
+// 初始属性
 export const initializationAttribute = {
     Sharpen: null,
     isLock: false,
@@ -83,5 +85,6 @@ export const initializationAttribute = {
     isMask: undefined,
     tileParentFileName: null,
     customVisible: true,
-    isBackgroundRepeat: false
+    isBackgroundRepeat: false,
+    publicControlId: null
 }

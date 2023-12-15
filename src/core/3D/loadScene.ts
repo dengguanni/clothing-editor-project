@@ -19,7 +19,7 @@ class LoadScene {
         return this.store.state.is3dPreview
     })
     static loadModel(url: string, name: string, callBack = null) {
-         console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载模型')
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载模型')
         if (LoadScene.scene) {
             LoadScene.scene.traverse(c => {
                 if (c.isGroup) {
@@ -95,7 +95,7 @@ class LoadScene {
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '模型加载完毕')
             LoadScene.scene.add(group);
             callBack ? callBack() : ''
-           
+
         });
     }
 
@@ -291,9 +291,9 @@ class LoadScene {
                 setModelRotation(p)
             }
         });
-        !p && ElMessage({
+        !p && p == '整体设计' && ElMessage({
             showClose: true,
-            message: '当前模型没有' + direction ,
+            message: '当前模型没有' + direction,
             type: 'error',
         })
 

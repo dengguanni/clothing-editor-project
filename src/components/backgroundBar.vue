@@ -132,8 +132,10 @@ const setTips = () => {
 // 点击添加
 const addItem = (item) => {
     if (setTips()) return
-    const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
+    let maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask)
+  
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+    maskRect = maskRect ? maskRect : workspace
     const currentBackground = canvasEditor.canvas.getObjects().find((item) => item.isBackground && item.cutPartsType == cutPartsType.value)
     const imageURL = baseUrl + item.ImageUrl_Path;
     let callback = (image, isError) => {

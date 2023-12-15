@@ -1,8 +1,6 @@
 <!--
  * @Author: 邓官妮
- * @Date: 2022-09-03 19:16:55
  * @LastEditors: 邓官妮
- * @LastEditTime: 2023-07-16 12:39:51
  * @Description: 锁定元素
 -->
 
@@ -41,16 +39,7 @@ watch(
   }
 );
 const lock = () => {
-  // console.log('lock', )
-  // // 修改自定义属性
-  // mixinState.mSelectActive.hasControls = false;
-  // // 修改默认属性
-  // lockAttrs.forEach((key) => {
-  //   mixinState.mSelectActive[key] = true;
-  // });
-  // mixinState.mSelectActive.selectable = false;
-  // isLock.value = true;
-  // canvasEditor.canvas.renderAll();
+
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
   activeObject.hasControls = false;
   activeObject.selectable = false;

@@ -76,9 +76,6 @@ onMounted(() => {
     let scaleX
     let scaleY
     canvasEditor.canvas.on('object:scaling', function (options) {
-
-        // console.log('object:scaling', options)
-        // console.log('options.transform', options.transform)
         if (!state.hasCropping) return
         const croppedImageH = croppedImage.value.height * croppedImage.value.scaleY
         const croppedImageW = croppedImage.value.width * croppedImage.value.scaleX
@@ -90,11 +87,9 @@ onMounted(() => {
             let rightOffset = croppedImageW + croppedImage.value.left - mask.left
             if (maskW.toFixed(0) == rightOffset.toFixed(0)) {
                 scaleX = mask.scaleX
-                console.log('相等', scaleX)
             }
 
             if (maskW < rightOffset) {
-                console.log('小于', scaleX)
                 scaleX && (mask.scaleX = scaleX)
             }
         }
@@ -128,25 +123,6 @@ onMounted(() => {
                 scaleX && (mask.scaleX = scaleX)
             }
         }
-
-        // if (options.target.top == croppedImage.value.top) {
-        //     scaleX = options.target.scaleY
-        // }
-
-        // console.log('maskW', maskW, 'scaleX', scaleX, 'croppedImageW', croppedImageW)
-        // console.log('maskH', maskW, 'scaleY', scaleY, 'croppedImageH', croppedImageH)
-
-        // action corner lastX scaleX
-        // console.log(options.target.height * options.target.scaleY)
-        // if (options.target.top < croppedImage.value.top) {
-        //     mask.scaleY = scaleY
-        // }
-        // if (options.target.left < croppedImage.value.left) {
-        //     mask.scaleX = scaleX
-
-        // }
-        // scaleX = null
-        // scaleY= null
 
     })
     canvasEditor.canvas.on('object:moving', function (options) {

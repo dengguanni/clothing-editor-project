@@ -1,8 +1,4 @@
 /*
- * @Author: 邓官妮
- * @Date: 2023-06-15 23:23:18
- * @LastEditors: 邓官妮
- * @LastEditTime: 2023-06-27 23:07:57
  * @Description: 图层调整插件
  */
 
@@ -36,43 +32,42 @@ class LayerPlugin {
       this.canvas.sendToBack(item)
     })
     workspace ? this.canvas.sendToBack(workspace) : ''
-    // console.log('2this.canvas.getObjects()', this.canvas.getObjects())
   }
-  setLayer(up) {
+  setLayer(up, obj = null) {
     const n = up ? 1 : -1
     let indexD
     const objects = this.canvas.getObjects()
-    const actives = this.canvas.getActiveObjects();
+    const actives = obj ? obj : this.canvas.getActiveObjects()[0];
     this.canvas.getObjects().forEach((element, index) => {
-      if (element.id == actives[0].id) {
+      if (element.id == actives.id) {
         indexD = index
       }
     })
     let z
     const fn = (index) => {
       if (!objects[index]) return
-      if (objects[index].cutPartsType == actives[0].cutPartsType && objects[index].isMask == undefined && objects[index].tileParentId !== actives[0].id) {
+      if (objects[index].cutPartsType == actives.cutPartsType && objects[index].isMask == undefined && objects[index].tileParentId !== actives.id) {
         z = index
       } else {
         fn(index + n)
       }
     }
     fn(indexD + n)
-    console.log('当前层级', indexD, '下一层', z)
-    if (actives[0].repeatType) {
+    if (actives.repeatType) {
       objects.forEach(element => {
-        if (element.tileParentId == actives[0].id) {
-          z && element.moveTo(z )
-          z && actives[0].moveTo(z-1)
+        if (element.tileParentId == actives.id) {
+          z && element.moveTo(z)
+          z && actives.moveTo(z - 1)
         }
       });
     } else {
-      z && actives[0].moveTo(z)
+      z && actives.moveTo(z)
     }
+
     this.fixedLayer()
   }
-  up() {
-    this.setLayer(true)
+  up(obj = null) {
+    this.setLayer(true,obj)
   }
 
   upTop() {
@@ -92,22 +87,8 @@ class LayerPlugin {
     }
   }
 
-  down() {
-    this.setLayer(false)
-    // const actives = this.canvas.getActiveObjects();
-    // if (actives && actives.length === 1) {
-    //   const activeObject = this.canvas.getActiveObjects()[0];
-    //   if (activeObject) {
-    //     if (activeObject.repeatType) {
-    //       this.canvas.getObjects().forEach(element => {
-    //         if (element.tileParentId == activeObject.id)
-    //           element.sendBackwards()
-    //       });
-    //     }
-    //     activeObject.sendBackwards();
-    //   }
-    //   this.fixedLayer()
-    // }
+  down(obj = null) {
+    this.setLayer(false, obj)
   }
 
   downTop() {

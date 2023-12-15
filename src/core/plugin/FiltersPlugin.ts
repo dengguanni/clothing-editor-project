@@ -1,6 +1,3 @@
-/*
- * @Description: 居中对齐插件
- */
 
 import { fabric } from 'fabric';
 import Editor from '../core';
@@ -60,12 +57,13 @@ class FiltersPlugin {
             activeObject.set('oldFilePath', null)
             activeObject.applyFilters()
             if (!hasF) {
-                activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.store.commit('setAllCuts')
+                activeObject.repeatType ? this.editor.setRepeat(activeObject.repeatType, true) : this.editor.setAllCuts()
             }
             // !hasF && this.editor.setRepeat(activeObject.repeatType, true)
             this.canvas.renderAll();
             noParamsFilters ? this.setCheckBoxList(noParamsFilters, null) : ''
             // !hasF && this.store.commit('setAllCuts')
+            this.editor.handleOverallObjs(activeObject,'replace')
             callback ? callback() : ''
         });
     }
@@ -166,6 +164,7 @@ class FiltersPlugin {
                 // this.store.commit('setAllCuts')
                 noParamsFilters ? this.setCheckBoxList(noParamsFilters, type) : ''
                 this.canvas.renderAll();
+                this.editor.handleOverallObjs(activeObject,'replace')
             });
         }
         setUserUploadFile(url, FileName, 'images_temp//', callback)

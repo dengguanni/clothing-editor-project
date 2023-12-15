@@ -8,10 +8,33 @@
 
 <template>
   <div class="box">
-    <Button class="all-design-btn" style="display: none;">
+    <Button class="all-design-btn">
       <span v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></span>
       整体设计
     </Button>
+    <div class="layer-box">
+      <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
+        @click="select(item.id, { Title: '整体设计' })">
+        <div v-if="item.cutPartsType == '整体设计' && item.isMask == undefined && item.customVisible !== undefined">
+          <Tooltip :content="item.name || item.text || item.type" placement="left">
+            <div class="ellipsis">
+              <div style="display:flex;">
+                <div :class="isSelect(item) && 'active'" v-html="iconType(item.type)" style="margin: 2px 5px 0px 40px;">
+                </div>
+                <span> {{ textType(item.type, item) }}</span>
+              </div>
+              <div>
+                <Lock v-show="false" :isLock="state.isLock"></Lock>
+                <span v-html="iconType(item.isLock ? 'lock' : 'unlock')" style="margin: 0px 10px;" @click="doLock"></span>
+                <span v-html="iconType(item.customVisible ? 'display' : 'hide')" style="margin: 0px 10px;"
+                  @click="doHide"></span>
+              </div>
+            </div>
+          </Tooltip>
+        </div>
+      </div>
+    </div>
+
     <template v-if="list.length">
       <Collapse v-model="value1">
         <Panel :name="item1.Title" v-for="(item1, index) in cutParts" :key="item1.Title">
@@ -21,7 +44,8 @@
             <div class="layer-box">
               <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
                 @click="select(item.id, item1)">
-                <div v-if="item.cutPartsType == item1.Title && item.isMask == undefined && item.customVisible!==undefined">
+                <div
+                  v-if="item.cutPartsType == item1.Title && item.isMask == undefined && item.customVisible !== undefined">
                   <Tooltip :content="item.name || item.text || item.type" placement="left">
                     <div class="ellipsis">
                       <div style="display:flex;">
@@ -152,6 +176,7 @@ const doLock = debounce(() => {
     activeObject.isLock = true
 
   }
+  canvasEditor.handleOverallObjs(activeObject, 'lock')
   canvasEditor.canvas.renderAll();
   store.commit('setAllIsLock')
 }, 200)
@@ -161,7 +186,8 @@ const doHide = debounce(() => {
   activeObject.visible ? '' : canvasEditor.canvas.discardActiveObject()
   activeObject.customVisible = activeObject.visible
   canvasEditor.canvas.renderAll();
- canvasEditor.setAllCuts(false)
+  canvasEditor.setAllCuts(false)
+  canvasEditor.handleOverallObjs(activeObject, 'modified')
 }, 500)
 const textType = (type, item) => {
   if (type.includes('text')) {
@@ -180,7 +206,9 @@ const textType = (type, item) => {
 };
 // 选中元素
 const select = (id, obj) => {
+  console.log('id, obj', id, obj)
   if (obj) {
+
     store.commit('setCutPartsType', obj.Title)
     const info = canvasEditor.canvas.getObjects().find((item) => item.id === id);
     canvasEditor.canvas.setActiveObject(info);
@@ -203,13 +231,21 @@ const btnIconType = (type) => {
   return iconType[type];
 };
 const up = () => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  console.log('1up')
   canvasEditor.up();
+  canvasEditor.handleOverallObjs(activeObject, 'top')
+  console.log('up')
+ 
 };
 const upTop = () => {
   canvasEditor.upTop();
 };
 const down = () => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  canvasEditor.handleOverallObjs(activeObject, 'down')
   canvasEditor.down();
+ 
 };
 const downTop = () => {
   canvasEditor.downTop();

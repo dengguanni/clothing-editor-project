@@ -84,9 +84,9 @@ const notSelectOneMode = () => {
 const flip = (type) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
   activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords();
-  canvasEditor.canvas.renderAll();
- canvasEditor.setAllCuts(false)
+  canvasEditor.setAllCuts(false)
   canvasEditor.setRepeat(activeObject.repeatType, true)
+  canvasEditor.handleOverallObjs(activeObject, 'modified')
 };
 const angle = (value) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
@@ -94,8 +94,9 @@ const angle = (value) => {
   // activeObject.set('angle', activeObject.angle + value)
   store.commit('setObjectAttr')
   canvasEditor.setRepeat(activeObject.repeatType, true)
-  canvasEditor.canvas.renderAll();
- canvasEditor.setAllCuts(false)
+  canvasEditor.setAllCuts(false)
+  canvasEditor.handleOverallObjs(activeObject, 'rotating') 
+ 
 }
 </script>
 

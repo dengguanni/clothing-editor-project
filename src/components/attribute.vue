@@ -451,6 +451,7 @@ const setAllCuts = debounce(() => {
   //   canvasEditor.canvas.renderAll();
   // }
  canvasEditor.setAllCuts(false)
+ canvasEditor.handleOverallObjs(activeObject, 'rotating') 
 }, 400)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();

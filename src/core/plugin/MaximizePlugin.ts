@@ -6,9 +6,10 @@ class MaximizePlugin {
     static canvasEditor: any
     static activeObject: any
     static mask: any
-    static setMax(type: string, mask: any) {
-        this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
-        this.mask = this.canvasEditor.canvas.getObjects().find((item) => item.isMask);
+    static setMax(type: string, obj: any = null, mask: any = null) {
+        this.activeObject = obj ? obj : this.canvasEditor.canvas.getActiveObjects()[0];
+        this.mask = mask ? mask : this.canvasEditor.canvas.getObjects().find((item) => item.isMask);
+        this.mask = this.mask ? this.mask : this.canvasEditor.canvas.getObjects().find((item) => item.id == 'workspace')
         this.activeObject.rotate(0);
         if (type == 'bigFull') {
             this.designMaximization()
@@ -20,13 +21,14 @@ class MaximizePlugin {
             this.widthMaximization()
         }
         this.canvasEditor.setRepeat(this.activeObject.repeatType, true)
+        this.canvasEditor.handleOverallObjs(this.activeObject,'modified')
         this.canvasEditor.canvas.requestRenderAll();
 
     }
     // 设计最大化
     static designMaximization() {
         this.activeObject = this.canvasEditor.canvas.getActiveObjects()[0];
-        console.log(' this.activeObject',  this.activeObject)
+        console.log(' this.activeObject', this.activeObject)
         if (this.activeObject.width >= this.activeObject.height) {
             this.widthMaximization()
         } else {
@@ -40,7 +42,7 @@ class MaximizePlugin {
         this.activeObject.scaleX = scale
         this.activeObject.scaleY = scale
         this.activeObject.top = this.mask.top
-        const left = this.mask.left + (this.mask.width * this.mask.scaleX) / 2 - (this.activeObject.width *scale / 2)
+        const left = this.mask.left + (this.mask.width * this.mask.scaleX) / 2 - (this.activeObject.width * scale / 2)
         this.activeObject.left = left
     }
     //    宽度最大化
@@ -49,7 +51,7 @@ class MaximizePlugin {
         this.activeObject.scaleX = scale
         this.activeObject.scaleY = scale
         this.activeObject.left = this.mask.left
-        const top = this.mask.top + (this.mask.height * this.mask.scaleY) / 2 - (this.activeObject.height *scale / 2)
+        const top = this.mask.top + (this.mask.height * this.mask.scaleY) / 2 - (this.activeObject.height * scale / 2)
         this.activeObject.top = top
     }
     //    铺满设计区

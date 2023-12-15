@@ -1,10 +1,11 @@
 <template>
     <div class="canvas-menu-1" v-if="cutParts.length > 0">
-        <!-- <button @click="changeSelection(0)" :class="0 == active ? 'btn-active' : 'btn'">整体设计</button> -->
+        <button @click="store.commit('setCutPartsType', '整体设计')"
+            :class="active == '整体设计' ? 'btn-active' : 'btn'">整体设计</button>
         <div class="menu-list">
             <div v-for="item in cutParts" :key="item.Title" class="menu-item">
                 <div :class="item.Title == active ? 'active-image' : 'image'"
-                    @click=" store.commit('setCutPartsType', item.Title)">
+                    @click="store.commit('setCutPartsType', item.Title)">
                     <div class="thumbnail">
                         <img :src="item.ImageUrl" style=" width: 40%;">
                     </div>
@@ -12,7 +13,7 @@
                 <div class="text-1">{{ item.Title }} </div>
             </div>
         </div>
-        <img :src="testBase64" style="width: 300px;height: auto;">
+        <!-- <img :src="testBase64" style="width: 300px;height: auto;"> -->
     </div>
 </template>
   
@@ -26,6 +27,7 @@ import GoodsInfo from '@/core/objects/goods/goodsInfo'
 import picture from '@/api/picture'
 import guid from '@/utils/guiId.ts'
 import baseUrl from '@/config/constants/baseUrl'
+import MaximizePlugin from '@/core/plugin/MaximizePlugin.ts'
 import { useStore } from 'vuex'
 import { debounce } from 'lodash-es';
 const load3DScene = new LoadScene()
@@ -44,6 +46,7 @@ const repeatList = {
     transverse: '横向平铺',
     direction: '纵向平铺'
 }
+const overallDesignImage = '../src/assets/png/zhengti.png'
 let listenCanvas = false
 const URLbase64 = ref('')
 const active = ref('')
@@ -87,7 +90,7 @@ watch(cutPartsType, (newVal, oldVal) => {
     if (newVal) {
         changeSelection()
     }
-}, { immediate: true, deep: true });
+}, { deep: true });
 watch(cutParts, (newVal, oldVal) => {
     if (newVal.length > 0) {
         loadCuts()
@@ -99,27 +102,24 @@ watch(sizeGUID, (newVal, oldVal) => {
         init(newVal)
     }
 }, { immediate: true, deep: true });
-const watchCanvas = () => {
 
+const watchCanvas = () => {
     if (listenCanvas) return
     listenCanvas = true
-    const fn = () => {
-        //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '监听到操作')
-        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
-        const mask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
-        const objects = canvasEditor.canvas.getObjects()
-        if (cutPartsType.value && !disableClipping.value) {
+    const fn = (ops, type) => {
+        if (cutPartsType.value && !disableClipping.value && cutPartsType.value !== '整体设计') {
             canvasEditor.setAllCuts(false)
         }
+
     }
-    canvasEditor.canvas.on('object:added', () => {
-        console.log('added')
+    canvasEditor.canvas.on('object:added', (option) => {
+        console.log('added', option)
         canvasEditor.fixedLayer()
-        fn()
+        fn(option, 'added')
     })
-    canvasEditor.canvas.on('object:modified', () => {
+    canvasEditor.canvas.on('object:modified', (option) => {
         console.log('modified')
-        fn()
+        fn(option, 'modified')
     })
     canvasEditor.canvas.on('selection:created', (val) => {
         console.log('selection:created', val.selected[0])
@@ -128,10 +128,10 @@ const watchCanvas = () => {
         if (val) store.commit('setSelected', val.selected[0])
     })
     canvasEditor.canvas.on('before:transform', (val) => {
+        console.log('transform')
         if (val.transform.target.tileParentId) {
             const obj = canvasEditor.canvas.getObjects().find(el => el.id == val.transform.target.tileParentId)
             canvasEditor.canvas.discardActiveObject();
-            console.log('obj', obj)
             obj && canvasEditor.canvas.setActiveObject(obj);
         }
         store.commit('setSelected', val.transform.target)
@@ -143,7 +143,7 @@ const watchCanvas = () => {
                 canvasEditor.canvas.remove(el)
             }
         })
-        fn(isSetSteps.value)
+        fn(val, 'removed')
     })
 }
 // 获取裁片 模型信息 
@@ -171,6 +171,7 @@ const init = (newVal) => {
             let callback = () => {
                 arr && store.commit('setCutParts', arr)
                 cutParts.value[0] && store.commit('setCutPartsType', cutParts.value[0].Title)
+
             }
             LoadScene.loadModel(modelInfo.modelUrl, modelInfo.modelName, callback)
             GoodsInfo.SizeGUID = newVal
@@ -193,6 +194,7 @@ const init = (newVal) => {
 const loadCuts = debounce(() => {
     store.commit('setDisableClipping', true)
     store.commit('setSaveBtnDisabled', false)
+    const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
     const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
     if (objects.length !== 0) store.commit('setPageLoading', false)
@@ -200,12 +202,35 @@ const loadCuts = debounce(() => {
     objects.forEach(el => {
         canvasEditor.canvas.remove(el)
     })
-    canvasEditor.canvas.requestRenderAll();
+    const properties1 = {
+        left: 0,
+        top: 0
+    };
+    let callback1 = (image, isError) => {
+        image.opacity = 0
+        image.cutPartsType = '整体设计'
+        image.name = '整体设计'
+        image.isMask = false
+        image.isLock = true
+        image.visible = false
+        image.set({
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            width: 703,
+            height: 703,
+            left: workspace.width / 2 - (image.width * 1) / 2,
+            top: workspace.height / 2 - (image.height * 1) / 2,
+        })
+        canvasEditor.canvas.add(image)
+    }
+    fabric.Image.fromURL(overallDesignImage, callback1, properties1);
     let i = 0
     const fn = (index) => {
-        const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+
         const time = Date.parse(new Date())
-        // const imageURL = cutParts.value[index].MaskUrl_Path + '?num=' + time
+        // const path = new fabric.Rect({ width: 703, height: 703, top: 0, left: 0 })
+
         const imageURL = baseUrl + cutParts.value[index].MaskUrl_Path
         let callback = (image, isError) => {
             image.set({
@@ -236,7 +261,6 @@ const loadCuts = debounce(() => {
             canvasEditor.canvas.add(image)
             canvasEditor.canvas.requestRenderAll();
             i++
-
             if (i == cutParts.value.length) {
                 console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '裁片加载结束')
                 loadCanvasObject()
@@ -264,10 +288,10 @@ const changeSelection = () => {
     load3DScene.setModelCamera(cutPartsType.value)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     active.value = cutPartsType.value
-    cutPartsType.value = cutPartsType.value
     let maskRect
     const oldMask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
     oldMask ? oldMask.isMask = false : ''
+    console.log('旧的', oldMask)
     canvasEditor.canvas.getObjects().forEach(el => {
         {
             if (el.cutPartsType == cutPartsType.value || el.id == 'grid') {
@@ -279,6 +303,7 @@ const changeSelection = () => {
                 el.visible = true
                 el.isMask = true
                 maskRect = el
+                console.log('切换裁片', maskRect)
                 const path = new fabric.Rect({ width: maskRect.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                 canvasEditor.canvas.clipPath = path;
                 isShowCuts.value ? el.visible = true : el.visible = false
@@ -288,6 +313,7 @@ const changeSelection = () => {
             }
         }
     })
+    // !maskRect && (canvasEditor.canvas.clipPath = workspace);
     canvasEditor.fixedLayer()
 }
 // 刷新加载对象
@@ -303,6 +329,7 @@ const loadCanvasObject = () => {
                     store.commit('setSaveBtnDisabled', false)
                     store.commit('setIsSetSteps', false)
                     store.commit('setPageLoading', false)
+                    canvasEditor.overallDesignPluginInit()
                 }, 1000)
                 console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '刷新加载对象添加完毕')
             })
@@ -311,6 +338,7 @@ const loadCanvasObject = () => {
             store.commit('setDisableClipping', false)
             watchCanvas()
             store.commit('setPageLoading', false)
+            canvasEditor.overallDesignPluginInit()
         }
 
     }

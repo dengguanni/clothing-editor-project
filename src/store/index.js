@@ -27,7 +27,7 @@ const store = createStore({
       bgColor: '',
       sizeGUID: '',
       cutParts: [],
-      cutPartsType: '',
+      cutPartsType: '整体设计',
       colorList: [],
       goodsId: '',
       // 撤回-回退

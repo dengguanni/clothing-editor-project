@@ -34,8 +34,8 @@
                     </div>
                     <div v-show="item.type == 'layer' && state.isLayer" class="scale-menu" @click.stop id="layer">
                         <div id="layer-up" class="item" @click.stop="menu3Click('layer-up')">上移</div>
-                        <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')">置顶</div>
-                        <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')">置底</div>
+                        <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')" v-show="selected.cutPartsType!=='整体设计'">置顶</div>
+                        <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')" v-show="selected.cutPartsType!=='整体设计'">置底</div>
                         <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
                     </div>
                 </Tooltip>
@@ -284,10 +284,14 @@ const setButtonActive = (arr, type) => {
 
 }
 const setCopyTo = (item) => {
+    store.commit('setDisableClipping', true)
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-    if (item.Title == 'all') {
+    if (item.Title == '整体设计') {
+        let n = 0
         cutParts.value.forEach(el => {
             if (el.Title !== cutPartsType.value) {
+                const mask = canvasEditor.canvas.getObjects().find((item) => (item.isMask !== undefined && item.cutPartsType == el.cutPartsType))
+                console.log('mask', mask)
                 activeObject.clone(c => {
                     c.set({
                         id: uuid(),
@@ -295,8 +299,21 @@ const setCopyTo = (item) => {
                         visible: false,
                         FileName: activeObject.FileName,
                         FilePath: activeObject.FilePath,
+                        customVisible: true,
+                        publicControlId: null
                     })
+                    n++
+                    
+                    if (c.isBackground) {
+                        const bg = canvasEditor.canvas.getObjects().find((item) => (item.isBackground && item.cutPartsType == c.cutPartsType))
+                        canvasEditor.canvas.remove(bg)
+                        // canvasEditor.setMax('full', c, mask)
+                    }
                     canvasEditor.canvas.add(c)
+                    if (n == cutParts.value.length - 1) {
+                        store.commit('setDisableClipping', false)
+                        canvasEditor.setAllCuts(true)
+                    }
                 })
             }
         })
@@ -308,6 +325,7 @@ const setCopyTo = (item) => {
                 visible: false,
                 FileName: activeObject.FileName,
                 FilePath: activeObject.FilePath,
+                customVisible: true
             })
             if (c.repeatType) {
                 canvasEditor.canvas.getObjects().forEach(element => {
@@ -320,20 +338,27 @@ const setCopyTo = (item) => {
                                 FilePath: element.FilePath,
                                 tileParentFileName: c.FileName,
                                 tileParentId: c.id,
-                                cutPartsType: c.cutPartsType
+                                cutPartsType: c.cutPartsType,
+                                customVisible: true
                             })
                             canvasEditor.canvas.add(cloned)
+                            store.commit('setDisableClipping', false)
+                            canvasEditor.setAllCuts(true)
+
                         })
                     }
                 });
+            } else {
+                canvasEditor.canvas.add(c)
+                store.commit('setDisableClipping', false)
+                canvasEditor.setAllCuts(true)
             }
-            canvasEditor.canvas.add(c)
+
         })
     }
     // canvasEditor.setRepeat(repeatType, true)
     canvasEditor.canvas.renderAll();
     state.copyTo = false
-
     Message.success('复制成功');
 }
 const menuList1Click = (type) => {
@@ -363,7 +388,7 @@ const menuList1Click = (type) => {
 
 const del = debounce(function () {
     canvasEditor.del();
-   canvasEditor.setAllCuts(false)
+    canvasEditor.setAllCuts(false)
 }, 300);
 const btnClick = (item) => {
     const activeObject = canvasEditor.canvas.getActiveObject()
@@ -423,8 +448,8 @@ const scaleSmall = debounce((obj) => {
     activeObject.top = activeObject.top + top
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
-   canvasEditor.setAllCuts(false)
-
+    canvasEditor.setAllCuts(false)
+    canvasEditor.handleOverallObjs(activeObject,'modified')
 }, 300);
 
 // 元素变大
@@ -442,7 +467,9 @@ const scaleBig = debounce((obj) => {
     activeObject.top = activeObject.top - top
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
-   canvasEditor.setAllCuts(false)
+    canvasEditor.setAllCuts(false)
+    canvasEditor.handleOverallObjs(activeObject,'modified')
+
 }, 300);
 const lock = () => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0]
@@ -455,6 +482,7 @@ const lock = () => {
             activeObject[key] = true;
         });
         store.commit('setAllIsLock')
+        canvasEditor.handleOverallObjs(activeObject,'lock')
     } else if (activeObject.isLock) {
         activeObject.hasControls = true;
         // 修改默认属性
@@ -465,10 +493,13 @@ const lock = () => {
         activeObject.isLock = false
         activeObject.hoverCursor = null
         store.commit('setAllIsLock')
+        canvasEditor.handleOverallObjs(activeObject,'lock')
+
     }
     canvasEditor.canvas.renderAll();
 }
 const menu3Click = (type) => {
+    const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     switch (type) {
         case 'delete':
             del()
@@ -494,20 +525,24 @@ const menu3Click = (type) => {
             MouseEventEventListener.setMouseupFn = setLayer
             break
         case 'layer-up':
+            console.log('top')
             canvasEditor.up();
-           canvasEditor.setAllCuts(false)
+            canvasEditor.setAllCuts(false)
+            canvasEditor.handleOverallObjs(activeObject, 'top')
             break
         case 'layer-down':
+            console.log('down')
             canvasEditor.down();
-           canvasEditor.setAllCuts(false)
+            canvasEditor.setAllCuts(false)
+            canvasEditor.handleOverallObjs(activeObject, 'down')
             break
         case 'layer-top':
             canvasEditor.upTop();
-           canvasEditor.setAllCuts(false)
+            canvasEditor.setAllCuts(false)
             break
         case 'layer-bottom':
             canvasEditor.downTop();
-           canvasEditor.setAllCuts(false)
+            canvasEditor.setAllCuts(false)
             break
         case 'createCopy':
             clone();
