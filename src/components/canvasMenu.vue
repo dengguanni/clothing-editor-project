@@ -1,7 +1,7 @@
 <template>
     <div class="canvas-menu-1" v-if="cutParts.length > 0">
-        <button @click="store.commit('setCutPartsType', '整体设计')"
-            :class="active == '整体设计' ? 'btn-active' : 'btn'">整体设计</button>
+        <button @click="store.commit('setCutPartsType', '[整体设计]')"
+            :class="active == '[整体设计]' ? 'btn-active' : 'btn'">整体设计</button>
         <div class="menu-list">
             <div v-for="item in cutParts" :key="item.Title" class="menu-item">
                 <div :class="item.Title == active ? 'active-image' : 'image'"
@@ -107,15 +107,15 @@ const watchCanvas = () => {
     if (listenCanvas) return
     listenCanvas = true
     const fn = (ops, type) => {
-        if (cutPartsType.value && !disableClipping.value && cutPartsType.value !== '整体设计') {
+        if (cutPartsType.value && !disableClipping.value && cutPartsType.value !== '[整体设计]' && !ops.tileParentId) {
             canvasEditor.setAllCuts(false)
         }
 
     }
     canvasEditor.canvas.on('object:added', (option) => {
         console.log('added', option)
+        fn(option, 'add')
         canvasEditor.fixedLayer()
-        fn(option, 'added')
     })
     canvasEditor.canvas.on('object:modified', (option) => {
         console.log('modified')
@@ -208,8 +208,8 @@ const loadCuts = debounce(() => {
     };
     let callback1 = (image, isError) => {
         image.opacity = 0
-        image.cutPartsType = '整体设计'
-        image.name = '整体设计'
+        image.cutPartsType = '[整体设计]'
+        image.name = '[整体设计]'
         image.isMask = false
         image.isLock = true
         image.visible = false

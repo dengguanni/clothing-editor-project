@@ -34,8 +34,10 @@
                     </div>
                     <div v-show="item.type == 'layer' && state.isLayer" class="scale-menu" @click.stop id="layer">
                         <div id="layer-up" class="item" @click.stop="menu3Click('layer-up')">上移</div>
-                        <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')" v-show="selected.cutPartsType!=='整体设计'">置顶</div>
-                        <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')" v-show="selected.cutPartsType!=='整体设计'">置底</div>
+                        <div class="item" id='layer-top' @click.stop="menu3Click('layer-top')"
+                            v-show="selected.cutPartsType !== '[整体设计]'">置顶</div>
+                        <div class="item" id="layer-bottom" @click.stop="menu3Click('layer-bottom')"
+                            v-show="selected.cutPartsType !== '[整体设计]'">置底</div>
                         <div class="item" id="layer-down" @click.stop="menu3Click('layer-down')">下移</div>
                     </div>
                 </Tooltip>
@@ -286,7 +288,7 @@ const setButtonActive = (arr, type) => {
 const setCopyTo = (item) => {
     store.commit('setDisableClipping', true)
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
-    if (item.Title == '整体设计') {
+    if (item.Title == 'all') {
         let n = 0
         cutParts.value.forEach(el => {
             if (el.Title !== cutPartsType.value) {
@@ -303,7 +305,7 @@ const setCopyTo = (item) => {
                         publicControlId: null
                     })
                     n++
-                    
+
                     if (c.isBackground) {
                         const bg = canvasEditor.canvas.getObjects().find((item) => (item.isBackground && item.cutPartsType == c.cutPartsType))
                         canvasEditor.canvas.remove(bg)
@@ -367,6 +369,8 @@ const menuList1Click = (type) => {
         case 'basic':
             // canvasEditor.setRepeat('basic', false, menuList1)
             canvasEditor.setRepeat('basic', false, menuList1)
+            canvasEditor.handleOverallObjs(activeObject,'repeat')
+
             break;
         case 'cropping':
             //   state.isShowCropping = true
@@ -375,12 +379,15 @@ const menuList1Click = (type) => {
             break;
         case 'mirror':
             canvasEditor.setRepeat('mirror', false, menuList1)
+            canvasEditor.handleOverallObjs(activeObject,'repeat')
             break;
         case 'transverse':
             canvasEditor.setRepeat('transverse', false, menuList1)
+            canvasEditor.handleOverallObjs(activeObject,'repeat')
             break;
         case 'direction':
             canvasEditor.setRepeat('direction', false, menuList1)
+            canvasEditor.handleOverallObjs(activeObject,'repeat')
             break;
         default:
     }
@@ -449,7 +456,7 @@ const scaleSmall = debounce((obj) => {
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     canvasEditor.setAllCuts(false)
-    canvasEditor.handleOverallObjs(activeObject,'modified')
+    canvasEditor.handleOverallObjs(activeObject, 'modified')
 }, 300);
 
 // 元素变大
@@ -468,7 +475,7 @@ const scaleBig = debounce((obj) => {
     canvasEditor.setRepeat(activeObject.repeatType, true)
     canvasEditor.canvas.renderAll()
     canvasEditor.setAllCuts(false)
-    canvasEditor.handleOverallObjs(activeObject,'modified')
+    canvasEditor.handleOverallObjs(activeObject, 'modified')
 
 }, 300);
 const lock = () => {
@@ -482,7 +489,7 @@ const lock = () => {
             activeObject[key] = true;
         });
         store.commit('setAllIsLock')
-        canvasEditor.handleOverallObjs(activeObject,'lock')
+        canvasEditor.handleOverallObjs(activeObject, 'lock')
     } else if (activeObject.isLock) {
         activeObject.hasControls = true;
         // 修改默认属性
@@ -493,7 +500,7 @@ const lock = () => {
         activeObject.isLock = false
         activeObject.hoverCursor = null
         store.commit('setAllIsLock')
-        canvasEditor.handleOverallObjs(activeObject,'lock')
+        canvasEditor.handleOverallObjs(activeObject, 'lock')
 
     }
     canvasEditor.canvas.renderAll();

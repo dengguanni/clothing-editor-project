@@ -71,58 +71,79 @@ class ControlsRepeat {
             });
         }
     }
-    setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
-        const activeObject = this.canvas.getActiveObjects()[0];
-        if (!val) {
-            if (repeatType) {
-                if (activeObject.repeatType == repeatType) {
-                    activeObject.isRepeat = activeObject.isRepeat == undefined ? true : !activeObject.isRepeat
-                } else {
-                    activeObject.isRepeat = true
-                }
-            } else {
-                activeObject.isRepeat = false
-            }
-        }
-        activeObject.repeatType = repeatType
 
-        if (activeObject.isRepeat && activeObject.repeatType) {
-            if (activeObject.parentCroppingFileName) {
-                activeObject.repeatType = null
-                activeObject.isRepeat = false
-                Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
-                return
-            }
-            arr.length > 0 ? this.setButtonActive(arr, activeObject.repeatType) : ''
-            if (activeObject.repeatType == 'basic') {
-                this.handelRepeat('基础平铺')
-            } else if (activeObject.repeatType == 'mirror') {
-                this.handelRepeat('镜像平铺')
-            } else if (activeObject.repeatType == 'transverse') {
-                this.handelRepeat('横向平铺')
-            } else if (activeObject.repeatType == 'direction') {
-                this.handelRepeat('纵向平铺')
-            }
-            this.canvas.requestRenderAll();
-        } else {
-            activeObject.repeatType = null
-            this.canvas.getObjects().forEach((el: any) => {
-                if (el.tileParentId == activeObject.id) {
-                    this.canvas.remove(el)
+    setRepeat(repeatType: string, val: boolean = false, arr: any = []) {
+
+        const fn = (activeObject) => {
+
+            if (!val) {
+                if (repeatType) {
+                    if (activeObject.repeatType == repeatType) {
+                        activeObject.isRepeat = activeObject.isRepeat == undefined ? true : !activeObject.isRepeat
+                    } else {
+                        activeObject.isRepeat = true
+                    }
+                } else {
+                    activeObject.isRepeat = false
                 }
-            })
-            // this.editor.setAllCuts()
+            }
+            activeObject.repeatType = repeatType
+
+
+            if (activeObject.isRepeat && activeObject.repeatType) {
+                if (activeObject.parentCroppingFileName) {
+                    activeObject.repeatType = null
+                    activeObject.isRepeat = false
+                    Message.error('裁剪后不支持平铺，请移除剪裁后再试试');
+                    return
+                }
+                arr.length > 0 ? this.setButtonActive(arr, activeObject.repeatType) : ''
+
+                if (activeObject.repeatType == 'basic') {
+                    this.handelRepeat('基础平铺', obj)
+                } else if (activeObject.repeatType == 'mirror') {
+                    this.handelRepeat('镜像平铺', obj)
+                } else if (activeObject.repeatType == 'transverse') {
+                    this.handelRepeat('横向平铺', obj)
+                } else if (activeObject.repeatType == 'direction') {
+                    this.handelRepeat('纵向平铺', obj)
+                }
+                console.log('平铺activeObject', activeObject)
+
+            } else {
+                activeObject.repeatType = null
+                this.canvas.getObjects().forEach((el: any) => {
+                    if (el.tileParentId == activeObject.id) {
+                        this.canvas.remove(el)
+                    }
+                })
+                // this.editor.setAllCuts()
+            }
         }
+        const obj = this.canvas.getActiveObjects()[0];
+        fn(obj)
+        // if (!obj.isBackground) {
+        //     const children = this.canvas.getObjects().filter((item) => (item.publicControlId == obj.id))
+        //     children && children.forEach(el => {
+        //         fn(el)
+        //     })
+        // }
     }
 
-    handelRepeat(type, obj = null, isLoadAll = false) {
+    handelRepeat(type, obj = null, isLoadAll = false, callback = null) {
         if (!isLoadAll) {
             this.editor.setAllCuts()
             this.store.commit('setDisableClipping', true)
         }
         //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺准备')
         const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
-        const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
+        let Mask = this.canvas.getObjects().find((item: any) => item.isMask !== undefined && item.cutPartsType == activeObject.cutPartsType);
+        console.log('Mask', Mask, 'activeObject', activeObject)
+        // this.canvas.getObjects().forEach((el: any) => {
+        //     if (el.isMask !== undefined && el.cutPartsType) {
+        //         this.canvas.remove(el)
+        //     }
+        // })
         console.log('activeObject', activeObject.left - Mask.left)
         activeObject.clone(c => {
             c.rotate(0)
@@ -139,18 +160,18 @@ class ControlsRepeat {
                 Image_flipY: activeObject.flipY,
                 Image_angle: activeObject.angle
             }
-            // console.log('平铺参数', p)
-            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
 
+            //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始平铺')
             picture.setBasicRepeat(p).then(res => {
-                //console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
-                res.Tag[0].base64 ? this.replaceImage(res.Tag[0].base64, activeObject, isLoadAll) : ''
+                console.log('平铺参数', p, '结果', res)
+                // console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '平铺请求结束')
+                res.Tag[0]?.base64 ? this.replaceImage(res.Tag[0].base64, activeObject, isLoadAll, callback) : ''
 
             })
         })
     }
     // 更新图片
-    replaceImage = (url, obj = null, isLoadAll) => {
+    replaceImage = (url, obj = null, isLoadAll, callback2 = null) => {
         ////console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '上传图片')
         const FileName = guid() + '.png'
         const URL = 'data:image/jpeg;base64,' + url
@@ -158,7 +179,8 @@ class ControlsRepeat {
             let z: number
             const activeObject = obj ? obj : this.canvas.getActiveObjects()[0];
             const imageURL = baseUrl + 'UserUploadFile/images_temp/' + FileName.substring(0, 1) + '/' + FileName
-            const Mask = this.canvas.getObjects().find((item: any) => item.isMask);
+            let Mask = this.canvas.getObjects().find((item: any) => item.isMask !== undefined && item.cutPartsType == activeObject.cutPartsType);
+
             let callback = (image: any, isError: boolean) => {
                 if (!isError) {
                     this.canvas.getObjects().forEach((el: any) => {
@@ -177,6 +199,7 @@ class ControlsRepeat {
                     activeObject.isBackground ? image.isBackgroundRepeat = true : image.isBackgroundRepeat = false
                     image.tileParentFileName = activeObject.FileName
                     image.tileParentId = activeObject.id
+                    console.log('image.tileParentId ', image.tileParentId )
                     image.visible = activeObject.visible
                     image.cutPartsType = activeObject.cutPartsType
                     image.id = uuid()
@@ -196,6 +219,7 @@ class ControlsRepeat {
                     this.canvas.add(image);
                     activeObject.isBackground ? this.canvas.sendToBack(image) : image.moveTo(z)
                     this.editor.fixedLayer()
+                    callback2 && callback2()
                     !isLoadAll && this.store.commit('setDisableClipping', false)
 
                 }

@@ -291,7 +291,7 @@ class LoadScene {
                 setModelRotation(p)
             }
         });
-        !p && p == '整体设计' && ElMessage({
+        !p && p == '[整体设计]' && ElMessage({
             showClose: true,
             message: '当前模型没有' + direction,
             type: 'error',

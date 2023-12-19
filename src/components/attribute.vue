@@ -37,7 +37,7 @@
             <span class="label">间距</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.charSpacing" :max="100" :step=1
-                @on-input="(value) => sliderChangeCommon('charSpacing', value)" @mouseup="store.commit('setAllCuts')"
+                @on-input="(value) => sliderChangeCommon('charSpacing', value)" @mouseup="commonFn()"
                 :disabled="disabled"></Slider>
             </div>
           </div>
@@ -57,7 +57,7 @@
             <span class="label">行高</span>
             <div class="content slider-box">
               <Slider v-model="fontAttr.lineHeight" :max="4" :step=0.1 :disabled="disabled"
-                @on-input="(value) => sliderChangeCommon('lineHeight', value)" @mouseup="store.commit('setAllCuts')"></Slider>
+                @on-input="(value) => sliderChangeCommon('lineHeight', value)" @mouseup="commonFn()"></Slider>
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@
             <span class="label">描边</span>
             <div class="content slider-box">
               <Slider v-model="baseAttr.strokeWidth" :max="10" :step=1
-                @on-input="(value) => sliderChangeCommon('strokeWidth', value)" @mouseup="store.commit('setAllCuts')"
+                @on-input="(value) => sliderChangeCommon('strokeWidth', value)" @mouseup="commonFn()"
                 :disabled="disabled"></Slider>
             </div>
           </div>
@@ -230,8 +230,8 @@
     v-show="baseType.includes(mixinState.mSelectOneType) && !props.isText">
     <Col span="4"><span>旋转</span></Col>
     <Col span="12">
-    <Slider v-model="baseAttr.angle" :min="-360" :max="360" @on-input="(value) => changeCommon('angle', value)" @mouseup="setAllCuts"
-      :disabled="disabled">
+    <Slider v-model="baseAttr.angle" :min="-360" :max="360" @on-input="(value) => changeCommon('angle', value)"
+      @mouseup="setAllCuts" :disabled="disabled">
     </Slider>
     </Col>
     <Col span="1">
@@ -450,8 +450,8 @@ const setAllCuts = debounce(() => {
   //   obj.rotate(baseAttr.angle)
   //   canvasEditor.canvas.renderAll();
   // }
- canvasEditor.setAllCuts(false)
- canvasEditor.handleOverallObjs(activeObject, 'rotating') 
+  commonFn()
+  canvasEditor.handleOverallObjs(activeObject, 'rotating')
 }, 400)
 const getObjectAttr = (e) => {
   const activeObject = canvasEditor.canvas.getActiveObject();
@@ -513,7 +513,7 @@ const changeFontFamily = (fontName) => {
     const activeObject = canvasEditor.canvas.getActiveObjects()[0];
     activeObject && activeObject.set('fontFamily', fontName);
     canvasEditor.canvas.renderAll();
-   canvasEditor.setAllCuts(false)
+    commonFn()
     return;
   }
   Spin.show();
@@ -526,7 +526,7 @@ const changeFontFamily = (fontName) => {
       activeObject && activeObject.set('fontFamily', fontName);
       canvasEditor.canvas.renderAll();
       Spin.hide();
-     canvasEditor.setAllCuts(false)
+      commonFn()
     })
     .catch((err) => {
       Spin.hide();
@@ -544,8 +544,8 @@ const changeCommon = (key, value) => {
   }
   // 旋转角度适配
   if (key === 'angle') {
-    console.log('angle,',value )
-   
+    console.log('angle,', value)
+
     activeObject.rotate(value);
     value === 0 ? activeObject.angle = 0 : ''
     canvasEditor.canvas.renderAll();
@@ -555,7 +555,7 @@ const changeCommon = (key, value) => {
   canvasEditor.canvas.renderAll();
   console.log('key', key, value)
   setTimeout(() => {
-   canvasEditor.setAllCuts(false)
+    commonFn()
   }, 300);
 };
 
@@ -574,7 +574,7 @@ const borderSet = (key) => {
     activeObject.set(stroke.value);
     canvasEditor.canvas.renderAll();
   }
- canvasEditor.setAllCuts(false)
+  commonFn()
 };
 
 // 阴影设置
@@ -591,7 +591,7 @@ const changeFontWeight = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
- canvasEditor.setAllCuts(false)
+  commonFn()
 };
 
 // 斜体
@@ -601,7 +601,7 @@ const changeFontStyle = (key, value) => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0];
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
- canvasEditor.setAllCuts(false)
+  commonFn()
 };
 
 // 中划
@@ -621,7 +621,11 @@ const changeUnderline = (key, value) => {
   activeObject && activeObject.set(key, nValue);
   canvasEditor.canvas.renderAll();
 };
-
+const commonFn = () => {
+  const activeObject = canvasEditor.canvas.getActiveObjects()[0];
+  canvasEditor.setAllCuts(false)
+  canvasEditor.handleOverallObjs(activeObject, 'replace')
+}
 // 修改边数
 const changeEdge = (value) => {
   const activeObjects = canvasEditor.canvas.getActiveObjects();

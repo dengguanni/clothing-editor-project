@@ -66,7 +66,7 @@ class CopyPlugin {
   _copyObject(activeObject: any) {
     console.log('复制_copyObject')
     this.cache = activeObject
-    if (this.cache) {
+    if (this.cache && !this.cache.tileParentId) {
       // this.clone(this.cache);
       if (this.cache.isBackground && this.cutPartsType.value == this.cache.cutPartsType) {
         Message.error('粘贴失败，一个裁片只能有一张背景图，请粘贴至别的裁片试试')
@@ -185,9 +185,9 @@ class CopyPlugin {
       visible: true,
       repeatType: c.repeatType,
       filters: [],
+      fill: c.fill
     })
     c.customVisible = c.customVisible
-
     this.canvas.add(c);
     this.canvas.setActiveObject(c);
     this.editor.setRepeat(c.repeatType, true)

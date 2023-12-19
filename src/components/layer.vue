@@ -10,12 +10,12 @@
   <div class="box">
     <Button class="all-design-btn">
       <span v-html="iconType('clothing')" style="margin: 2px 5px 0px 5px;"></span>
-      整体设计
+      [整体设计]
     </Button>
     <div class="layer-box">
       <div v-for="item in list" :key="item.id" :class="isSelect(item) && 'active'"
-        @click="select(item.id, { Title: '整体设计' })">
-        <div v-if="item.cutPartsType == '整体设计' && item.isMask == undefined && item.customVisible !== undefined">
+        @click="select(item.id, { Title: '[整体设计]' })">
+        <div v-if="item.cutPartsType == '[整体设计]' && item.isMask == undefined && item.customVisible !== undefined">
           <Tooltip :content="item.name || item.text || item.type" placement="left">
             <div class="ellipsis">
               <div style="display:flex;">

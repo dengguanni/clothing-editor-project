@@ -95,7 +95,7 @@ const angle = (value) => {
   store.commit('setObjectAttr')
   canvasEditor.setRepeat(activeObject.repeatType, true)
   canvasEditor.setAllCuts(false)
-  canvasEditor.handleOverallObjs(activeObject, 'rotating') 
+  canvasEditor.handleOverallObjs(activeObject, 'modified') 
  
 }
 </script>

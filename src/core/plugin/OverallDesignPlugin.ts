@@ -1,11 +1,13 @@
 /*
-整体设计
+[整体设计]
  */
 
 import { fabric } from 'fabric';
 import Editor from '../core';
 import { useStore } from 'vuex'
 import { v4 as uuid } from 'uuid';
+import { setUserUploadFile } from '@/core/2D/handleImages.ts'
+import guid from '@/utils/guiId.ts'
 const lockAttrs = [
     'lockMovementX',
     'lockMovementY',
@@ -48,6 +50,7 @@ class OverallDesignPlugin {
         // })
     }
     addHandle(activeObject: any) {
+        if (activeObject.tileParentId) return
         this.store.commit('setDisableClipping', true)
         let n = 0
         this.cutParts.value.forEach(el => {
@@ -61,7 +64,8 @@ class OverallDesignPlugin {
                         FilePath: activeObject.FilePath,
                         customVisible: true,
                         isBackground: activeObject.isBackground,
-                        publicControlId: activeObject.id
+                        publicControlId: activeObject.id,
+                        repeatType: activeObject.repeatType
                     })
                     if (c.isBackground) {
                         const mask = this.canvas.getObjects().find((item) => (item.isMask !== undefined && item.cutPartsType == c.cutPartsType))
@@ -92,7 +96,7 @@ class OverallDesignPlugin {
                     el.rotate(activeObject.angle)
                     el.flipX = activeObject.flipX
                     el.flipY = activeObject.flipY
-                    el.visible = el.cutPartsType == '整体设计' ? activeObject.visible : false
+                    el.visible = el.cutPartsType == '[整体设计]' ? activeObject.visible : false
                     el.customVisible = activeObject.customVisible
                 })
 
@@ -112,13 +116,30 @@ class OverallDesignPlugin {
     }
     handelRemove(activeObject: any) {
         this.store.commit('setDisableClipping', true)
-        this.canvas.getObjects().forEach((item) => {
-            if (item.publicControlId == activeObject.id) {
-                this.canvas.remove(item)
+        const objects = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+        let n = 0
+        let m = 0
+        objects.forEach((item) => {
+            n++
+            console.log('删除', item)
+            const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
+            console.log('repeatObjs', repeatObjs, 'm', m)
+            repeatObjs.forEach(e => {
+                m++
+                this.canvas.remove(e)
+
+            })
+            this.canvas.remove(item)
+
+            console.log('object', objects, 'n', n, 'this.canvas.getObjects()', this.canvas.getObjects())
+            if (n == objects.length) {
+                this.store.commit('setDisableClipping', false)
+                setTimeout(() => {
+                    this.editor.setAllCuts(true)
+                }, 1000);
+
             }
         })
-        this.store.commit('setDisableClipping', false)
-        this.editor.setAllCuts(true)
     }
     handelLock(activeObject: any) {
         const doLock = () => {
@@ -152,11 +173,89 @@ class OverallDesignPlugin {
         this.editor.setAllCuts(true)
 
     }
-    handelReplace(activeObject: any) {
+    handelRepeat(activeObject) {
+        console.log('handelRepeat', activeObject)
+        const obj = {
+            basic: '基础平铺',
+            mirror: '镜像平铺',
+            transverse: '横向平铺',
+            direction: '纵向平铺'
+        }
+
         if (!activeObject.isBackground) {
+            this.store.commit('setDisableClipping', true)
+            const children = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+            console.log('平铺children', children)
+            children && children.forEach(el => {
+                const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
+                el.repeatType = activeObject.repeatType
+                repeatObjs.forEach(e => this.canvas.remove(e))
+            })
+            let n = 0
+            children && children.forEach(el => {
+                this.editor.handelRepeat(obj[activeObject.repeatType], el, true, () => {
+                    n++
+                    if (n == children.length) {
+                        this.store.commit('setDisableClipping', false)
+                        this.editor.setAllCuts(true)
+                    }
+                })
+            })
+        }
+    }
+    handelReplace(activeObject: any) {
+
+        const oldObject = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+        if (activeObject.type == 'text') {
             let n = 0
             this.store.commit('setDisableClipping', true)
-            const oldObject = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+            const FileName = guid() + '.png'
+            activeObject.clone(clone => {
+                clone.rotate(0);
+                clone.set({
+                    angle: 0
+                })
+                const url = clone.toDataURL({
+                    width: clone.width * clone.zoomX,
+                    height: clone.height * clone.zoomY,
+                    scaleX: 1,
+                    scaleY: 1,
+                    multiplier: 1,
+                })
+                activeObject.FileName = FileName
+                activeObject.FilePath = 'images_temp/' + FileName.substring(0, 1)
+
+                const callback = () => {
+                    oldObject.forEach(element => {
+                        activeObject.clone(c => {
+                            c.set({
+                                id: uuid(),
+                                cutPartsType: element.cutPartsType,
+                                visible: false,
+                                FileName: activeObject.FileName,
+                                FilePath: activeObject.FilePath,
+                                customVisible: true,
+                                isBackground: activeObject.isBackground,
+                                publicControlId: activeObject.id,
+                                repeatType: activeObject.repeatType
+                            })
+                            this.canvas.remove(element)
+                            this.canvas.add(c)
+
+                            n++
+                            if (n == oldObject.length) {
+                                this.store.commit('setDisableClipping', false)
+                                this.editor.setAllCuts(true)
+                            }
+                        })
+                    });
+                }
+                setUserUploadFile(url, FileName, 'images_temp/', callback, null)
+            })
+        } else if (!activeObject.isBackground && activeObject.type !== 'text') {
+
+            let n = 0
+            this.store.commit('setDisableClipping', true)
             oldObject.forEach(element => {
                 activeObject.clone(c => {
                     c.set({
@@ -174,40 +273,33 @@ class OverallDesignPlugin {
                     n++
                     if (n == oldObject.length) {
                         this.store.commit('setDisableClipping', false)
-                        this.editor.setAllCuts(true)
+                        activeObject.repeatType ? this.handelRepeat(activeObject) :this.editor.setAllCuts(true)
+                        
                     }
                 })
             });
 
-
         }
     }
     handelTop(activeObject: any) {
-        console.log('handelTop1',)
         const children = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
-        console.log('children', children)
         children.forEach(el => {
-            // this.canvas.bringForward(el)
             this.editor.up(el)
-            console.log('handelTop',)
         })
         this.editor.setAllCuts(true)
     }
     handelDown(activeObject: any) {
         console.log('handelDown2',)
         const children = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
-        console.log('children', children)
         children.forEach(el => {
-            // this.canvas.sendBackwards(el)
             this.editor.down(el)
-            console.log('handelDown',)
         })
         this.editor.setAllCuts(true)
     }
     handleOverallObjs(activeObject: any, type: string) {
         console.log('activeObject', activeObject, type)
-        if (activeObject && activeObject.cutPartsType == '整体设计') {
-            console.log('整体设计')
+        if (activeObject && activeObject.cutPartsType == '[整体设计]') {
+            console.log('[整体设计]')
             switch (type) {
                 case 'added':
                     this.addHandle(activeObject)
@@ -233,12 +325,15 @@ class OverallDesignPlugin {
                 case 'down':
                     this.handelDown(activeObject)
                     break;
+                case 'repeat':
+                    this.handelRepeat(activeObject)
+                    break;
                 default:
             }
         } else {
             switch (type) {
                 case 'added':
-                    if (!activeObject.publicControlId) {
+                    if (!activeObject.publicControlId && !activeObject.tileParentId) {
                         this.canvas.getObjects().forEach((item) => {
                             if (activeObject.cutPartsType == item.cutPartsType) {
                                 item.publicControlId = null
@@ -256,7 +351,11 @@ class OverallDesignPlugin {
                     }
                     break;
                 case 'removed':
-                    activeObject.publicControlId = null
+                    // console.log(' item.publicControlId = null', type, activeObject)
+                    const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
+                    this.store.commit('setDisableClipping', true)
+                    repeatObjs.forEach(e => this.canvas.remove(e))
+                    this.store.commit('setDisableClipping', false)
                     break;
                 case 'rotating':
                     activeObject.publicControlId = null
@@ -269,6 +368,7 @@ class OverallDesignPlugin {
                     break;
                 default:
             }
+            console.log('type  activeObject.publicControlId', type, activeObject)
         }
 
     }

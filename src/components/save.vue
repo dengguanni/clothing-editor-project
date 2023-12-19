@@ -205,7 +205,7 @@ const savaProject = debounce(function () {
 // 保存步骤
 const setSaveData = function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '整体设计'))
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '[整体设计]'))
   const objectsCopy = JSON.parse(JSON.stringify(objects))
   objectsCopy.forEach((element, index) => {
     allCustomAttribute.forEach(key => {

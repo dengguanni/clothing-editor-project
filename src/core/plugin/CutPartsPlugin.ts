@@ -63,9 +63,10 @@ class CutPartsPlugin {
             // this.store.commit('setPageLoading', false)
             return
         }
+        console.log('isColorChange', isColorChange,)
         this.editor.fixedLayer()
-        const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId && el.cutPartsType !== '整体设计')
-        console.log('剪裁objects', objects, 'this.cutPartsType.value', this.cutPartsType.value)
+        const objects = this.canvas.getObjects().filter(el => el.isMask == undefined && el.id !== 'workspace' && el.id !== 'grid' && !el.tileParentId && el.cutPartsType !== '[整体设计]')
+        // console.log('剪裁objects', objects, 'this.cutPartsType.value', this.cutPartsType.value)
         if (this.cutPartsType.value) {
             let ImagesList: any = {}
             this.cutParts.value.forEach(el => {
@@ -117,7 +118,7 @@ class CutPartsPlugin {
 
                         // ImagesList[p.Part_name].Images.push(obj)
                         objects[index].customVisible && objects[index].cutPartsType == p.Part_name && ImagesList[p.Part_name].Images.push(obj)
-                      
+
                         if (objects[index + 1]) {
                             fn(objects, index + 1, p, maskRect, indexP)
                         } else {
@@ -144,7 +145,7 @@ class CutPartsPlugin {
                     bgc_g: this.bgColor.value.G,
                     bgc_b: this.bgColor.value.B
                 }
-                this.cutPartsType.value !== '整体设计' && fn(objects, 0, p, maskRect)
+                this.cutPartsType.value !== '[整体设计]' && fn(objects, 0, p, maskRect)
             } else {
                 this.store.commit('setsLoad3d', true)
                 this.isLoadAll = true
@@ -171,23 +172,28 @@ class CutPartsPlugin {
         console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始剪裁')
         picture.setCutAllParts(p).then(res => {
             console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '剪裁请求完毕', p, '参数', res)
-            const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
-            this.store.commit('setTestBase64', url)
-            this.load3DScene.setTexture(p.Part_name, url, () => {
-                if (indexP !== null) {
-                    if (this.cutParts.value.length == CutPartsPlugin.num) {
-                        console.log('总的  保存', !this.isSetSteps.value)
-                        this.store.commit('setsLoad3d', false)
+            if (res.Tag[0]?.base64) {
+                const url = 'data:image/jpeg;base64,' + res.Tag[0].base64
+                this.store.commit('setTestBase64', url)
+                this.load3DScene.setTexture(p.Part_name, url, () => {
+                    if (indexP !== null) {
+                        if (this.cutParts.value.length == CutPartsPlugin.num) {
+                            console.log('总的  保存', !this.isSetSteps.value)
+                            this.store.commit('setsLoad3d', false)
+                            this.isSetSteps.value ? '' : this.store.commit('setSave')
+                            callback ? callback() : ''
+                        }
+                        CutPartsPlugin.num++
+                    } else {
+                        console.log('保存', !this.isSetSteps.value)
                         this.isSetSteps.value ? '' : this.store.commit('setSave')
-                        callback ? callback() : ''
+                        this.store.commit('setsLoad3d', false)
                     }
-                    CutPartsPlugin.num++
-                } else {
-                    console.log('保存', !this.isSetSteps.value)
-                    this.isSetSteps.value ? '' : this.store.commit('setSave')
-                    this.store.commit('setsLoad3d', false)
-                }
-            })
+                })
+            } else {
+                this.store.commit('setsLoad3d', false)
+            }
+
         })
     }
     contextMenu() {
