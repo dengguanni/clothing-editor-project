@@ -178,7 +178,8 @@ const getSaveData = () => {
     store.commit('setSaveSteps', steps)
     const p = {
         ID: '',
-        userID: userID.value
+        userID: userID.value,
+        SizeGUID: sizeGUID.value
     }
     historyAip.getHistory(p).then(res => {
         if (res.Tag.length > 0) {
@@ -196,6 +197,7 @@ const getSaveData = () => {
 
 const changeColor = (item: any) => {
     store.commit('setBgColor', item)
+    store.commit('setDisableClipping', false)
     canvasEditor.setAllCuts(true)
 }
 const getBgColor = (GUID: string) => {

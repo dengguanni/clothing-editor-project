@@ -117,7 +117,7 @@ class CutPartsPlugin {
                         }
 
                         // ImagesList[p.Part_name].Images.push(obj)
-                        objects[index].customVisible && objects[index].cutPartsType == p.Part_name && ImagesList[p.Part_name].Images.push(obj)
+                        objects[index].FilePath && objects[index].customVisible && objects[index].cutPartsType == p.Part_name && ImagesList[p.Part_name].Images.push(obj)
 
                         if (objects[index + 1]) {
                             fn(objects, index + 1, p, maskRect, indexP)
@@ -182,6 +182,7 @@ class CutPartsPlugin {
                             this.store.commit('setsLoad3d', false)
                             this.isSetSteps.value ? '' : this.store.commit('setSave')
                             callback ? callback() : ''
+                            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '整体剪裁结束')
                         }
                         CutPartsPlugin.num++
                     } else {

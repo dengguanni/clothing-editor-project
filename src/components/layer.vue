@@ -156,7 +156,6 @@ const iconType = (type) => {
 
 const doLock = debounce(() => {
   const activeObject = canvasEditor.canvas.getActiveObjects()[0]
-  console.log('activeObject', activeObject.isLock)
   if (activeObject.isLock) {
     activeObject.hasControls = true;
     activeObject.selectable = true;

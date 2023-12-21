@@ -217,7 +217,7 @@ const setTips = () => {
   } else if (!cutParts.value) {
     message = '该尺码暂无裁片'
   } else if (!colorList.value) {
-    message = '该尺码暂底板颜色'
+    message = '该尺码暂无底板颜色'
   }
   if (message) {
     ElMessage({

@@ -46,7 +46,7 @@ const repeatList = {
     transverse: '横向平铺',
     direction: '纵向平铺'
 }
-const overallDesignImage = '../src/assets/png/zhengti.png'
+const overallDesignImage = 'http://8.140.206.30:8089/ImageSource/Other/WhiteBox.png'
 let listenCanvas = false
 const URLbase64 = ref('')
 const active = ref('')
@@ -104,6 +104,7 @@ watch(sizeGUID, (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 
 const watchCanvas = () => {
+    console.log('监听')
     if (listenCanvas) return
     listenCanvas = true
     const fn = (ops, type) => {
@@ -196,7 +197,7 @@ const loadCuts = debounce(() => {
     store.commit('setSaveBtnDisabled', false)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
     console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '开始加载裁片')
-    const objects = canvasEditor.canvas.getObjects().filter((item) => item.isMask !== undefined)
+    const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
     if (objects.length !== 0) store.commit('setPageLoading', false)
     store.commit('setIsSetSteps', true)
     objects.forEach(el => {
@@ -287,11 +288,11 @@ const changeSelection = () => {
     activeObject ? activeObject.cutPartsType == cutPartsType.value ? '' : canvasEditor.canvas.discardActiveObject() : ''
     load3DScene.setModelCamera(cutPartsType.value)
     const workspace = canvasEditor.canvas.getObjects().find((item) => item.id === 'workspace')
+
     active.value = cutPartsType.value
     let maskRect
     const oldMask = canvasEditor.canvas.getObjects().find((item) => item.isMask)
     oldMask ? oldMask.isMask = false : ''
-    console.log('旧的', oldMask)
     canvasEditor.canvas.getObjects().forEach(el => {
         {
             if (el.cutPartsType == cutPartsType.value || el.id == 'grid') {
@@ -303,7 +304,6 @@ const changeSelection = () => {
                 el.visible = true
                 el.isMask = true
                 maskRect = el
-                console.log('切换裁片', maskRect)
                 const path = new fabric.Rect({ width: maskRect.width, height: maskRect.height, top: maskRect.top, left: maskRect.left })
                 canvasEditor.canvas.clipPath = path;
                 isShowCuts.value ? el.visible = true : el.visible = false
@@ -314,13 +314,19 @@ const changeSelection = () => {
         }
     })
     // !maskRect && (canvasEditor.canvas.clipPath = workspace);
+    workspace.cutPartsType = ''
     canvasEditor.fixedLayer()
 }
 // 刷新加载对象
 const loadCanvasObject = () => {
     store.commit('setIsSetSteps', true)
-
+    store.commit('setDisableClipping', true)
+    const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+    objects.forEach(el => {
+        canvasEditor.canvas.remove(el)
+    })
     const fnEnd = () => {
+        console.log('fnEnd', fnEnd)
         if (bgColor.value) {
             store.commit('setDisableClipping', false)
             canvasEditor.setAllCuts(true, () => {
@@ -390,6 +396,8 @@ const loadCanvasObject = () => {
             }
         }
     }
+    store.commit('setPageLoading', false)
+    console.log('(canvasObjects.value.length', canvasObjects.value.length, canvasObjects.value)
     if (canvasObjects.value.length > 0) {
         fn(canvasObjects.value[0], 0)
     } else {

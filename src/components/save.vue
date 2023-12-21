@@ -3,11 +3,10 @@
 <template>
   <div class="save-box">
     <!-- <Button type="primary" @click="getData">
-      <commonIconfont type="gistuceng"></commonIconfont>
+      全部清空
     </Button> -->
     <Button type="primary" @click="savaProject(true)" :disabled="saveBtnDisabled">
       {{ saveBtnValue }}
-      <!-- <Icon type="ios-arrow-down"></Icon> -->
     </Button>
     <!-- <commonIconfont type="jiesuo_o"></commonIconfont> -->
   </div>
@@ -102,19 +101,13 @@ const test = () => {
   })
 }
 const getData = () => {
-  const frustum = new THREE.Frustum();
-  console.log(frustum.setFromProjectionMatrix())
-  // console.log('getObjects', canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid')))
-  // canvasEditor.test(1111)
-  // saveSteps.value.ID
-  // const p = {
-  //   ID: ''
-  // }
-  // historyAip.getHistory(p).then(res => {
-  //   const data = res.Tag[0].Table[0].JsonValue
-  //   console.log('拿回', JSON.parse(data))
-  // })
-
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid'))
+  store.commit('setDisableClipping', true)
+  objects.forEach(el => {
+    canvasEditor.canvas.remove(el)
+  })
+  store.commit('setDisableClipping', false)
+  canvasEditor.setAllCuts(true)
 }
 const savaProject = debounce(function () {
   saveBtnValue.value = '处理中'
@@ -205,7 +198,7 @@ const savaProject = debounce(function () {
 // 保存步骤
 const setSaveData = function (showLoading = false) {
   if (showLoading) store.commit('setPageLoading', showLoading)
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '[整体设计]'))
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '[整体设计]' || v.FileName == undefined))
   const objectsCopy = JSON.parse(JSON.stringify(objects))
   objectsCopy.forEach((element, index) => {
     allCustomAttribute.forEach(key => {
@@ -214,9 +207,10 @@ const setSaveData = function (showLoading = false) {
     element['src'] = ''
   });
   store.commit('setCanvasObjects', objectsCopy)
-  historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value), userID: userID.value }]).then(res => {
+  console.log('保存', saveData.value)
+  historyAip.setHistory([{ 'JsonValue': JSON.stringify(saveData.value), userID: userID.value, SizeGUID: sizeGUID.value }]).then(res => {
     store.commit('setSaveSteps', res.Tag[0].Table[0])
-    // console.log('保存结果', res)
+
     store.commit('setPageLoading', false)
   })
 }

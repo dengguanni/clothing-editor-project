@@ -368,6 +368,7 @@ const menuList1Click = (type) => {
     switch (type) {
         case 'basic':
             // canvasEditor.setRepeat('basic', false, menuList1)
+            console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击平铺')
             canvasEditor.setRepeat('basic', false, menuList1)
             canvasEditor.handleOverallObjs(activeObject,'repeat')
 
@@ -399,7 +400,6 @@ const del = debounce(function () {
 }, 300);
 const btnClick = (item) => {
     const activeObject = canvasEditor.canvas.getActiveObject()
-    console.log('activeObject', activeObject)
     if (activeObject && activeObject.Sharpen && item == 'filter') {
         Message.error('添加清晰后不支持滤镜');
         return

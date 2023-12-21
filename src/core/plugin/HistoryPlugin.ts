@@ -40,6 +40,9 @@ class HistoryPlugin {
   userID = computed(() => {
     return this.store.state.userID
   })
+  sizeGUID = computed(() => {
+    return this.store.state.sizeGUID
+})
   _init() {
     this.history = useRefHistory(ref(), {
       capacity: 50,
@@ -161,7 +164,8 @@ class HistoryPlugin {
     this.store.commit('setDisableClipping', true)
     const p = {
       ID: isNext ? this.saveSteps.value.ID - 1 : Number(this.saveSteps.value.ID) + 1,
-      userID: this.userID.value
+      userID: this.userID.value,
+      SizeGUID: this.sizeGUID.value
     }
     historyAip.getHistory(p).then(res => {
       console.log('p', p, 'getHistory', res)

@@ -326,7 +326,7 @@ const setTips = () => {
   } else if (!cutParts.value) {
     message = '该尺码暂无裁片'
   } else if (!colorList.value) {
-    message = '该尺码暂底板颜色'
+    message = '该尺码暂无底板颜色'
   }
 
   if (message) {
@@ -340,6 +340,7 @@ const setTips = () => {
   return message
 }
 const addItem = (item) => {
+  console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '点击添加')
   if (setTips()) return
   const maskRect = canvasEditor.canvas.getObjects().find((item) => item.isMask);
   const imageURL = baseUrl + item.ImageUrl_Path;

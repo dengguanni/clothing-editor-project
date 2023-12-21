@@ -50,12 +50,12 @@ class OverallDesignPlugin {
         // })
     }
     addHandle(activeObject: any) {
-        if (activeObject.tileParentId) return
-        this.store.commit('setDisableClipping', true)
+                if (activeObject.tileParentId) return
+                this.store.commit('setDisableClipping', true)
         let n = 0
         this.cutParts.value.forEach(el => {
             if (el.Title !== this.cutPartsType.value) {
-                activeObject.clone(c => {
+                                activeObject.clone(c => {
                     c.set({
                         id: uuid(),
                         cutPartsType: el.Title,
@@ -116,20 +116,20 @@ class OverallDesignPlugin {
     }
     handelRemove(activeObject: any) {
         this.store.commit('setDisableClipping', true)
-        const objects = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+        const objects = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id && item.id!=='workspace'))
         let n = 0
         let m = 0
         objects.forEach((item) => {
             n++
             console.log('删除', item)
-            const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
+            const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id && item.id!=='workspace'))
             console.log('repeatObjs', repeatObjs, 'm', m)
             repeatObjs.forEach(e => {
                 m++
                 this.canvas.remove(e)
 
             })
-            this.canvas.remove(item)
+           this.canvas.remove(item)
 
             console.log('object', objects, 'n', n, 'this.canvas.getObjects()', this.canvas.getObjects())
             if (n == objects.length) {
@@ -175,36 +175,44 @@ class OverallDesignPlugin {
     }
     handelRepeat(activeObject) {
         console.log('handelRepeat', activeObject)
+        console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '整体平铺开始')
         const obj = {
             basic: '基础平铺',
             mirror: '镜像平铺',
             transverse: '横向平铺',
             direction: '纵向平铺'
         }
-
         if (!activeObject.isBackground) {
             this.store.commit('setDisableClipping', true)
-            const children = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
+            const children = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id)) //整体对对应的子级
             console.log('平铺children', children)
             children && children.forEach(el => {
-                const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
+                const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == el.id)) //子级对应的平铺图
+                console.log('级对应的平铺图repeatObjsb', repeatObjs)
                 el.repeatType = activeObject.repeatType
                 repeatObjs.forEach(e => this.canvas.remove(e))
             })
-            let n = 0
-            children && children.forEach(el => {
-                this.editor.handelRepeat(obj[activeObject.repeatType], el, true, () => {
-                    n++
-                    if (n == children.length) {
-                        this.store.commit('setDisableClipping', false)
-                        this.editor.setAllCuts(true)
-                    }
+            if (activeObject.repeatType) {
+                let n = 0
+                children && children.forEach(el => {
+                    this.editor.handelRepeat(obj[activeObject.repeatType], el, true, () => {
+                        n++
+                        if (n == children.length) {
+                            this.store.commit('setDisableClipping', false)
+                            this.editor.setAllCuts(true)
+                           console.log(new Date().getMinutes() + '分' + new Date().getSeconds() + '秒' + new Date().getMilliseconds() + '毫秒', '整体平铺结束')
+                        }
+                    })
                 })
-            })
+            } else {
+                this.store.commit('setDisableClipping', false)
+                this.editor.setAllCuts(true)
+                console.log('删除剩下的')
+            }
+
         }
     }
     handelReplace(activeObject: any) {
-
         const oldObject = this.canvas.getObjects().filter((item) => (item.publicControlId == activeObject.id))
         if (activeObject.type == 'text') {
             let n = 0
@@ -273,8 +281,8 @@ class OverallDesignPlugin {
                     n++
                     if (n == oldObject.length) {
                         this.store.commit('setDisableClipping', false)
-                        activeObject.repeatType ? this.handelRepeat(activeObject) :this.editor.setAllCuts(true)
-                        
+                        activeObject.repeatType ? this.handelRepeat(activeObject) : this.editor.setAllCuts(true)
+
                     }
                 })
             });
@@ -297,9 +305,10 @@ class OverallDesignPlugin {
         this.editor.setAllCuts(true)
     }
     handleOverallObjs(activeObject: any, type: string) {
-        console.log('activeObject', activeObject, type)
+        // console.log('activeObject', activeObject, type,activeObject.cutPartsType )
+        activeObject.cutPartsType =  activeObject.cutPartsType ? activeObject.cutPartsType : '[整体设计]'
         if (activeObject && activeObject.cutPartsType == '[整体设计]') {
-            console.log('[整体设计]')
+            console.log('[整体设计]',type)
             switch (type) {
                 case 'added':
                     this.addHandle(activeObject)
@@ -342,19 +351,21 @@ class OverallDesignPlugin {
                     }
                     break;
                 case 'modified':
-                    if (!activeObject.publicControlId) {
+                    // if (!activeObject.publicControlId) {
                         this.canvas.getObjects().forEach((item) => {
                             if (activeObject.cutPartsType == item.cutPartsType) {
                                 item.publicControlId = null
                             }
                         })
-                    }
+                    // }
                     break;
                 case 'removed':
                     // console.log(' item.publicControlId = null', type, activeObject)
                     const repeatObjs = this.canvas.getObjects().filter((item) => (item.tileParentId == activeObject.id))
                     this.store.commit('setDisableClipping', true)
-                    repeatObjs.forEach(e => this.canvas.remove(e))
+                    repeatObjs.forEach(e =>{ 
+                        if(e.id!=='workspace') this.canvas.remove(e)
+                    })
                     this.store.commit('setDisableClipping', false)
                     break;
                 case 'rotating':

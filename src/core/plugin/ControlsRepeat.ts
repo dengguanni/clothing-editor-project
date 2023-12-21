@@ -131,6 +131,10 @@ class ControlsRepeat {
     }
 
     handelRepeat(type, obj = null, isLoadAll = false, callback = null) {
+        if (!type) {
+            console.log('handelRepeat  activeObject',activeObject)
+            return
+        }
         if (!isLoadAll) {
             this.editor.setAllCuts()
             this.store.commit('setDisableClipping', true)
@@ -144,7 +148,6 @@ class ControlsRepeat {
         //         this.canvas.remove(el)
         //     }
         // })
-        console.log('activeObject', activeObject.left - Mask.left)
         activeObject.clone(c => {
             c.rotate(0)
             const p = {
@@ -199,7 +202,7 @@ class ControlsRepeat {
                     activeObject.isBackground ? image.isBackgroundRepeat = true : image.isBackgroundRepeat = false
                     image.tileParentFileName = activeObject.FileName
                     image.tileParentId = activeObject.id
-                    console.log('image.tileParentId ', image.tileParentId )
+                    console.log('image.tileParentId ', image.tileParentId)
                     image.visible = activeObject.visible
                     image.cutPartsType = activeObject.cutPartsType
                     image.id = uuid()
