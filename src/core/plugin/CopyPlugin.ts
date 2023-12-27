@@ -96,7 +96,9 @@ class CopyPlugin {
             top: this.cache.top + grid,
             visible: true,
             repeatType: this.cache.repeatType,
-            filters: []
+            filters: [],
+            scaleX: this.cache.scaleX,
+            scaleY: this.cache.scaleY
           })
           this.canvas.add(c)
           this.editor.fixedLayer()

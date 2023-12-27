@@ -307,7 +307,7 @@ class OverallDesignPlugin {
     handleOverallObjs(activeObject: any, type: string) {
         // console.log('activeObject', activeObject, type,activeObject.cutPartsType )
         activeObject.cutPartsType =  activeObject.cutPartsType ? activeObject.cutPartsType : '[整体设计]'
-        if (activeObject && activeObject.cutPartsType == '[整体设计]') {
+        if (activeObject && activeObject.cutPartsType == '[整体设计]' && activeObject.id !== 'grid' && !activeObject.hasCropping) {
             console.log('[整体设计]',type)
             switch (type) {
                 case 'added':

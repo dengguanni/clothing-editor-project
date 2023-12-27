@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AdvertisingImages: typeof import('./src/components/advertisingImages.vue')['default']
     Align: typeof import('./src/components/align.vue')['default']
     Attribute: typeof import('./src/components/attribute.vue')['default']
     BackgroundBar: typeof import('./src/components/backgroundBar.vue')['default']

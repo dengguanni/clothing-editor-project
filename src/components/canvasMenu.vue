@@ -396,7 +396,7 @@ const loadCanvasObject = () => {
             }
         }
     }
-    store.commit('setPageLoading', false)
+    // store.commit('setPageLoading', false)
     console.log('(canvasObjects.value.length', canvasObjects.value.length, canvasObjects.value)
     if (canvasObjects.value.length > 0) {
         fn(canvasObjects.value[0], 0)

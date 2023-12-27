@@ -5,6 +5,7 @@
       :goodsId="goodsInfo.GUID"></productDetails>
     <bigPreview v-if="dialogType == 4 || dialogType == 5" :is3D="dialogType"></bigPreview>
   </Dialog>
+  <advertisingImages></advertisingImages>
   <div class="home" v-loading="pageLoading" element-loading-background="rgba(122, 122, 122, 1)"
     :element-loading-text="loadingContent.loadingText" :element-loading-spinner="loadingContent.spinner">
     <!-- <Layout> -->
@@ -13,7 +14,7 @@
       <div class="header-left">
         <div class="logo">
           <img src="http://8.140.206.30:8089/ImageSource/Other/Logo.png" style="height: 54px; width: 180px;" />
-          <span style="color: rgb(180, 178, 178);"> 更新时间:12.20</span>
+          <span style="color: rgb(180, 178, 178);"> 更新时间:12.25</span>
         </div>
         <history></history>
       </div>
@@ -222,6 +223,7 @@ import Dialog from '@/components/dialog'
 import patternCard from '@/components/patternCard.vue'
 import productDetails from '@/components/productDetails.vue'
 import bigPreview from '@/components/bigPreview.vue'
+import advertisingImages from '@/components/advertisingImages.vue'
 
 // 功能
 import { CanvasEventEmitter } from '@/utils/event/notifier';

@@ -244,7 +244,9 @@ class LoadScene {
     }
 
     setModelCamera(direction: string) {
+
         const setModelRotation = (targetPosition: any) => {
+            console.log('targetPosition', targetPosition)
             let position = {
                 x1: LoadScene.camera.position.x,
                 y1: LoadScene.camera.position.y,

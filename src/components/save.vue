@@ -120,7 +120,8 @@ const savaProject = debounce(function () {
     "Parts": [
     ]
   }
-  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId))
+  const objects = canvasEditor.canvas.getObjects().filter(v => !(v.id == 'workspace' || v.isMask !== undefined || v.id == 'grid' || v.tileParentId || v.cutPartsType == '[整体设计]'))
+  console.log('objects', objects)
   let Parts = []
   let callback = (p) => {
     Modal.confirm({

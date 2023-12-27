@@ -356,10 +356,11 @@ const addItem = (item) => {
       image.FilePath = item.FilePath
       image.cutPartsType = cutPartsType.value
       image.angle = 0
+      MaximizePlugin.setMax('bigFull',image)
       canvasEditor.canvas.bringToFront(maskRect)
       const info = canvasEditor.canvas.getObjects().find((item) => item.id === image.id);
       canvasEditor.canvas.setActiveObject(info);
-      MaximizePlugin.setMax('bigFull')
+     
       canvasEditor.canvas.requestRenderAll();
 
     }
